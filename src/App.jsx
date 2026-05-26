@@ -10,7 +10,7 @@ import { safeGet } from './utils/storage';
 import { supabase } from './supabaseClient';
 import Login from './Login';
 import { PlayerSelect, Chip, AutoMinRow, MinRow, Sheet, ConfirmSheet, GoalSheet, CardSheet, SubSheet, MomentSheet, MatchHeader, formatMinuut, TimelineRow, GCard, SHead, INP, Empty, PBtn, BackBtn, ClubCard } from './components';
-
+const MATCHLY_LOGO = null;
 // html2canvas shim — keep original loadH2C() calls working
 
 const loadH2C = () => new Promise(res => {
