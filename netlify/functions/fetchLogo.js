@@ -6,21 +6,50 @@ exports.handler = async (event) => {
 
   try {
     const slug = toSlug(club);
-    const firstLetter = slug[0];
-    const clubUrl = `https://www.hollandsevelden.nl/clubs/${firstLetter}/${slug}/`;
+    const clubUrl = `https://www.hollandsevelden.nl/clubs/${slug[0]}/${slug}/`;
     const html = await fetchUrl(clubUrl);
 
     if (!html) return respond(null, 'Pagina niet gevonden');
 
-    // Debug: stuur een stukje HTML terug
-    const snippet = html.substring(0, 3000);
+    // Pak de og:image meta tag — die bevat het echte logo
+    const ogMatch = html.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i)
+                 || html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
 
-    const logoUrl = extractLogo(html);
-    return {
-      statusCode: 200,
-      headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ logoUrl, slug, clubUrl, htmlSnippet: snippet })
-    };
+    if (ogMatch && ogMatch[1] && !ogMatch[1].includes('transparent') && !ogMatch[1].includes('og-image')) {
+      const logoUrl = ogMatch[1].startsWith('http') ? ogMatch[1] : 'https://www.hollandsevelden.nl' + ogMatch[1];
+      return respond(logoUrl);
+    }
+
+    // Fallback: probeer ook data-src / data-original
+    const patterns = [
+      /data-src="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
+      /data-original="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
+    ];
+    for (const p of patterns) {
+      const matches = [...html.matchAll(p)];
+      for (const m of matches) {
+        const url = m[1].trim().split(' ')[0];
+        if (url && !url.includes('transparent') && !url.includes('placeholder')) {
+          return respond(url.startsWith('http') ? url : 'https://www.hollandsevelden.nl' + url);
+        }
+      }
+    }
+
+    // Fallback: probeer ook zonder prefix (bijv. "svv" i.p.v. "svv-schiedam")
+    const shortSlug = slug.split('-')[0];
+    if (shortSlug !== slug) {
+      const shortUrl = `https://www.hollandsevelden.nl/clubs/${shortSlug[0]}/${shortSlug}/`;
+      const html2 = await fetchUrl(shortUrl);
+      const og2 = html2 && (
+        html2.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) ||
+        html2.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i)
+      );
+      if (og2 && og2[1] && !og2[1].includes('transparent')) {
+        return respond(og2[1].startsWith('http') ? og2[1] : 'https://www.hollandsevelden.nl' + og2[1]);
+      }
+    }
+
+    return respond(null);
   } catch (e) {
     return respond(null, e.message);
   }
@@ -34,33 +63,11 @@ function toSlug(name) {
     .replace(/\s+/g, '-');
 }
 
-function extractLogo(html) {
-  const patterns = [
-    /data-src="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
-    /data-original="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
-    /data-lazy="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
-    /data-lazy-src="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
-    /data-srcset="([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"\s]*)"/gi,
-    /"logo[^"]*":\s*"([^"]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^"]*)"/gi,
-    /background-image:\s*url\(['"]?([^'")]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)[^'")]*)/gi,
-  ];
-  for (const p of patterns) {
-    const matches = [...html.matchAll(p)];
-    for (const m of matches) {
-      const url = m[1].trim().split(' ')[0];
-      if (url && !url.includes('transparent') && !url.includes('placeholder')) {
-        return url.startsWith('http') ? url : 'https://www.hollandsevelden.nl' + url;
-      }
-    }
-  }
-  return null;
-}
-
 function respond(logoUrl, error) {
   return {
     statusCode: 200,
     headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
-    body: JSON.stringify({ logoUrl: logoUrl||null, error: error||null })
+    body: JSON.stringify({ logoUrl: logoUrl || null, error: error || null }),
   };
 }
 
