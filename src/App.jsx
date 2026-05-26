@@ -6,6 +6,9 @@ import { IG_ICON, FB_ICON } from './constants/icons';
 import { WEATHER, M, U, T, hex } from './constants/colors';
 import { usePersistedState, clearAllMatchlyStorage } from './hooks/usePersistedState';
 import { safeGet } from './utils/storage';
+
+import { supabase } from './supabaseClient';
+import Login from './Login';
 import { PlayerSelect, Chip, AutoMinRow, MinRow, Sheet, ConfirmSheet, GoalSheet, CardSheet, SubSheet, MomentSheet, MatchHeader, formatMinuut, TimelineRow, GCard, SHead, INP, Empty, PBtn, BackBtn, ClubCard } from './components';
 
 // html2canvas shim — keep original loadH2C() calls working
@@ -19,7 +22,6 @@ const loadH2C = () => new Promise(res => {
 });
 
 export default function App() {
-
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
   const [team,setTeam]           = usePersistedState("team", "Heren 1");
