@@ -456,7 +456,7 @@ export default function App() {
     setLoading_(true);
     setMsg("");
     try {
-      const res = await fetch(`/.netlify/functions/fetch-logo?club=${encodeURIComponent(naam.trim())}`);
+      const res = await fetch(`/.netlify/functions/fetchLogo?club=${encodeURIComponent(naam.trim())}`);
       if(!res.ok) throw new Error(`Fout ${res.status}`);
       const data = await res.json();
       if(data.logoUrl) {
