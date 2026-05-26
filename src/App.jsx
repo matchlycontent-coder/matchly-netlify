@@ -1158,7 +1158,8 @@ export default function App() {
   })();
 
   // ── HV Logo Search (shared for own + opponent) ──
-  // STAP 1: kijk eerst in Supabase. STAP 2: niet gevonden? → web search. STAP 3: bewaar nieuw logo in Supabase.
+  // STAP 1: Supabase cache. STAP 2: directe lookup via find-logo functie. STAP 3: opslaan voor volgende keer.
+  // Geen Anthropic API meer voor logo's = geen rate limits, geen gegokte URL's.
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
     if(!naam.trim()) return;
     setLoading_(true);
@@ -1174,61 +1175,29 @@ export default function App() {
         return;
       }
     } catch (cacheErr) {
-      // cache gefaald is geen probleem, val terug op web search
       console.log("Supabase cache lookup faalde:", cacheErr);
     }
 
-    // STAP 2: niet in cache → web search via Anthropic
+    // STAP 2: niet in cache → direct via hollandsevelden.nl
     try {
-      const vraag = `Zoek het officiële clublogo van "${naam}" op hollandsevelden.nl.
-Zoek specifiek naar: site:hollandsevelden.nl "${naam}" logo
-Geef ALLEEN de directe afbeeldings-URL terug die eindigt op .png, .jpg, .jpeg, .svg of .webp.
-Typische structuren: https://cms.hollandsevelden.nl/storage/... of https://www.hollandsevelden.nl/media/...
-Geef UITSLUITEND de URL terug, geen andere tekst.`;
-
-      const res = await fetch("/.netlify/functions/anthropic", {
+      const res = await fetch("/.netlify/functions/find-logo", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({
-          model: "claude-sonnet-4-20250514",
-          max_tokens: 400,
-          tools: [{"type": "web_search_20250305", "name": "web_search"}],
-          messages: [{role: "user", content: vraag}]
-        })
+        body: JSON.stringify({ clubName: naam.trim() })
       });
+
       if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
 
-      // web_search is server-side: extract text from all content blocks (text + tool_result)
-      const allText = (data.content || [])
-        .map(b => {
-          if (b.type === "text") return b.text;
-          // tool_result blocks may contain the search results as text
-          if (b.type === "tool_result" && Array.isArray(b.content)) {
-            return b.content.filter(c => c.type === "text").map(c => c.text).join(" ");
-          }
-          return "";
-        })
-        .join(" ")
-        .trim();
-
-      // Extract image URL — try progressively broader patterns
-      const urlMatch =
-        allText.match(/https?:\/\/[^\s"'<>\n,]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)(?:\?[^\s"'<>\n,]*)?/i) ||
-        allText.match(/https?:\/\/[^\s"'<>\n,]+\/(?:logo|clublogo|emblem|badge|wapen|crest)[^\s"'<>\n,]*/i) ||
-        allText.match(/https?:\/\/cms\.hollandsevelden[^\s"'<>\n,]+/i) ||
-        allText.match(/https?:\/\/(?:www\.)?hollandsevelden[^\s"'<>\n,]+/i);
-
-      if (urlMatch && urlMatch[0]) {
-        const cleanUrl = urlMatch[0].replace(/[.,;!?)>]+$/, "");
-        setUrl(cleanUrl);
+      if (data.logoUrl) {
+        setUrl(data.logoUrl);
         setMsg("✓ Logo gevonden");
-        // STAP 3: bewaar in Supabase voor volgende keer (in achtergrond, blokkeert niets)
-        saveLogoToSupabase(naam, naam, cleanUrl).catch(saveErr => {
+        // STAP 3: bewaar in Supabase voor volgende keer
+        saveLogoToSupabase(naam, data.displayName || naam, data.logoUrl).catch(saveErr => {
           console.log("Supabase opslaan faalde:", saveErr);
         });
       } else {
-        setMsg("Niet gevonden — upload handmatig");
+        setMsg(data.reason || "Niet gevonden — upload handmatig");
       }
     } catch(e) {
       setMsg("Zoeken mislukt — " + (e.message || "onbekende fout"));
