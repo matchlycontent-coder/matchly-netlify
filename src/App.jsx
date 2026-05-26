@@ -495,7 +495,7 @@ export default function App() {
     if(!clubName.trim()) return;
     setTeamIdLoading(true); setTeamIdMsg("");
     try {
-      const vraag = `Zoek het KNVB team-ID voor "${clubName} ${team}" op voetbal.nl. Het team-ID staat in de URL: voetbal.nl/teams/nederland/team/[ID]/show/. Geef ALLEEN het numerieke ID terug, niets anders.`;
+      const vraag = `Zoek het team-ID voor "${clubName} ${team}" op voetbal.nl. Het team-ID staat in de URL: voetbal.nl/team/[ID]/team of voetbal.nl/teams/nederland/team/[ID]/show/. Het ID begint soms met een letter zoals T35686918 of is puur numeriek. Geef ALLEEN het ID terug (bijv. T35686918 of 122561), niets anders.`;
       const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
@@ -509,8 +509,8 @@ export default function App() {
         if(b.type==="tool_result"&&Array.isArray(b.content)) return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
         return "";
       }).join("").trim();
-      const match = txt.match(/\d{4,8}/);
-      if(match) { setTeamId(match[0]); setTeamIdMsg(`Team gevonden: ID ${match[0]}`); }
+      const match = txt.match(/\b([Tt]\d{6,10}|\d{4,8})\b/);
+      if(match) { setTeamId(match[0].toUpperCase()); setTeamIdMsg(`Team gevonden: ID ${match[0].toUpperCase()}`); }
       else { setTeamIdMsg("Niet gevonden — vul het ID handmatig in via voetbal.nl"); }
     } catch(e) {
       setTeamIdMsg("Zoeken mislukt — vul het ID handmatig in");
@@ -4053,7 +4053,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
               ))}
               <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:12,padding:"12px 14px",marginTop:4}}>
                 <div style={{fontSize:10,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,marginBottom:6}}>VOORBEELD URL</div>
-                <div style={{fontFamily:"monospace",fontSize:11,color:T.text3,lineHeight:1.7,wordBreak:"break-all"}}>voetbal.nl/teams/nederland/team/<span style={{color:U,fontWeight:700}}>122561</span>/show/</div>
+                <div style={{fontFamily:"monospace",fontSize:11,color:T.text3,lineHeight:1.7,wordBreak:"break-all"}}>voetbal.nl/team/<span style={{color:U,fontWeight:700}}>T35686918</span>/team</div>
               </div>
               <button onClick={()=>setShowTeamIdInfo(false)} style={{width:"100%",marginTop:20,padding:"13px",background:hex(U,0.15),border:`1px solid ${hex(U,0.3)}`,borderRadius:14,color:U,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,letterSpacing:0.5}}>Begrepen</button>
             </div>
