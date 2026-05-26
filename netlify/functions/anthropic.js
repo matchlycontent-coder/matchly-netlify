@@ -3,6 +3,12 @@ const https = require('https');
 // Werkt met zowel ANTHROPIC_API_KEY als VITE_ANTHROPIC_API_KEY
 const API_KEY = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
 
+// Oude/uitgefaseerde modelnamen worden onderweg vervangen door de nieuwe
+const MODEL_REPLACEMENTS = {
+  'claude-sonnet-4-20250514': 'claude-sonnet-4-6',
+  'claude-opus-4-20250514': 'claude-opus-4-7',
+};
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -32,7 +38,16 @@ exports.handler = async (event) => {
   console.log('API key gevonden, lengte:', API_KEY.length, 'tekens');
 
   try {
-    const body = event.body;
+    let body = event.body;
+
+    // Vervang oude modelnamen door de huidige
+    for (const [oud, nieuw] of Object.entries(MODEL_REPLACEMENTS)) {
+      if (body.includes(oud)) {
+        body = body.split(oud).join(nieuw);
+        console.log(`Model vervangen: ${oud} → ${nieuw}`);
+      }
+    }
+
     console.log('Request body lengte:', body ? body.length : 0, 'tekens');
 
     const result = await callAnthropic(body);
