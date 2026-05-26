@@ -450,67 +450,23 @@ export default function App() {
     return [...clubSlice, { ...currentTeam, _isTeam:true }];
   })();
 
-  // ── HV Logo Search (shared for own + opponent) ──
+  // ── HV Logo Search via Netlify Function (server-side scraping van hollandsevelden.nl) ──
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
     if(!naam.trim()) return;
     setLoading_(true);
     setMsg("");
     try {
-      const vraag = `Zoek op hollandsevelden.nl het clublogo voor de Nederlandse amateurvoetbalclub "${naam}".
-Geef ALLEEN de directe URL van de logo-afbeelding terug (eindigt op .png, .jpg, .jpeg, .svg, .webp of bevat /logo).
-Typische URL structuur: https://www.hollandsevelden.nl/... of https://cms.hollandsevelden.nl/...
-Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
-
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-6",
-          max_tokens:300,
-          tools:[{"type":"web_search_20250305","name":"web_search"}],
-          messages:[{role:"user",content:vraag}]
-        })
-      });
+      const res = await fetch(`/.netlify/functions/fetch-logo?club=${encodeURIComponent(naam.trim())}`);
+      if(!res.ok) throw new Error(`Fout ${res.status}`);
       const data = await res.json();
-      const blocks = data.content || [];
-      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
-
-      let txt = "";
-      if(toolBlocks.length > 0) {
-        const res2 = await fetch("https://api.anthropic.com/v1/messages",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            model:"claude-sonnet-4-6",
-            max_tokens:300,
-            tools:[{"type":"web_search_20250305","name":"web_search"}],
-            messages:[
-              {role:"user",content:vraag},
-              {role:"assistant",content:blocks},
-              {role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Geef ALLEEN de directe logo afbeeldingsURL terug van hollandsevelden.nl. Geen andere tekst."}))}
-            ]
-          })
-        });
-        const d2 = await res2.json();
-        txt = (d2.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
-      } else {
-        txt = (blocks||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
-      }
-
-      // Extract URL from response
-      const urlMatch = txt.match(/https?:\/\/[^\s"'<>\n,]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)/i)
-                    || txt.match(/https?:\/\/[^\s"'<>\n,]+\/(?:logo|clublogo|emblem)[^\s"'<>\n,]*/i)
-                    || txt.match(/https?:\/\/[^\s"'<>\n,]+hollandsevelden[^\s"'<>\n,]+/i);
-
-      if(urlMatch && urlMatch[0]) {
-        const cleanUrl = urlMatch[0].replace(/[.,;!?)]+$/, "");
-        setUrl(cleanUrl);
+      if(data.logoUrl) {
+        setUrl(data.logoUrl);
         setMsg("✓ Logo gevonden");
       } else {
-        setMsg("Niet gevonden — upload handmatig");
+        setMsg("Niet gevonden — upload handmatig of plak URL");
       }
     } catch(e) {
-      setMsg("Zoeken mislukt");
+      setMsg("Zoeken mislukt — " + (e.message||"onbekende fout"));
     }
     setLoading_(false);
   };
@@ -545,19 +501,14 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
       });
+      if(!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
-      const blocks = data.content || [];
-      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
-      let finalData = data;
-      if(toolBlocks.length > 0) {
-        const res2 = await fetch("https://api.anthropic.com/v1/messages",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
-        });
-        finalData = await res2.json();
-      }
-      const txt = (finalData.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
+      // web_search is server-side: haal tekst direct op
+      const txt = (data.content||[]).map(b=>{
+        if(b.type==="text") return b.text;
+        if(b.type==="tool_result"&&Array.isArray(b.content)) return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
+        return "";
+      }).join("").trim();
       const match = txt.match(/\d{4,8}/);
       if(match) { setTeamId(match[0]); setTeamIdMsg(`Team gevonden: ID ${match[0]}`); }
       else { setTeamIdMsg("Niet gevonden — vul het ID handmatig in via voetbal.nl"); }
@@ -657,7 +608,7 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
 
 ${compInfo}
 
-Gebruik de web_fetch tool om de pagina op te halen en de eerstvolgende wedstrijd uit het wedstrijdprogramma te halen. Let goed op:
+Gebruik web_search om het wedstrijdprogramma op te zoeken. Let goed op:
 - Pak de eerstvolgende wedstrijd vanaf (en INCLUSIEF) vandaag (${today}). Dus als er vandaag een wedstrijd is, gebruik die.
 - De wedstrijd kan thuis of uit zijn
 - Geef tegenstandernaam exact zoals op de pagina staat
@@ -679,12 +630,16 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
       const d = await callClaudeAPI({
         model: "claude-sonnet-4-6",
         max_tokens: 1500,
-        tools: [{type:"web_fetch_20250910",name:"web_fetch",max_uses:3}],
+        tools: [{type:"web_search_20250305",name:"web_search"}],
         messages: [{role:"user",content:vraag}],
       });
 
-      // Lees laatste text block
-      const txt = (d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ");
+      // web_search is server-side: haal tekst op uit alle content blocks
+      const txt = (d.content||[]).map(b=>{
+        if(b.type==="text") return b.text;
+        if(b.type==="tool_result"&&Array.isArray(b.content)) return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
+        return "";
+      }).join(" ");
       const jsonMatch = txt.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("Geen JSON in antwoord");
       const result = JSON.parse(jsonMatch[0]);
