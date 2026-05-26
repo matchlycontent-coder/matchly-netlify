@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { getLogoFromSupabase, saveLogoToSupabase } from "./supabaseLogos";
 
 const loadH2C = () => new Promise(res => {
   if (window.html2canvas) return res(window.html2canvas);
@@ -844,7 +845,7 @@ export default function App() {
   const [oppLogoLoading,setOppLogoLoading] = useState(false);
   const [oppLogoMsg,setOppLogoMsg]     = useState("");
 
-  // Auto-zoek tegenstander logo: bij wijziging opponent of online worden, met 1.5s debounce
+  // Auto-zoek tegenstander logo: bij wijziging opponent of online worden, met 2.5s debounce (tegen rate limits)
   const lastSearchedOpponent = useRef("");
   useEffect(() => {
     if (!isOnline || !opponent || opponent.trim().length < 3) return;
@@ -854,7 +855,7 @@ export default function App() {
       setOppLogoUrl("");
       setOppLogoMsg("");
       searchHvLogo(opponent.trim(), setOppLogoUrl, setOppLogoLoading, setOppLogoMsg);
-    }, 1500);
+    }, 2500);
     return () => clearTimeout(t);
   }, [isOnline, opponent]); // eslint-disable-line
 
@@ -1157,12 +1158,27 @@ export default function App() {
   })();
 
   // ── HV Logo Search (shared for own + opponent) ──
-  // web_search_20250305 is server-side: Anthropic executes the search and returns text directly.
-  // No second API call needed — just extract the URL from the first response's text blocks.
+  // STAP 1: kijk eerst in Supabase. STAP 2: niet gevonden? → web search. STAP 3: bewaar nieuw logo in Supabase.
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
     if(!naam.trim()) return;
     setLoading_(true);
     setMsg("");
+
+    // STAP 1: probeer eerst de Supabase-cache
+    try {
+      const cachedUrl = await getLogoFromSupabase(naam);
+      if (cachedUrl) {
+        setUrl(cachedUrl);
+        setMsg("✓ Logo gevonden (cache)");
+        setLoading_(false);
+        return;
+      }
+    } catch (cacheErr) {
+      // cache gefaald is geen probleem, val terug op web search
+      console.log("Supabase cache lookup faalde:", cacheErr);
+    }
+
+    // STAP 2: niet in cache → web search via Anthropic
     try {
       const vraag = `Zoek het officiële clublogo van "${naam}" op hollandsevelden.nl.
 Zoek specifiek naar: site:hollandsevelden.nl "${naam}" logo
@@ -1207,6 +1223,10 @@ Geef UITSLUITEND de URL terug, geen andere tekst.`;
         const cleanUrl = urlMatch[0].replace(/[.,;!?)>]+$/, "");
         setUrl(cleanUrl);
         setMsg("✓ Logo gevonden");
+        // STAP 3: bewaar in Supabase voor volgende keer (in achtergrond, blokkeert niets)
+        saveLogoToSupabase(naam, naam, cleanUrl).catch(saveErr => {
+          console.log("Supabase opslaan faalde:", saveErr);
+        });
       } else {
         setMsg("Niet gevonden — upload handmatig");
       }
