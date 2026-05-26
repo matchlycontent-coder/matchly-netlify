@@ -465,7 +465,7 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
+          model:"claude-sonnet-4-6",
           max_tokens:300,
           tools:[{"type":"web_search_20250305","name":"web_search"}],
           messages:[{role:"user",content:vraag}]
@@ -481,7 +481,7 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({
-            model:"claude-sonnet-4-20250514",
+            model:"claude-sonnet-4-6",
             max_tokens:300,
             tools:[{"type":"web_search_20250305","name":"web_search"}],
             messages:[
@@ -543,7 +543,7 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
       const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
+        body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
       });
       const data = await res.json();
       const blocks = data.content || [];
@@ -553,7 +553,7 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
         const res2 = await fetch("https://api.anthropic.com/v1/messages",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
+          body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
         });
         finalData = await res2.json();
       }
@@ -677,7 +677,7 @@ Geef ALLEEN dit JSON terug, geen tekst eromheen:
 Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, geef terug: {"error":"Geen wedstrijd gevonden"}.`;
 
       const d = await callClaudeAPI({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1500,
         tools: [{type:"web_fetch_20250910",name:"web_fetch",max_uses:3}],
         messages: [{role:"user",content:vraag}],
@@ -843,7 +843,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
     const sys = stijl === "Jeugd & Plezier" ? sysJeugd : sysAdult;
     try {
-      const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
+      const d = await callClaudeAPI({ model:"claude-sonnet-4-6", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
       const raw=d.content?.map(b=>b.text||"").join("")||"";
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
@@ -986,7 +986,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       { type: "text", text: prompt }
     ];
     const d = await callClaudeAPI({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
       messages: [{ role: "user", content }]
     });
@@ -1073,7 +1073,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       }
       const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 5000);
       const d = await callClaudeAPI({
-        model: "claude-sonnet-4-20250514", max_tokens: 500,
+        model: "claude-sonnet-4-6", max_tokens: 500,
         messages: [{ role: "user", content: `Vind in deze voetbal.nl tekst de eerstvolgende wedstrijd. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${text}` }]
       });
       const raw = d.content?.map(b => b.text || "").join("") || "";
@@ -3388,7 +3388,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       {voetbalFallback&&<button onClick={async()=>{
                         setScanning("nextmatch");setScanError(null);
                         try{
-                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
+                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
                           const d=await res.json();const raw=d.content?.map(b=>b.text||"").join("")||"";const out=JSON.parse(raw.replace(/```json|```/g,"").trim());
                           const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean);
                           setNextGame(parts.join(" | "));
