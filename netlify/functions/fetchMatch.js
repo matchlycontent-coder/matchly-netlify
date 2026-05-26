@@ -1,4 +1,5 @@
 const https = require('https');
+const http = require('http');
 
 exports.handler = async (event) => {
   const teamId = event.queryStringParameters?.teamId;
@@ -123,20 +124,21 @@ function respond(data) {
   };
 }
 
-function fetchUrl(url) {
+function fetchUrl(url, redirectCount = 0) {
+  if (redirectCount > 5) return Promise.resolve('');
   return new Promise((resolve, reject) => {
-    const req = https.get(url, {
+    const lib = url.startsWith('https') ? https : http;
+    const req = lib.get(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120',
         'Accept': 'text/html,application/xhtml+xml',
         'Accept-Language': 'nl-NL,nl;q=0.9',
       }
     }, (res) => {
-      if ((res.statusCode === 301 || res.statusCode === 302) && res.headers.location) {
-        const loc = res.headers.location.startsWith('http')
-          ? res.headers.location
-          : 'https://www.voetbal.nl' + res.headers.location;
-        fetchUrl(loc).then(resolve).catch(reject);
+      if ((res.statusCode === 301 || res.statusCode === 302 || res.statusCode === 307 || res.statusCode === 308) && res.headers.location) {
+        let loc = res.headers.location;
+        if (!loc.startsWith('http')) loc = 'https://www.voetbal.nl' + loc;
+        fetchUrl(loc, redirectCount + 1).then(resolve).catch(reject);
         return;
       }
       if (res.statusCode === 404) { resolve(''); return; }
