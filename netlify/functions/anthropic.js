@@ -18,6 +18,7 @@ exports.handler = async (event) => {
   }
 
   if (!process.env.ANTHROPIC_API_KEY) {
+    console.log('FOUT: ANTHROPIC_API_KEY ontbreekt in environment variables');
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
@@ -25,18 +26,28 @@ exports.handler = async (event) => {
     };
   }
 
+  console.log('API key gevonden, lengte:', process.env.ANTHROPIC_API_KEY.length, 'tekens');
+  console.log('Begint met:', process.env.ANTHROPIC_API_KEY.substring(0, 10) + '...');
+
   try {
     const body = event.body;
+    console.log('Request body lengte:', body ? body.length : 0, 'tekens');
+
     const result = await callAnthropic(body);
+
+    console.log('Anthropic antwoord status:', result.status);
+    console.log('Anthropic antwoord (eerste 500 tekens):', result.data.substring(0, 500));
+
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
       },
-      body: result,
+      body: result.data,
     };
   } catch (e) {
+    console.log('FOUT in callAnthropic:', e.message);
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
@@ -62,7 +73,7 @@ function callAnthropic(body) {
     const req = https.request(options, (res) => {
       let data = '';
       res.on('data', chunk => data += chunk);
-      res.on('end', () => resolve(data));
+      res.on('end', () => resolve({ status: res.statusCode, data: data }));
     });
 
     req.on('error', reject);
