@@ -598,24 +598,36 @@ export default function App() {
     setNextMatchLoading(true);
     setNextMatchMsg("");
     try {
-      // ── Andere teams: voetbal.nl via Netlify Function ──
+      // ── Andere teams: voetbal.nl via AI web search ──
       if (!isHeren1 && teamId) {
-        const res = await fetch(`/.netlify/functions/fetchMatch?teamId=${encodeURIComponent(teamId)}`);
-        const result = await res.json();
-        if (result.error) {
-          setNextMatchMsg("⚠ " + result.error + " — vul handmatig in.");
-          return;
-        }
+        const today = new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
+        const vraag = `Zoek de eerstvolgende geplande wedstrijd voor "${clubName} ${team}" op voetbal.nl. Het team staat op deze URL: https://www.voetbal.nl/team/${teamId}/wedstrijden of https://www.voetbal.nl/teams/nederland/team/${teamId}/show/. Vandaag is ${today}. Geef ALLEEN dit JSON terug:\n{\n  "tegenstander": "Exacte naam",\n  "datum": "YYYY-MM-DD",\n  "tijd": "HH:MM",\n  "thuis_uit": "thuis",\n  "wedstrijdtype": "Competitie"\n}\nAls niets gevonden: {"error":"Geen wedstrijd gevonden"}`;
+
+        const d = await callClaudeAPI({
+          model: "claude-sonnet-4-6",
+          max_tokens: 500,
+          tools: [{type:"web_search_20250305",name:"web_search"}],
+          messages: [{role:"user",content:vraag}],
+        });
+        const txt = (d.content||[]).map(b=>{
+          if(b.type==="text") return b.text;
+          if(b.type==="tool_result"&&Array.isArray(b.content)) return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
+          return "";
+        }).join(" ");
+        const jsonMatch = txt.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) throw new Error("Geen JSON in antwoord");
+        const result = JSON.parse(jsonMatch[0]);
+        if (result.error) { setNextMatchMsg("⚠ " + result.error + " — vul handmatig in."); return; }
         if (result.tegenstander) setOpp(result.tegenstander);
         if (result.datum) setMatchDate(result.datum);
         if (result.tijd) setKick(result.tijd);
-        if (result.thuis_uit) setLoc(result.thuis_uit === "uit" ? "uit" : "thuis");
+        if (result.thuis_uit) setLoc(result.thuis_uit==="uit"?"uit":"thuis");
         if (result.wedstrijdtype) setMKind(result.wedstrijdtype);
         if (result.tegenstander) {
-          setTimeout(() => { searchHvLogo(result.tegenstander, setOppLogoUrl, setOppLogoLoading, setOppLogoMsg); }, 300);
+          setTimeout(()=>{ searchHvLogo(result.tegenstander, setOppLogoUrl, setOppLogoLoading, setOppLogoMsg); }, 300);
         }
-        const dateStr = result.datum ? new Date(result.datum).toLocaleDateString("nl-NL", { weekday:"long", day:"numeric", month:"long" }) : "";
-        setNextMatchMsg(`✓ ${result.tegenstander}${dateStr ? ` · ${dateStr}` : ""}`);
+        const dateStr = result.datum ? new Date(result.datum).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) : "";
+        setNextMatchMsg(`✓ ${result.tegenstander}${dateStr?` · ${dateStr}`:""}`);
         return;
       }
 
