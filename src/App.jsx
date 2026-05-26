@@ -1,11 +1,14 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GOAL_TYPES, AWAY_TYPES, RED_REASONS, H1_F1, H1_F2, H1_F3, H2_F1, H2_F2, H2_F3, ALG_BEELD, BIJZ, MOTM_REDENEN } from './constants/options';
+import { GOAL_TYPES, AWAY_TYPES, RED_REASONS, H1_F1, H1_F2, H1_F3, H2_F1, H2_F2, H2_F3, ALG_BEELD, BIJZ, MOTM_REDENEN, MATCHLY_LOGO } from './constants/options';
 import { THEMES } from './constants/themes';
 import { LAYOUT_REGISTRY } from './constants/layouts';
 import { IG_ICON, FB_ICON } from './constants/icons';
 import { WEATHER, M, U, T, hex } from './constants/colors';
 import { usePersistedState, clearAllMatchlyStorage } from './hooks/usePersistedState';
 import { safeGet } from './utils/storage';
+
+import { supabase } from './supabaseClient';
+import Login from './Login';
 import { PlayerSelect, Chip, AutoMinRow, MinRow, Sheet, ConfirmSheet, GoalSheet, CardSheet, SubSheet, MomentSheet, MatchHeader, formatMinuut, TimelineRow, GCard, SHead, INP, Empty, PBtn, BackBtn, ClubCard } from './components';
 
 // html2canvas shim — keep original loadH2C() calls working
@@ -19,7 +22,6 @@ const loadH2C = () => new Promise(res => {
 });
 
 export default function App() {
-
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
   const [team,setTeam]           = usePersistedState("team", "Heren 1");
@@ -454,49 +456,61 @@ export default function App() {
     setLoading_(true);
     setMsg("");
     try {
-      // web_search_20250305 is server-side: Anthropic voert de zoekopdracht zelf uit
-      // en geeft tekst direct terug in de eerste response. Geen tweede call nodig.
-      const vraag = `Zoek het officiële clublogo van "${naam}" op hollandsevelden.nl.
-Zoek specifiek: site:hollandsevelden.nl "${naam}" logo
-Geef ALLEEN de directe afbeeldings-URL terug (eindigend op .png, .jpg, .jpeg, .svg of .webp).
-Typische structuren: https://cms.hollandsevelden.nl/storage/... of https://www.hollandsevelden.nl/media/...
-Geef UITSLUITEND de URL terug, geen andere tekst.`;
+      const vraag = `Zoek op hollandsevelden.nl het clublogo voor de Nederlandse amateurvoetbalclub "${naam}".
+Geef ALLEEN de directe URL van de logo-afbeelding terug (eindigt op .png, .jpg, .jpeg, .svg, .webp of bevat /logo).
+Typische URL structuur: https://www.hollandsevelden.nl/... of https://cms.hollandsevelden.nl/...
+Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
 
       const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
-          max_tokens:400,
+          model:"claude-sonnet-4-6",
+          max_tokens:300,
           tools:[{"type":"web_search_20250305","name":"web_search"}],
           messages:[{role:"user",content:vraag}]
         })
       });
-      if(!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
+      const blocks = data.content || [];
+      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
 
-      // Haal tekst op uit alle content blocks (text + eventuele tool_result blocks)
-      const txt = (data.content||[]).map(b=>{
-        if(b.type==="text") return b.text;
-        if(b.type==="tool_result"&&Array.isArray(b.content))
-          return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
-        return "";
-      }).join(" ").trim();
+      let txt = "";
+      if(toolBlocks.length > 0) {
+        const res2 = await fetch("https://api.anthropic.com/v1/messages",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            model:"claude-sonnet-4-6",
+            max_tokens:300,
+            tools:[{"type":"web_search_20250305","name":"web_search"}],
+            messages:[
+              {role:"user",content:vraag},
+              {role:"assistant",content:blocks},
+              {role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Geef ALLEEN de directe logo afbeeldingsURL terug van hollandsevelden.nl. Geen andere tekst."}))}
+            ]
+          })
+        });
+        const d2 = await res2.json();
+        txt = (d2.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
+      } else {
+        txt = (blocks||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
+      }
 
-      const urlMatch =
-        txt.match(/https?:\/\/[^\s"'<>\n,]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)(?:\?[^\s"'<>\n,]*)?/i) ||
-        txt.match(/https?:\/\/[^\s"'<>\n,]+\/(?:logo|clublogo|emblem|badge|wapen|crest)[^\s"'<>\n,]*/i) ||
-        txt.match(/https?:\/\/cms\.hollandsevelden[^\s"'<>\n,]+/i) ||
-        txt.match(/https?:\/\/(?:www\.)?hollandsevelden[^\s"'<>\n,]+/i);
+      // Extract URL from response
+      const urlMatch = txt.match(/https?:\/\/[^\s"'<>\n,]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)/i)
+                    || txt.match(/https?:\/\/[^\s"'<>\n,]+\/(?:logo|clublogo|emblem)[^\s"'<>\n,]*/i)
+                    || txt.match(/https?:\/\/[^\s"'<>\n,]+hollandsevelden[^\s"'<>\n,]+/i);
 
       if(urlMatch && urlMatch[0]) {
-        setUrl(urlMatch[0].replace(/[.,;!?)>]+$/, ""));
+        const cleanUrl = urlMatch[0].replace(/[.,;!?)]+$/, "");
+        setUrl(cleanUrl);
         setMsg("✓ Logo gevonden");
       } else {
         setMsg("Niet gevonden — upload handmatig");
       }
     } catch(e) {
-      setMsg("Zoeken mislukt — " + (e.message||"onbekende fout"));
+      setMsg("Zoeken mislukt");
     }
     setLoading_(false);
   };
@@ -529,17 +543,21 @@ Geef UITSLUITEND de URL terug, geen andere tekst.`;
       const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
+        body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
       });
-      if(!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
-      // web_search is server-side: haal tekst direct op uit eerste response
-      const txt = (data.content||[]).map(b=>{
-        if(b.type==="text") return b.text;
-        if(b.type==="tool_result"&&Array.isArray(b.content))
-          return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
-        return "";
-      }).join("").trim();
+      const blocks = data.content || [];
+      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
+      let finalData = data;
+      if(toolBlocks.length > 0) {
+        const res2 = await fetch("https://api.anthropic.com/v1/messages",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
+        });
+        finalData = await res2.json();
+      }
+      const txt = (finalData.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
       const match = txt.match(/\d{4,8}/);
       if(match) { setTeamId(match[0]); setTeamIdMsg(`Team gevonden: ID ${match[0]}`); }
       else { setTeamIdMsg("Niet gevonden — vul het ID handmatig in via voetbal.nl"); }
@@ -639,7 +657,7 @@ Geef UITSLUITEND de URL terug, geen andere tekst.`;
 
 ${compInfo}
 
-Gebruik web_search om het wedstrijdprogramma op te zoeken en de eerstvolgende wedstrijd te vinden. Let goed op:
+Gebruik de web_fetch tool om de pagina op te halen en de eerstvolgende wedstrijd uit het wedstrijdprogramma te halen. Let goed op:
 - Pak de eerstvolgende wedstrijd vanaf (en INCLUSIEF) vandaag (${today}). Dus als er vandaag een wedstrijd is, gebruik die.
 - De wedstrijd kan thuis of uit zijn
 - Geef tegenstandernaam exact zoals op de pagina staat
@@ -659,20 +677,15 @@ Geef ALLEEN dit JSON terug, geen tekst eromheen:
 Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, geef terug: {"error":"Geen wedstrijd gevonden"}.`;
 
       const d = await callClaudeAPI({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1500,
-        tools: [{type:"web_search_20250305",name:"web_search"}],
+        tools: [{type:"web_fetch_20250910",name:"web_fetch",max_uses:3}],
         messages: [{role:"user",content:vraag}],
       });
 
-      // web_search is server-side: haal tekst op uit alle content blocks
-      const txt = (d.content||[]).map(b=>{
-        if(b.type==="text") return b.text;
-        if(b.type==="tool_result"&&Array.isArray(b.content))
-          return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
-        return "";
-      }).join(" ");
-      const jsonMatch = txt.match(/\{[\s\S]*?\}/);
+      // Lees laatste text block
+      const txt = (d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ");
+      const jsonMatch = txt.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("Geen JSON in antwoord");
       const result = JSON.parse(jsonMatch[0]);
 
@@ -830,7 +843,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
     const sys = stijl === "Jeugd & Plezier" ? sysJeugd : sysAdult;
     try {
-      const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
+      const d = await callClaudeAPI({ model:"claude-sonnet-4-6", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
       const raw=d.content?.map(b=>b.text||"").join("")||"";
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
@@ -945,7 +958,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       try {
         const res = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
           body: JSON.stringify(payload)
         });
         if (res.status === 429 || res.status >= 500) {
@@ -973,7 +986,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       { type: "text", text: prompt }
     ];
     const d = await callClaudeAPI({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
       messages: [{ role: "user", content }]
     });
@@ -1060,7 +1073,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       }
       const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 5000);
       const d = await callClaudeAPI({
-        model: "claude-sonnet-4-20250514", max_tokens: 500,
+        model: "claude-sonnet-4-6", max_tokens: 500,
         messages: [{ role: "user", content: `Vind in deze voetbal.nl tekst de eerstvolgende wedstrijd. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${text}` }]
       });
       const raw = d.content?.map(b => b.text || "").join("") || "";
@@ -3375,7 +3388,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       {voetbalFallback&&<button onClick={async()=>{
                         setScanning("nextmatch");setScanError(null);
                         try{
-                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
+                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
                           const d=await res.json();const raw=d.content?.map(b=>b.text||"").join("")||"";const out=JSON.parse(raw.replace(/```json|```/g,"").trim());
                           const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean);
                           setNextGame(parts.join(" | "));
