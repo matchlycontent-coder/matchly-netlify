@@ -3306,6 +3306,14 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Facebook handle</div>
                   <input value={fbHandle} onChange={e=>setFbHandle(e.target.value)} placeholder="@vjouvclub of facebook.com/vjouvclub" style={{...INP,marginBottom:16}} />
 
+
+                  {/* Voetbal.nl clubcode */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Voetbal.nl clubcode <span style={{opacity:0.5,fontWeight:400}}>(eenmalig voor hele club)</span></div>
+                  <div style={{display:"flex",gap:8,marginBottom:4}}>
+                    <input value={clubCode} onChange={e=>setClubCode(e.target.value)} placeholder="Bijv. 67890" style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,padding:"10px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none"}} />
+                    {clubCode && (<a href={`https://www.voetbal.nl/clubs/nederland/${clubCode}/show/`} target="_blank" rel="noopener noreferrer" style={{padding:"10px 14px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center"}}>↗</a>)}
+                  </div>
+                  <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:16}}>Geldt voor alle teams van de club.</div>
                   {/* AI consent toggle */}
                   <div style={{background:aiConsent?"rgba(255,255,255,0.02)":hex(T.red,0.05),border:`1px solid ${aiConsent?T.border3:hex(T.red,0.25)}`,borderRadius:14,padding:14,marginBottom:16}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
@@ -3397,21 +3405,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
                         <span style={{fontSize:14}}>🔗</span>
                         <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,color:T.yellow,letterSpacing:0.5}}>Voetbal.nl koppeling</div>
-                      </div>
-
-                      {/* Club code — once for whole club */}
-                      <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>
-                        <strong style={{color:T.text3}}>Clubcode</strong> (eenmalig in te stellen door de clubbeheerder via voetbal.nl):
-                      </div>
-                      <div style={{display:"flex",gap:8,marginBottom:12}}>
-                        <input value={clubCode} onChange={e=>setClubCode(e.target.value)} placeholder="Bijv. 67890"
-                          style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,padding:"10px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none"}} />
-                        {clubCode && (
-                          <a href={`https://www.voetbal.nl/clubs/nederland/${clubCode}/show/`} target="_blank" rel="noopener noreferrer"
-                            style={{padding:"10px 14px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center"}}>
-                            ↗
-                          </a>
-                        )}
                       </div>
 
                       {/* Team ID for this specific team */}
