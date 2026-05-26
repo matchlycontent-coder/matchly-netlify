@@ -598,7 +598,28 @@ export default function App() {
     setNextMatchLoading(true);
     setNextMatchMsg("");
     try {
-      const today = new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
+      // ── Andere teams: voetbal.nl via Netlify Function ──
+      if (!isHeren1 && teamId) {
+        const res = await fetch(`/.netlify/functions/fetchMatch?teamId=${encodeURIComponent(teamId)}`);
+        const result = await res.json();
+        if (result.error) {
+          setNextMatchMsg("⚠ " + result.error + " — vul handmatig in.");
+          return;
+        }
+        if (result.tegenstander) setOpp(result.tegenstander);
+        if (result.datum) setMatchDate(result.datum);
+        if (result.tijd) setKick(result.tijd);
+        if (result.thuis_uit) setLoc(result.thuis_uit === "uit" ? "uit" : "thuis");
+        if (result.wedstrijdtype) setMKind(result.wedstrijdtype);
+        if (result.tegenstander) {
+          setTimeout(() => { searchHvLogo(result.tegenstander, setOppLogoUrl, setOppLogoLoading, setOppLogoMsg); }, 300);
+        }
+        const dateStr = result.datum ? new Date(result.datum).toLocaleDateString("nl-NL", { weekday:"long", day:"numeric", month:"long" }) : "";
+        setNextMatchMsg(`✓ ${result.tegenstander}${dateStr ? ` · ${dateStr}` : ""}`);
+        return;
+      }
+
+      // ── Heren 1 / fallback: hollandsevelden.nl via AI ──
       const fullTeam = `${clubName} ${isHeren1?team:team}`.trim();
       const compInfo = hvCompUrl
         ? `De competitie staat op deze HollandsVelden URL: ${hvCompUrl}`
