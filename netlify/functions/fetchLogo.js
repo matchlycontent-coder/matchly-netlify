@@ -96,7 +96,7 @@ function fetchUrl(url, redirectCount = 0) {
       res.on('end', () => resolve(data));
     });
     req.on('error', () => resolve(''));
-    req.setTimeout(15000, () => { req.destroy(); resolve(''); }); // 15s timeout, geen crash
+    req.setTimeout(8000, () => { req.destroy(); resolve(''); }); // 15s timeout, geen crash
   });
 }
 
@@ -120,6 +120,6 @@ function fetchImage(url, redirectCount = 0) {
       res.on('end', () => resolve({ data: Buffer.concat(chunks), contentType }));
     });
     req.on('error', reject);
-    req.setTimeout(15000, () => { req.destroy(); reject(new Error('Image timeout')); });
+    req.setTimeout(8000, () => { req.destroy(); reject(new Error('Image timeout')); });
   });
 }
