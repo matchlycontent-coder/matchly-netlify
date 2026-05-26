@@ -7,6 +7,7 @@ import { WEATHER, M, U, T, hex } from './constants/colors';
 import { usePersistedState, clearAllMatchlyStorage } from './hooks/usePersistedState';
 import { safeGet } from './utils/storage';
 import { PlayerSelect, Chip, AutoMinRow, MinRow, Sheet, ConfirmSheet, GoalSheet, CardSheet, SubSheet, MomentSheet, MatchHeader, formatMinuut, TimelineRow, GCard, SHead, INP, Empty, PBtn, BackBtn, ClubCard } from './components';
+const MATCHLY_LOGO = null;
 
 // html2canvas shim — keep original loadH2C() calls working
 
