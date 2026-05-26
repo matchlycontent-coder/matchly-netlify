@@ -1,5 +1,8 @@
 const https = require('https');
 
+// Werkt met zowel ANTHROPIC_API_KEY als VITE_ANTHROPIC_API_KEY
+const API_KEY = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
+
 exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return {
@@ -17,17 +20,16 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
-    console.log('FOUT: ANTHROPIC_API_KEY ontbreekt in environment variables');
+  if (!API_KEY) {
+    console.log('FOUT: API key ontbreekt (ANTHROPIC_API_KEY of VITE_ANTHROPIC_API_KEY)');
     return {
       statusCode: 500,
       headers: { 'Access-Control-Allow-Origin': '*' },
-      body: JSON.stringify({ error: 'ANTHROPIC_API_KEY ontbreekt in Netlify environment variables' }),
+      body: JSON.stringify({ error: 'API key ontbreekt in Netlify environment variables' }),
     };
   }
 
-  console.log('API key gevonden, lengte:', process.env.ANTHROPIC_API_KEY.length, 'tekens');
-  console.log('Begint met:', process.env.ANTHROPIC_API_KEY.substring(0, 10) + '...');
+  console.log('API key gevonden, lengte:', API_KEY.length, 'tekens');
 
   try {
     const body = event.body;
@@ -64,7 +66,7 @@ function callAnthropic(body) {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'x-api-key': API_KEY,
         'anthropic-version': '2023-06-01',
         'anthropic-beta': 'interleaved-thinking-2025-05-14',
       },
