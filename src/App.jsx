@@ -1170,7 +1170,7 @@ Geef ALLEEN de directe afbeeldings-URL terug die eindigt op .png, .jpg, .jpeg, .
 Typische structuren: https://cms.hollandsevelden.nl/storage/... of https://www.hollandsevelden.nl/media/...
 Geef UITSLUITEND de URL terug, geen andere tekst.`;
 
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/.netlify/functions/anthropic", {
         method: "POST",
         headers: {"Content-Type": "application/json"},
         body: JSON.stringify({
@@ -1241,7 +1241,7 @@ Geef UITSLUITEND de URL terug, geen andere tekst.`;
     setTeamIdLoading(true); setTeamIdMsg("");
     try {
       const vraag = `Zoek het KNVB team-ID voor "${clubName} ${team}" op voetbal.nl. Het team-ID staat in de URL: voetbal.nl/teams/nederland/team/[ID]/show/. Geef ALLEEN het numerieke ID terug, niets anders.`;
-      const res = await fetch("https://api.anthropic.com/v1/messages",{
+      const res = await fetch("/.netlify/functions/anthropic",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
@@ -1656,7 +1656,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
     for (const d of delays) {
       if (d > 0) await sleep(d);
       try {
-        const res = await fetch("https://api.anthropic.com/v1/messages", {
+        const res = await fetch("/.netlify/functions/anthropic", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -4088,7 +4088,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       {voetbalFallback&&<button onClick={async()=>{
                         setScanning("nextmatch");setScanError(null);
                         try{
-                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
+                          const res=await fetch("/.netlify/functions/anthropic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
                           const d=await res.json();const raw=d.content?.map(b=>b.text||"").join("")||"";const out=JSON.parse(raw.replace(/```json|```/g,"").trim());
                           const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean);
                           setNextGame(parts.join(" | "));
