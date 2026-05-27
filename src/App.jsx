@@ -1628,6 +1628,10 @@ REGELS:
 - Schrijf actieve zinnen. Vermijd passieve constructies. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 - Wissel zinslengte af: combineer korte, krachtige zinnen (5–8 woorden) met langere, beschrijvende zinnen (15–20 woorden). Vermijd drie of meer zinnen van vergelijkbare lengte achter elkaar.
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
+- Let op correcte Nederlandse lidwoorden in vaste voetbal-uitdrukkingen:
+  • Clean sheet → "op de nul houden" (mét "de"), bv. "Hans hield CWO op de nul". NOOIT "op nul houden".
+  • Punten kwijtraken → "op nul punten houden" of "punten verspelen", bv. "CWO bleef op nul punten staan".
+  • Algemeen: controleer of een zelfstandig naamwoord een lidwoord nodig heeft (de/het/een). Schrijf "in de slotfase", "in de eerste helft", "op het middenveld", niet zonder lidwoord.
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
 - Bij momenten "Houtwerk geraakt": schrijf afwisselend "raakte het houtwerk" of "raakte het aluminium". Bij meerdere momenten varieer tussen beide om herhaling te voorkomen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
@@ -1662,6 +1666,9 @@ REGELS:
 - Schrijf korte zinnen (gemiddeld 6–12 woorden). Een enkele langere zin mag, maar wees zuinig.
 - Beschrijf wat er gebeurde in begrijpelijke taal. Geen tactiek, geen analyse, geen technische bespiegelingen.
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
+- Let op correcte Nederlandse lidwoorden in vaste voetbal-uitdrukkingen:
+  • Clean sheet → "op de nul houden" (mét "de"), bv. "De keeper hield het team op de nul". NOOIT "op nul houden".
+  • Algemeen: controleer of een zelfstandig naamwoord een lidwoord nodig heeft (de/het/een). Schrijf "in de eerste helft", "op het veld", niet zonder lidwoord.
 - Gebruik het woord "spelertjes" maximaal 2 keer per verslag. Wissel af met "het team", "de jongens en meiden", "het elftal", de clubnaam of het pronomen "ze". Herstructureer de zin als dat natuurlijker is (bijv. "Het ging gelijk op" in plaats van "De spelertjes speelden gelijk op").
 - Gebruik geen emoji's in de tekstoutput.
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
