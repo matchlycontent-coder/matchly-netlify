@@ -220,10 +220,11 @@ function PlayerSelect({ value, onChange, squad, placeholder }) {
   );
 }
 
-function Chip({ label, active, onClick, color, xs }) {
+function Chip({ label, active, onClick, color, xs, gradient }) {
   const c = color || U;
+  const activeBg = gradient ? `linear-gradient(135deg,${c} 0%,${hex(c,0.55)} 100%)` : c;
   return (
-    <button onClick={onClick} style={{padding:xs?"6px 13px":"10px 18px",borderRadius:100,border:`1px solid ${active?c:T.border3}`,background:active?c:"rgba(255,255,255,0.04)",color:active?"#fff":T.text3,fontSize:xs?11:13,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.4,whiteSpace:"nowrap",transition:"all 0.18s cubic-bezier(0.4,0,0.2,1)",backdropFilter:"blur(8px)",boxShadow:active?`0 0 16px ${hex(c,0.35)}`:"none"}}>
+    <button onClick={onClick} style={{padding:xs?"6px 13px":"10px 18px",borderRadius:100,border:`1px solid ${active?c:T.border3}`,background:active?activeBg:"rgba(255,255,255,0.04)",color:active?"#fff":T.text3,fontSize:xs?11:13,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.4,whiteSpace:"nowrap",transition:"all 0.18s cubic-bezier(0.4,0,0.2,1)",backdropFilter:"blur(8px)",boxShadow:active?`0 0 16px ${hex(c,0.35)}`:"none"}}>
       {label}
     </button>
   );
@@ -356,7 +357,7 @@ function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused }) {
   const [half,setHalf]=useState(""); const [min,setMin]=useState(""); const [xt,setXt]=useState(false);
   const [player,setPlayer]=useState(""); const [assist,setAssist]=useState(""); const [gtype,setGtype]=useState("");
   return (
-    <Sheet title={isOwn?"🔴 Tegendoelpunt":"⚽ Doelpunt"} onClose={onClose} accentColor={c}>
+    <Sheet title={isOwn?"⚽ Tegendoelpunt":"⚽ Doelpunt"} onClose={onClose} accentColor={c}>
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
         <AutoMinRow liveMinute={liveMinute} paused={paused} half={half} setHalf={setHalf} minute={min} setMinute={setMin} extra={xt} setExtra={setXt} color={c} />
         {!isOwn && (
@@ -540,7 +541,7 @@ function MatchHeader({ clubName, opponent, homeScore, awayScore, status, elapsed
           <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,letterSpacing:3,color:isLive?(paused?"#ffc107":T.red):isDone?U:T.text3,textTransform:"uppercase"}}>
             {isLive?(paused?"PAUZE":"LIVE"):isDone?"AFGELOPEN":"AANKOMEND"}
           </span>
-          {isLive && elapsed>0 && <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,color:T.text3}}>• {elapsed}'</span>}
+          {isLive && <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,color:T.text3}}>• {Math.max(1, elapsed)}'</span>}
           {isLive && setElapsed && (
             <button onClick={()=>setTimeAdjustOpen(o=>!o)} title="Wedstrijdtijd aanpassen" style={{background:timeAdjustOpen?hex(U,0.25):"transparent",border:"none",cursor:"pointer",padding:"2px 5px",marginLeft:2,borderRadius:100,fontSize:11,lineHeight:1,color:T.text3}}>
               {timeAdjustOpen?"✕":"✏️"}
@@ -879,6 +880,10 @@ export default function App() {
   const [weather,setWeather] = usePersistedState("weather", "");
   const [elapsed,setElapsed] = useState(0);
   const [paused,setPaused] = useState(false);
+  // Timestamp-based klok zodat tijd doorloopt als app sluit/op achtergrond gaat
+  const [matchStartTime,setMatchStartTime] = usePersistedState("matchStartTime", null); // Date.now() bij start
+  const [totalPausedMs,setTotalPausedMs] = usePersistedState("totalPausedMs", 0); // som van alle pauzes (ms)
+  const [pauseStartTime,setPauseStartTime] = usePersistedState("pauseStartTime", null); // start huidige pauze
   const [sponsorOffset,setSponsorOffset] = useState(0);
   const [showDemo,setShowDemo] = useState(false);
   const [blockReminder,setBlockReminder] = useState(null); // {label, end}
@@ -1129,12 +1134,26 @@ export default function App() {
     if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:"instant"});
   },[screen, status]);
 
-  // Live timer
+  // Live timer — gebaseerd op timestamps zodat tijd doorloopt bij app-sluit/achtergrond
   useEffect(()=>{
-    if(status==="LIVE" && !paused) timer.current=setInterval(()=>setElapsed(t=>t+1),60000);
-    else clearInterval(timer.current);
+    if(status !== "LIVE") return;
+    // Backward-compat: oude wedstrijd zonder timestamps → start nu
+    if (!matchStartTime) {
+      setMatchStartTime(Date.now() - elapsed * 60000); // gebruik elapsed als offset
+      return; // effect re-runt zodra matchStartTime gezet is
+    }
+    const computeElapsed = () => {
+      const now = Date.now();
+      const currentPause = paused && pauseStartTime ? (now - pauseStartTime) : 0;
+      const elapsedMs = now - matchStartTime - totalPausedMs - currentPause;
+      return Math.max(0, Math.floor(elapsedMs / 60000));
+    };
+    // Sync direct + bij wijziging van afhankelijke velden
+    setElapsed(computeElapsed());
+    // Periodieke herberekening — survives backgrounding (interval kan haperen, herberekening corrigeert)
+    timer.current = setInterval(()=>setElapsed(computeElapsed()), 10000);
     return ()=>clearInterval(timer.current);
-  },[status,paused]);
+  },[status, paused, matchStartTime, totalPausedMs, pauseStartTime]);
 
   // Spelbeeld blok-grenzen → reminder
   useEffect(()=>{
@@ -1343,11 +1362,35 @@ export default function App() {
     setEvents(p=>p.filter(e=>e.id!==id));
   };
   const cp = (txt,k) => { navigator.clipboard.writeText(txt); setCopied(k); setTimeout(()=>setCopied(null),2500); };
-  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setScreen("dashboard"); };
+  const startMatch = () => {
+    setHasStarted(true);
+    setStatus("LIVE");
+    setScreen("dashboard");
+    setMatchStartTime(Date.now());
+    setTotalPausedMs(0);
+    setPauseStartTime(null);
+    setElapsed(0);
+  };
+  // Pauze toggle die de pauzeduur correct bijhoudt (zodat klok doorloopt bij app-sluit)
+  const togglePause = () => {
+    if (paused) {
+      // Pauze afsluiten: voeg duur toe aan totaal
+      if (pauseStartTime) {
+        setTotalPausedMs(prev => prev + (Date.now() - pauseStartTime));
+      }
+      setPauseStartTime(null);
+      setPaused(false);
+    } else {
+      // Pauze starten
+      setPauseStartTime(Date.now());
+      setPaused(true);
+    }
+  };
 
   const resetMatch = () => {
     setHasStarted(false); setStatus("PRE"); setHome(0); setAway(0); setEvents([]);
     setOpp(""); setOppDraft(""); setMKind(""); setLoc("thuis"); setKick(""); setMatchDate(""); setWeather(""); setElapsed(0);
+    setMatchStartTime(null); setTotalPausedMs(0); setPauseStartTime(null);
     setReminderShown({}); setBlockReminder(null); setPaused(false);
     setAlgBeld(""); setH1f1(""); setH1f2(""); setH1f3("");
     setH2f1(""); setH2f2(""); setH2f3("");
@@ -1586,6 +1629,7 @@ REGELS:
 - Wissel zinslengte af: combineer korte, krachtige zinnen (5–8 woorden) met langere, beschrijvende zinnen (15–20 woorden). Vermijd drie of meer zinnen van vergelijkbare lengte achter elkaar.
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
+- Bij momenten "Houtwerk geraakt": schrijf afwisselend "raakte het houtwerk" of "raakte het aluminium". Bij meerdere momenten varieer tussen beide om herhaling te voorkomen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
 
 VERSLAG: 150–250 woorden. Chronologisch per fase. Sluit af met eindstand.
@@ -1623,6 +1667,7 @@ REGELS:
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
+- Bij momenten "Houtwerk geraakt": schrijf afwisselend "raakte het houtwerk" of "raakte het aluminium". Bij meerdere momenten varieer tussen beide om herhaling te voorkomen.
 - Schrijf actieve zinnen. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 
 VERSLAG: 120–180 woorden. Vertel in chronologische volgorde wat er gebeurde. Sluit af met een warme zin over de inzet of het plezier.
@@ -2191,13 +2236,26 @@ HEADLINE: 1 zin. Positief en simpel.`;
         select,input,textarea{-webkit-appearance:none;appearance:none;}
         select option{background:${T.bg2};}
         button:active{opacity:0.82;transform:scale(0.975);}
+        /* Verberg native datum/tijd placeholder als veld leeg is, overlay toont onze tekst */
+        .matchly-empty-date::-webkit-datetime-edit{color:transparent;}
+        .matchly-empty-time::-webkit-datetime-edit{color:transparent;}
+        .matchly-empty-date:focus::-webkit-datetime-edit,
+        .matchly-empty-time:focus::-webkit-datetime-edit{color:${T.text};}
       `}</style>
 
       <div style={{background:T.bg0,height:"100dvh",display:"flex",justifyContent:"center",overflow:"hidden"}}>
         <div style={{width:"100%",maxWidth:430,background:T.bg1,height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
           {/* HEADER */}
-          <MatchHeader clubName={clubName} opponent={opponent} homeScore={home} awayScore={away} status={status} elapsed={elapsed} paused={paused} clubLogo={logo} hvLogoUrl={hvLogoUrl} oppLogoUrl={oppLogoUrl} C={C} sec={sec} setElapsed={setElapsed} />
+          <MatchHeader clubName={clubName} opponent={opponent} homeScore={home} awayScore={away} status={status} elapsed={elapsed} paused={paused} clubLogo={logo} hvLogoUrl={hvLogoUrl} oppLogoUrl={oppLogoUrl} C={C} sec={sec} setElapsed={(newOrFn)=>{
+            const newVal = typeof newOrFn === "function" ? newOrFn(elapsed) : newOrFn;
+            const safeVal = Math.max(0, newVal);
+            // Shift matchStartTime zodat berekening klopt
+            const now = Date.now();
+            const currentPause = paused && pauseStartTime ? (now - pauseStartTime) : 0;
+            setMatchStartTime(now - totalPausedMs - currentPause - safeVal * 60000);
+            setElapsed(safeVal);
+          }} />
 
           {/* Offline banner - global */}
           {!isOnline && (
@@ -2284,7 +2342,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <button onClick={fetchNextMatch} disabled={nextMatchLoading} style={{width:"100%",marginBottom:nextMatchMsg?6:14,padding:"12px",background:nextMatchLoading?"rgba(255,255,255,0.04)":M.gradD,border:"none",borderRadius:100,color:nextMatchLoading?T.text4:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,letterSpacing:0.5,cursor:nextMatchLoading?"wait":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:nextMatchLoading?"none":`0 4px 16px ${hex(M.purple,0.35)}`}}>
                         {nextMatchLoading
                           ? <><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> Opzoeken…</>
-                          : <>🔄 Laadt komende wedstrijd</>
+                          : <>🔄 Laad komende wedstrijd</>
                         }
                       </button>
                       {nextMatchMsg && (
@@ -2352,8 +2410,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               style={{...INP,marginBottom:0}}
                             />
                             <div style={{display:"flex",gap:8}}>
-                              <input type="date" value={matchDate} onChange={e=>setMatchDate(e.target.value)} style={{...INP,marginBottom:0,flex:1,colorScheme:"dark"}}/>
-                              <input type="time" value={kick} onChange={e=>setKick(e.target.value)} placeholder="14:00" style={{...INP,marginBottom:0,flex:1,colorScheme:"dark"}}/>
+                              <div style={{position:"relative",flex:1}}>
+                                <input type="date" value={matchDate} onChange={e=>setMatchDate(e.target.value)} className={matchDate?"":"matchly-empty-date"} style={{...INP,marginBottom:0,width:"100%",boxSizing:"border-box",colorScheme:"dark"}}/>
+                                {!matchDate && <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:T.text4,fontSize:13,fontFamily:"Barlow,sans-serif",pointerEvents:"none"}}>📅 Datum</span>}
+                              </div>
+                              <div style={{position:"relative",flex:1}}>
+                                <input type="time" value={kick} onChange={e=>setKick(e.target.value)} className={kick?"":"matchly-empty-time"} style={{...INP,marginBottom:0,width:"100%",boxSizing:"border-box",colorScheme:"dark"}}/>
+                                {!kick && <span style={{position:"absolute",left:14,top:"50%",transform:"translateY(-50%)",color:T.text4,fontSize:13,fontFamily:"Barlow,sans-serif",pointerEvents:"none"}}>🕐 Tijd</span>}
+                              </div>
                             </div>
                             <div style={{display:"flex",gap:8}}>
                               <Chip label="🏠 Thuis" active={loc==="thuis"} onClick={()=>setLoc("thuis")} color={U} />
@@ -2549,7 +2613,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 </div>
 
                 {status==="LIVE" && (
-                  <button onClick={()=>setPaused(p=>!p)} style={{width:"100%",padding:14,background:paused?M.gradD:"transparent",border:paused?"none":`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:paused?"#fff":U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginBottom:10,boxShadow:paused?`0 8px 28px ${hex(M.purple,0.4)}`:"none",animation:paused?"pulsePause 1.6s ease-in-out infinite":"none"}}>
+                  <button onClick={togglePause} style={{width:"100%",padding:14,background:paused?M.gradD:"transparent",border:paused?"none":`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:paused?"#fff":U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginBottom:10,boxShadow:paused?`0 8px 28px ${hex(M.purple,0.4)}`:"none",animation:paused?"pulsePause 1.6s ease-in-out infinite":"none"}}>
                     {paused?"▶️ Wedstrijdtijd hervatten":"⏸️ Wedstrijdtijd pauzeren (rust)"}
                   </button>
                 )}
@@ -2577,7 +2641,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {screen==="goals" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:28}}>
-                {[{t:"GOAL",icon:"⚽",label:"Doelpunt",c:C},{t:"OWN",icon:"🔴",label:"Tegendoelpunt",c:T.red}].map(({t,icon,label,c})=>(
+                {[{t:"GOAL",icon:"⚽",label:"Doelpunt",c:C},{t:"OWN",icon:"⚽",label:"Tegendoelpunt",c:T.red}].map(({t,icon,label,c})=>(
                   <button key={t} onClick={()=>setModal(t)} style={{padding:"24px 16px",background:hex(c,0.07),border:`1px solid ${hex(c,0.2)}`,borderRadius:22,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:c,cursor:"pointer",textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:12,transition:"all 0.18s",boxShadow:`inset 0 1px 0 ${hex(c,0.15)}`}}>
                     <span style={{fontSize:36,filter:`drop-shadow(0 4px 8px ${hex(c,0.4)})`}}>{icon}</span>{label}
                   </button>
@@ -2612,19 +2676,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {screen==="spelbeeld" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
               <SHead label="1e Helft — Openingsfase (0–20 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>setH1f1(h1f1===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>setH1f1(h1f1===f?"":f)} color={U} gradient />)}</div>
               <SHead label="1e Helft — Middenfase (20–35 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>setH1f2(h1f2===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>setH1f2(h1f2===f?"":f)} color={U} gradient />)}</div>
               <SHead label="1e Helft — Slotfase (35–45 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>setH1f3(h1f3===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>setH1f3(h1f3===f?"":f)} color={U} gradient />)}</div>
               <SHead label="2e Helft — Openingsfase (45–65 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>setH2f1(h2f1===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>setH2f1(h2f1===f?"":f)} color={U} gradient />)}</div>
               <SHead label="2e Helft — Middenfase (65–80 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>setH2f2(h2f2===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>setH2f2(h2f2===f?"":f)} color={U} gradient />)}</div>
               <SHead label="2e Helft — Slotfase (80–90 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>setH2f3(h2f3===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>setH2f3(h2f3===f?"":f)} color={U} gradient />)}</div>
               <SHead label="Eindbeeld van de wedstrijd" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>setAlgBeld(algBeld===w?"":w)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>setAlgBeld(algBeld===w?"":w)} color={U} gradient />)}</div>
               <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${T.border}`}}>
                 <BackBtn onClick={()=>setScreen("dashboard")} label="Terug naar dashboard" />
               </div>
@@ -2690,7 +2754,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   {key:"penalty_opp", icon:"⚖️", label:"Niet gegeven teg. penalty",needsPlayer:false},
                   {key:"disallowed",  icon:"❌", label:"Afgekeurde goal",           needsPlayer:true},
                   {key:"disallowed_opp",icon:"🚩",label:"Afgekeurde goal teg.",    needsPlayer:false},
-                  {key:"bar",         icon:"🏃", label:"Paal/lat",                 needsPlayer:true},
+                  {key:"bar",         icon:"🏃", label:"Houtwerk geraakt",         needsPlayer:true},
                   {key:"big_save",    icon:"🧤", label:"Belangrijke redding",      needsPlayer:true},
                   {key:"injury",      icon:"🩹", label:"Blessure + wissel",        needsPlayer:true, needsPlayer2:true},
                 ].map(t=>(
@@ -3165,7 +3229,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             </div>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"3% 4%",flexShrink:0}}>
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
-                                {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"16%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"1%",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}} crossOrigin="anonymous"/>:<div style={{width:"16%",aspectRatio:"1/1",background:thex(TAC,0.2),border:`1px solid ${thex(TAC,0.4)}`,borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"5cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                                <div style={{width:"16%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                                  {(hvLogoUrl||logo)
+                                    ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
+                                    :<div style={{fontSize:"5cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                  }
+                                </div>
                                 <span style={{fontSize:(clubName.length>20?"1.9cqw":clubName.length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"#fff",textAlign:"center"}}>{clubName}</span>
                               </div>
                               <div style={{display:"flex",alignItems:"baseline",gap:"1%"}}>
@@ -3174,7 +3243,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <span style={{fontSize:"26cqw",fontWeight:900,color:"rgba(255,255,255,0.35)",lineHeight:1}}>{away}</span>
                               </div>
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
-                                {oppLogoUrl?<img src={oppLogoUrl} style={{width:"16%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"1%",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}} crossOrigin="anonymous"/>:<div style={{width:"16%",aspectRatio:"1/1",background:"rgba(255,255,255,0.07)",borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"5cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                                <div style={{width:"16%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid rgba(255,255,255,0.25)`,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 16px rgba(255,255,255,0.1)",overflow:"hidden"}}>
+                                  {oppLogoUrl
+                                    ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
+                                    :<div style={{fontSize:"5cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                  }
+                                </div>
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.9cqw":(opponent||"Tegenstander").length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"rgba(255,255,255,0.4)",textAlign:"center"}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
@@ -3272,10 +3346,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }}>
                               {/* Linker team - eigen club */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                {(hvLogoUrl||logo)
-                                  ?<img src={hvLogoUrl||logo} style={{width:"60%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"6%"}} crossOrigin="anonymous"/>
-                                  :<div style={{width:"60%",aspectRatio:"1/1",background:`linear-gradient(135deg,${TAC},${thex(TAC,0.7)})`,borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"#000"}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                }
+                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 20px ${thex(TAC,0.35)}`,overflow:"hidden"}}>
+                                  {(hvLogoUrl||logo)
+                                    ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
+                                    :<div style={{fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                  }
+                                </div>
                                 <span style={{fontSize:(clubName.length>20?"1.7cqw":clubName.length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.85)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{clubName}</span>
                               </div>
 
@@ -3288,10 +3364,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                               {/* Rechter team - tegenstander */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                {oppLogoUrl
-                                  ?<img src={oppLogoUrl} style={{width:"60%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"6%"}} crossOrigin="anonymous"/>
-                                  :<div style={{width:"60%",aspectRatio:"1/1",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                }
+                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid rgba(255,255,255,0.25)`,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 20px rgba(255,255,255,0.1)",overflow:"hidden"}}>
+                                  {oppLogoUrl
+                                    ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
+                                    :<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                  }
+                                </div>
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.7cqw":(opponent||"Tegenstander").length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.55)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
