@@ -138,7 +138,7 @@ const T = {
   bg0: M.bg0, bg1: M.bg1, bg2: M.bg2, bg3: M.bg3,
   bg4: M.bg4, surface: M.bg2,
   border:"#ffffff08", border2:"#ffffff12", border3:"#ffffff1e",
-  text:"#f0f0ff", text2:"#ffffffcc", text3:"#ffffff66", text4:"#ffffff28",
+  text:"#f0f0ff", text2:"#ffffffcc", text3:"#ffffff66", text4:"#ffffff80",
   green:"#00e676", red:"#ff1744", yellow:"#ffd600", blue:"#448aff",
 };
 
@@ -767,12 +767,19 @@ export default function App() {
   const [hvLogoLoading,setHvLogoLoading] = useState(false);
   const [hvLogoMsg,setHvLogoMsg] = useState("");
   const [hvCompUrl,setHvCompUrl] = usePersistedState("hvCompUrl", "");
-  // voetbal.nl (PERSISTED)
+  // voetbal.nl / Sportlink (PERSISTED)
   const [clubCode,setClubCode]   = usePersistedState("clubCode", "");
   const [teamId,setTeamId]       = usePersistedState("teamId", "");
+  const [sportlinkClientId,setSportlinkClientId] = usePersistedState("sportlinkClientId", ""); // Sportlink Club.Dataservice API client_id (clublaag)
   const [teamIdLoading,setTeamIdLoading] = useState(false);
   const [teamIdMsg,setTeamIdMsg] = useState("");
   const [showTeamIdInfo,setShowTeamIdInfo] = useState(false);
+  // Seizoensrooster
+  const [seizoensrooster,setSeizoenrooster] = usePersistedState("seizoensrooster", []); // [{datum,tijd,tegenstander,locatie,type}]
+  const [roosterImportText,setRoosterImportText] = useState("");
+  const [roosterImportLoading,setRoosterImportLoading] = useState(false);
+  const [roosterImportResult,setRoosterImportResult] = useState(null); // parsed preview
+  const [roosterImportErr,setRoosterImportErr] = useState("");
 
   // ── DISTRIBUTIE & COMMUNICATIE (PERSISTED) ──
   // SoMe-beheerder (handover-flow)
@@ -940,6 +947,7 @@ export default function App() {
   const [hasStarted,setHasStarted] = useState(false);
   const [modal,setModal]           = useState(null);
   const [confirm,setConfirm]       = useState(false);
+  const [contentEditing,setContentEditing] = useState(false); // ontsluiting na content-generatie
 
   // ── AI output (PERSISTED — bespaart API calls bij refresh) ──
   const [aiOut,setAiOut]     = usePersistedState("aiOut", null);
@@ -1300,14 +1308,16 @@ export default function App() {
 
   const resetMatch = () => {
     setHasStarted(false); setStatus("PRE"); setHome(0); setAway(0); setEvents([]);
-    setOpp(""); setMKind(""); setLoc("thuis"); setKick(""); setMatchDate(""); setWeather(""); setElapsed(0);
+    setOpp(""); setOppDraft(""); setMKind(""); setLoc("thuis"); setKick(""); setMatchDate(""); setWeather(""); setElapsed(0);
     setReminderShown({}); setBlockReminder(null); setPaused(false);
     setAlgBeld(""); setH1f1(""); setH1f2(""); setH1f3("");
     setH2f1(""); setH2f2(""); setH2f3("");
     setMotm(""); setStars([]); setBijzT([]); setBijzN(""); setMotmRedenen([]);
     setKeyMoments([]); setSpecialInfo([]);                  // wedstrijdmomenten + bijzonderheden leegmaken
-    setOppLogoUrl(""); setOppLogoMsg("");
+    setOppLogoUrl(""); setOppLogoMsg(""); setHvLogoMsg("");
     setAiOut(null); setAiErr(null); setScreen("dashboard");
+    setEditingMatch(false); setNextMatchMsg(""); setModal(null); setConfirm(false); setContentEditing(false);
+    setScanning(null); setScanError(null); setLastScanUndo(null);
     // chosenTheme NIET resetten — laatst gekozen design-keuze blijft voor de volgende wedstrijd (gebruiksgemak)
     setChecklist({afb:false,wa:false,mail:false,social:false});
     // autoFetchedRef NIET resetten — na 1e auto-fetch geen automatische ophaal meer (alleen via ↻ knop)
@@ -1322,6 +1332,57 @@ export default function App() {
     const url=URL.createObjectURL(blob);const a=document.createElement("a");
     a.download=`matchly_${clubName.replace(/\s+/g,"_")}_${home}-${away}.json`;
     a.href=url;a.click();URL.revokeObjectURL(url);
+  };
+
+  // ── Seizoensrooster importeren via AI (tekst of foto) ──
+  const parseRoosterText = async (textOrBase64, isImage = false) => {
+    if (!textOrBase64) return;
+    setRoosterImportLoading(true);
+    setRoosterImportErr("");
+    setRoosterImportResult(null);
+    try {
+      const prompt = `Je krijgt een wedstrijdrooster van een voetbalteam. Haal ALLE wedstrijden eruit en geef ze terug als JSON array.
+Noteer voor elke wedstrijd:
+- datum: "YYYY-MM-DD" (als jaar ontbreekt, gebruik het huidige seizoen)
+- tijd: "HH:MM" (gebruik null als niet vermeld)
+- tegenstander: exacte naam van de tegenstander
+- locatie: "thuis" of "uit"
+- type: "Competitie" of "Beker" (standaard "Competitie" als niet duidelijk)
+
+Geef ALLEEN een JSON array terug, niets anders:
+[{"datum":"2025-09-07","tijd":"14:00","tegenstander":"CWO Vlaardingen","locatie":"thuis","type":"Competitie"}]`;
+
+      const messages = isImage
+        ? [{ role: "user", content: [
+            { type: "image", source: { type: "base64", media_type: "image/jpeg", data: textOrBase64 } },
+            { type: "text", text: prompt }
+          ]}]
+        : [{ role: "user", content: `${prompt}\n\nRooster tekst:\n${textOrBase64}` }];
+
+      const res = await fetch("/.netlify/functions/anthropic", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ model: "claude-sonnet-4-20250514", max_tokens: 1500, messages })
+      });
+      if (!res.ok) throw new Error(`API ${res.status}`);
+      const data = await res.json();
+      const text = (data.content || []).filter(b => b.type === "text").map(b => b.text).join("");
+      const clean = text.replace(/```json|```/g, "").trim();
+      const parsed = JSON.parse(clean);
+      if (!Array.isArray(parsed) || parsed.length === 0) throw new Error("Geen wedstrijden gevonden");
+      setRoosterImportResult(parsed);
+    } catch(e) {
+      setRoosterImportErr("Kon het rooster niet inlezen: " + (e.message || "onbekende fout"));
+    }
+    setRoosterImportLoading(false);
+  };
+
+  const confirmRoosterImport = () => {
+    if (!roosterImportResult) return;
+    setSeizoenrooster(roosterImportResult);
+    setRoosterImportResult(null);
+    setRoosterImportText("");
+    setRoosterImportErr("");
   };
 
   // ── Eerstvolgende wedstrijd ophalen via Claude API (web search) ──
@@ -2415,13 +2476,37 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   <span>📊</span> Overzicht {events.length>0 && <span style={{fontSize:13,fontWeight:700,color:T.text4}}>({events.length})</span>}
                 </button>
 
+                {/* ── Content lock banner — getoond als content al is gemaakt ── */}
+                {status==="FINISHED" && aiOut && !contentEditing && (
+                  <div style={{marginBottom:14,padding:"12px 16px",background:"rgba(255,214,0,0.08)",border:`1px solid ${hex(T.yellow,0.3)}`,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+                    <div style={{fontSize:12,color:T.yellow,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>
+                      🔒 <strong>Content is aangemaakt.</strong> Wijzigingen vereisen hergenereratie.
+                    </div>
+                    <button onClick={()=>setContentEditing(true)} style={{padding:"7px 14px",background:hex(T.yellow,0.15),border:`1px solid ${hex(T.yellow,0.4)}`,borderRadius:10,color:T.yellow,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",letterSpacing:0.5}}>
+                      ✏️ Bewerk
+                    </button>
+                  </div>
+                )}
+
+                {/* ── Bewerk-modus banner ── */}
+                {status==="FINISHED" && aiOut && contentEditing && (
+                  <div style={{marginBottom:14,padding:"12px 16px",background:"rgba(0,230,118,0.08)",border:`1px solid ${hex(T.green,0.3)}`,borderRadius:14,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+                    <div style={{fontSize:12,color:T.green,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>
+                      ✏️ <strong>Bewerkingsmodus actief.</strong> Pas aan en genereer opnieuw.
+                    </div>
+                    <button onClick={()=>{ setContentEditing(false); setAiOut(null); setScreen("output"); }} style={{padding:"7px 14px",background:hex(T.green,0.15),border:`1px solid ${hex(T.green,0.4)}`,borderRadius:10,color:T.green,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:800,cursor:"pointer",whiteSpace:"nowrap",letterSpacing:0.5}}>
+                      🔄 Genereer opnieuw
+                    </button>
+                  </div>
+                )}
+
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#00e676,#00b248)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(0,230,118,0.4)"}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="#000"/></svg></div>} label="Goals" sub={`${gCount} eigen · ${oCount} tegen`} count={gCount+oCount} onClick={()=>setScreen("goals")} accent={C} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff6f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)",position:"relative"}}><div style={{position:"absolute",width:18,height:24,background:"#ffd600",borderRadius:3,top:4,left:6,border:"1.5px solid rgba(0,0,0,0.2)"}}/><div style={{position:"absolute",width:18,height:24,background:"#ff1744",borderRadius:3,top:7,left:12,border:"1.5px solid rgba(0,0,0,0.2)"}}/></div>} label="Kaarten" sub={`${yCount} geel · ${rCount} rood`} count={yCount+rCount} onClick={()=>setScreen("kaarten")} accent={T.yellow} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#448aff,#1565c0)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(68,138,255,0.35)"}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h13M13 4l3 3-3 3M21 17H8M11 14l-3 3 3 3"/></svg></div>} label="Wissels" sub={`${sCount} doorgevoerd`} count={sCount} onClick={()=>setScreen("wissels")} accent={C} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:`linear-gradient(135deg,${U},${hex(U,0.6)})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 14px ${hex(U,0.4)}`}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>} label="Spelbeeld" sub="Wedstrijdanalyse" onClick={()=>setScreen("spelbeeld")} accent={U} progress={[h1f1,h1f2,h1f3,h2f1,h2f2,h2f3,algBeld].filter(Boolean).length} progressMax={7} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff8f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)"}}>🏆</div>} label="Man of the Match" sub={home<away?"Niet bij verlies":(motm?motm:"Kies speler")} onClick={()=>setScreen("uitblinkers")} accent={T.yellow} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(124,58,237,0.45)",fontSize:20}}>⚡</div>} label="Wedstrijdmomenten" labelSize={14} sub={keyMoments.length+specialInfo.length>0?`${keyMoments.length+specialInfo.length} momenten`:"Kansen, blessures & meer"} count={keyMoments.length+specialInfo.length} onClick={()=>setScreen("wedstrijdinfo")} accent={"#7c3aed"} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#00e676,#00b248)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(0,230,118,0.4)"}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="#000"/></svg></div>} label="Goals" sub={`${gCount} eigen · ${oCount} tegen`} count={gCount+oCount} onClick={status==="FINISHED"&&aiOut&&!contentEditing?null:()=>setScreen("goals")} accent={C} disabled={status==="FINISHED"&&aiOut&&!contentEditing} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff6f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)",position:"relative"}}><div style={{position:"absolute",width:18,height:24,background:"#ffd600",borderRadius:3,top:4,left:6,border:"1.5px solid rgba(0,0,0,0.2)"}}/><div style={{position:"absolute",width:18,height:24,background:"#ff1744",borderRadius:3,top:7,left:12,border:"1.5px solid rgba(0,0,0,0.2)"}}/></div>} label="Kaarten" sub={`${yCount} geel · ${rCount} rood`} count={yCount+rCount} onClick={status==="FINISHED"&&aiOut&&!contentEditing?null:()=>setScreen("kaarten")} accent={T.yellow} disabled={status==="FINISHED"&&aiOut&&!contentEditing} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#448aff,#1565c0)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(68,138,255,0.35)"}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h13M13 4l3 3-3 3M21 17H8M11 14l-3 3 3 3"/></svg></div>} label="Wissels" sub={`${sCount} doorgevoerd`} count={sCount} onClick={status==="FINISHED"&&aiOut&&!contentEditing?null:()=>setScreen("wissels")} accent={C} disabled={status==="FINISHED"&&aiOut&&!contentEditing} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:`linear-gradient(135deg,${U},${hex(U,0.6)})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 14px ${hex(U,0.4)}`}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>} label="Spelbeeld" sub="Wedstrijdanalyse" onClick={status==="FINISHED"&&aiOut&&!contentEditing?null:()=>setScreen("spelbeeld")} accent={U} progress={[h1f1,h1f2,h1f3,h2f1,h2f2,h2f3,algBeld].filter(Boolean).length} progressMax={7} disabled={status==="FINISHED"&&aiOut&&!contentEditing} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff8f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)"}}>🏆</div>} label="Man of the Match" sub={home<away?"Niet bij verlies":(motm?motm:"Kies speler")} onClick={status==="FINISHED"&&aiOut&&!contentEditing?null:()=>setScreen("uitblinkers")} accent={T.yellow} disabled={status==="FINISHED"&&aiOut&&!contentEditing} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(124,58,237,0.45)",fontSize:20}}>⚡</div>} label="Wedstrijdmomenten" labelSize={14} sub={keyMoments.length+specialInfo.length>0?`${keyMoments.length+specialInfo.length} momenten`:"Kansen, blessures & meer"} count={keyMoments.length+specialInfo.length} onClick={status==="FINISHED"&&aiOut&&!contentEditing?null:()=>setScreen("wedstrijdinfo")} accent={"#7c3aed"} disabled={status==="FINISHED"&&aiOut&&!contentEditing} />
                 </div>
 
                 {status==="LIVE" && (
@@ -4132,6 +4217,17 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                         <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,color:T.yellow,letterSpacing:0.5}}>Voetbal.nl koppeling</div>
                       </div>
 
+                      {/* Sportlink Client ID — clublaag, eenmalig */}
+                      <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:10,padding:"10px 12px",marginBottom:12}}>
+                        <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>Sportlink Club.Dataservice</div>
+                        <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>
+                          <strong style={{color:T.text3}}>Client ID</strong> (eenmalig door clubbeheerder in te stellen). Vindplaats: Sportlink Club → Vereniging → Beheer → Gebruikersbeheer → tabblad Clubsite.
+                        </div>
+                        <input value={sportlinkClientId} onChange={e=>setSportlinkClientId(e.target.value)} placeholder="bijv. BBDX62N"
+                          style={{width:"100%",boxSizing:"border-box",background:"rgba(255,255,255,0.04)",border:`1px solid ${sportlinkClientId?hex(U,0.4):T.border3}`,borderRadius:8,padding:"9px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none"}} />
+                        {sportlinkClientId && <div style={{marginTop:5,fontSize:10,color:U,fontFamily:"Barlow,sans-serif"}}>✓ Sportlink Client ID opgeslagen</div>}
+                      </div>
+
                       {/* Club code — once for whole club */}
                       <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>
                         <strong style={{color:T.text3}}>Clubcode</strong> (eenmalig in te stellen door de clubbeheerder via voetbal.nl):
@@ -4178,6 +4274,91 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     ))}
                   </div>
                 </div>
+
+                {/* ── SEIZOENSROOSTER — Team-laag ── */}
+                <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                    <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8}}>Seizoensrooster</div>
+                    {seizoensrooster.length>0 && (
+                      <span style={{fontSize:10,color:T.green,fontFamily:"Barlow,sans-serif"}}>✓ {seizoensrooster.length} wedstrijden</span>
+                    )}
+                  </div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:14}}>
+                    Voer het rooster voor dit seizoen eenmalig in. De app weet dan altijd welke wedstrijd de volgende is en wie de tegenstander is. Plak tekst of maak een foto van je programma.
+                  </div>
+
+                  {/* Preview van bestaand rooster */}
+                  {seizoensrooster.length>0 && !roosterImportResult && (
+                    <div style={{marginBottom:14}}>
+                      {seizoensrooster.slice(0,3).map((w,i)=>(
+                        <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 0",borderBottom:`1px solid ${T.border2}`,fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif"}}>
+                          <span style={{minWidth:80,color:T.text4}}>{w.datum}</span>
+                          <span style={{flex:1}}>{w.tegenstander}</span>
+                          <span style={{fontSize:10,color:w.locatie==="thuis"?T.green:T.blue}}>{w.locatie}</span>
+                        </div>
+                      ))}
+                      {seizoensrooster.length>3 && <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:4}}>+ {seizoensrooster.length-3} meer wedstrijden</div>}
+                    </div>
+                  )}
+
+                  {/* Import preview */}
+                  {roosterImportResult && (
+                    <div style={{marginBottom:14,padding:12,background:"rgba(0,230,118,0.06)",border:`1px solid ${hex(T.green,0.3)}`,borderRadius:12}}>
+                      <div style={{fontSize:12,color:T.green,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,marginBottom:8}}>✓ {roosterImportResult.length} wedstrijden gevonden</div>
+                      {roosterImportResult.slice(0,4).map((w,i)=>(
+                        <div key={i} style={{display:"flex",alignItems:"center",gap:8,padding:"5px 0",borderBottom:`1px solid ${T.border2}`,fontSize:11,color:T.text3,fontFamily:"Barlow,sans-serif"}}>
+                          <span style={{minWidth:80,color:T.text4,fontSize:10}}>{w.datum}</span>
+                          <span style={{flex:1}}>{w.tegenstander}</span>
+                          <span style={{fontSize:10,color:w.locatie==="thuis"?T.green:T.blue}}>{w.locatie}</span>
+                        </div>
+                      ))}
+                      {roosterImportResult.length>4 && <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:4}}>+ {roosterImportResult.length-4} meer</div>}
+                      <div style={{display:"flex",gap:8,marginTop:10}}>
+                        <button onClick={confirmRoosterImport} style={{flex:1,padding:"10px",background:hex(T.green,0.15),border:`1px solid ${hex(T.green,0.4)}`,borderRadius:10,color:T.green,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer"}}>✓ Opslaan</button>
+                        <button onClick={()=>{setRoosterImportResult(null);setRoosterImportErr("");}} style={{padding:"10px 14px",background:"transparent",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,cursor:"pointer"}}>✕</button>
+                      </div>
+                    </div>
+                  )}
+
+                  {roosterImportErr && <div style={{marginBottom:10,fontSize:11,color:T.red,fontFamily:"Barlow,sans-serif"}}>{roosterImportErr}</div>}
+
+                  {/* Tekst-invoer */}
+                  {!roosterImportResult && (
+                    <>
+                      <textarea
+                        value={roosterImportText}
+                        onChange={e=>setRoosterImportText(e.target.value)}
+                        placeholder={"Plak hier je rooster, bijv.:\nzo 07-09 14:00 CWO thuis\nzo 21-09 10:00 SVV uit\n..."}
+                        rows={4}
+                        style={{width:"100%",boxSizing:"border-box",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:12,padding:"10px 12px",color:T.text,fontFamily:"Barlow,sans-serif",fontSize:12,outline:"none",resize:"vertical",marginBottom:10,lineHeight:1.6}}
+                      />
+                      <div style={{display:"flex",gap:8}}>
+                        <button
+                          onClick={()=>parseRoosterText(roosterImportText)}
+                          disabled={!roosterImportText.trim()||roosterImportLoading}
+                          style={{flex:1,padding:"11px",background:roosterImportText.trim()?hex(U,0.12):"rgba(255,255,255,0.04)",border:`1px solid ${roosterImportText.trim()?hex(U,0.3):T.border3}`,borderRadius:12,color:roosterImportText.trim()?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:roosterImportText.trim()?"pointer":"not-allowed",letterSpacing:0.5}}
+                        >
+                          {roosterImportLoading?"⏳ Analyseren...":"📋 Tekst verwerken"}
+                        </button>
+                        <label style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"11px 14px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:12,color:T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer"}}>
+                          📷 Foto
+                          <input type="file" accept="image/*" style={{display:"none"}} onChange={e=>{
+                            const f=e.target.files?.[0]; if(!f) return;
+                            const r=new FileReader();
+                            r.onload=()=>parseRoosterText(r.result.split(",")[1],true);
+                            r.readAsDataURL(f);
+                          }} />
+                        </label>
+                      </div>
+                      {seizoensrooster.length>0 && (
+                        <button onClick={()=>setSeizoenrooster([])} style={{marginTop:8,width:"100%",padding:"8px",background:"transparent",border:"none",color:T.text4,fontFamily:"Barlow,sans-serif",fontSize:11,cursor:"pointer",textDecoration:"underline",textDecorationStyle:"dotted"}}>
+                          Rooster wissen
+                        </button>
+                      )}
+                    </>
+                  )}
+                </div>
+
                 </>)}{/* einde Team-tab content */}
 
                 {/* ──────────────────────────────────
