@@ -229,6 +229,22 @@ function Chip({ label, active, onClick, color, xs }) {
   );
 }
 
+function NewTeamInput({ onAdd, U, T }) {
+  const [v, setV] = useState("");
+  const submit = () => { if (v.trim()) { onAdd(v); setV(""); } };
+  return (
+    <div style={{display:"flex",gap:8}}>
+      <input value={v} onChange={e=>setV(e.target.value)}
+        onKeyDown={e=>{ if(e.key==="Enter"){ e.preventDefault(); submit(); } }}
+        placeholder="Nieuw team toevoegen — bijv. JO13-2"
+        style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,padding:"9px 12px",color:T.text,fontFamily:"Barlow,sans-serif",fontSize:12,outline:"none"}} />
+      <button onClick={submit} disabled={!v.trim()} style={{padding:"9px 14px",background:v.trim()?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px solid ${v.trim()?hex(U,0.4):T.border3}`,borderRadius:10,color:v.trim()?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:800,cursor:v.trim()?"pointer":"not-allowed",letterSpacing:0.5,whiteSpace:"nowrap"}}>
+        + Toevoegen
+      </button>
+    </div>
+  );
+}
+
 function AutoMinRow({ liveMinute, paused, half, setHalf, minute, setMinute, extra, setExtra, color }) {
   const c = color || U;
   const [editing, setEditing] = useState(false);
@@ -725,10 +741,12 @@ export default function App() {
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
   const [team,setTeam]           = usePersistedState("team", "Heren 1");
+  const [clubTeams,setClubTeams] = usePersistedState("clubTeams", ["Heren 1","Heren 2","Heren 3","Heren 4","Dames 1","Dames 2","JO19-1","JO17-1","JO15-1"]); // teams die de club heeft — clubbeheerder beheert dit
   const [comp,setComp]           = usePersistedState("comp", "3e Klasse KNVB");
   const [stijlByTeam,setStijlByTeam] = usePersistedState("stijlByTeam", {});
   const stijl    = stijlByTeam[team] || safeGet("stijl","") || "Zakelijk & Nuchter"; // per team; valt terug op oude globale waarde voor backward-compat
   const setStijl = (v) => setStijlByTeam(prev => ({...prev, [team]: v}));
+  const [teamIdByTeam,setTeamIdByTeam] = usePersistedState("teamIdByTeam", {}); // per-team voetbal.nl team-ID
   const [C,setC]                 = usePersistedState("C", "#a855f7"); // Matchly-paars als default
   const [sec,setSec]             = usePersistedState("sec", "#ec4899"); // Matchly-magenta als secundair
   const [logo,setLogo]           = usePersistedState("logo", null);
@@ -816,6 +834,27 @@ export default function App() {
   const [opponent,setOpp]    = usePersistedState("opponent", "");
   const [oppDraft,setOppDraft] = useState(opponent);
   useEffect(() => { setOppDraft(opponent); }, [opponent]); // sync extern (bv. AI-fetch)
+
+  // ── Team-ID per-team sync: laden bij teamwissel, opslaan bij wijziging ──
+  // (Eenmalige sync op mount: zorg dat huidige teamId in de map staat voor backward-compat)
+  const teamRef = useRef(team);
+  useEffect(() => {
+    // Als team wijzigt: laad opgeslagen ID voor dat team (of leeg)
+    if (teamRef.current !== team) {
+      const saved = teamIdByTeam[team];
+      setTeamId(saved !== undefined ? saved : "");
+      teamRef.current = team;
+    }
+  }, [team]);
+  useEffect(() => {
+    // Als teamId wijzigt: sla op voor het huidige team
+    if (team) {
+      setTeamIdByTeam(prev => {
+        if (prev[team] === teamId) return prev;
+        return {...prev, [team]: teamId};
+      });
+    }
+  }, [teamId]);
 
   // ── ONLINE/OFFLINE detectie ──
   const [isOnline,setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
@@ -4172,6 +4211,73 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     </div>
                   )}
                 </div>
+
+                {/* ── KOPPELING — Club-laag (voetbal.nl + Sportlink) ── */}
+                <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
+                  <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:6}}>Voetbal.nl & Sportlink koppeling</div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:14}}>
+                    Eenmalig door clubbeheerder in te stellen. Alle teams van deze club profiteren ervan.
+                  </div>
+
+                  {/* Sportlink Client ID */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:6}}>
+                    <strong style={{color:T.text3}}>Sportlink Client ID</strong> — vindplaats: Sportlink Club → Vereniging → Beheer → Gebruikersbeheer → tabblad Clubsite
+                  </div>
+                  <input value={sportlinkClientId} onChange={e=>setSportlinkClientId(e.target.value)} placeholder="bijv. BBDX62N"
+                    style={{width:"100%",boxSizing:"border-box",background:"rgba(255,255,255,0.04)",border:`1px solid ${sportlinkClientId?hex(U,0.4):T.border3}`,borderRadius:10,padding:"10px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none",marginBottom:sportlinkClientId?4:12}} />
+                  {sportlinkClientId && <div style={{marginBottom:12,fontSize:10,color:U,fontFamily:"Barlow,sans-serif"}}>✓ Sportlink Client ID opgeslagen</div>}
+
+                  {/* Voetbal.nl Clubcode */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:6}}>
+                    <strong style={{color:T.text3}}>Voetbal.nl Clubcode</strong> — voor de standlinks en clubpagina op voetbal.nl
+                  </div>
+                  <div style={{display:"flex",gap:8}}>
+                    <input value={clubCode} onChange={e=>setClubCode(e.target.value)} placeholder="Bijv. 67890"
+                      style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,padding:"10px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none"}} />
+                    {clubCode && (
+                      <a href={`https://www.voetbal.nl/clubs/nederland/${clubCode}/show/`} target="_blank" rel="noopener noreferrer"
+                        style={{padding:"10px 14px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center"}}>
+                        ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+
+                {/* ── TEAM-OVERZICHT — Club-laag (welke teams heeft de club?) ── */}
+                <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:6}}>
+                    <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8}}>Team-overzicht</div>
+                    <span style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif"}}>{clubTeams.length} teams</span>
+                  </div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:14}}>
+                    De teams die deze club heeft. Teammanagers kiezen uit deze lijst hun team. Verwijder of voeg toe naar wens.
+                  </div>
+
+                  {/* Team chips met verwijder-knop */}
+                  <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:12}}>
+                    {clubTeams.map(t=>(
+                      <div key={t} style={{display:"inline-flex",alignItems:"center",gap:4,padding:"6px 10px",background:team===t?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px solid ${team===t?hex(U,0.4):T.border3}`,borderRadius:100,fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,color:team===t?U:T.text3,letterSpacing:0.5}}>
+                        <span>{t}</span>
+                        <button onClick={()=>{
+                          if (clubTeams.length <= 1) return; // minstens 1 team houden
+                          if (window.confirm(`Team "${t}" verwijderen uit de clublijst?`)) {
+                            const next = clubTeams.filter(x=>x!==t);
+                            setClubTeams(next);
+                            if (team === t) setTeam(next[0]);
+                          }
+                        }} style={{background:"none",border:"none",color:T.text4,cursor:"pointer",padding:"0 2px",fontSize:14,lineHeight:1}} title="Verwijderen">×</button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Nieuw team toevoegen */}
+                  <NewTeamInput onAdd={(name)=>{
+                    const v = name.trim();
+                    if (!v) return;
+                    if (clubTeams.includes(v)) return;
+                    setClubTeams([...clubTeams, v]);
+                  }} U={U} T={T} />
+                </div>
                 </>)}{/* einde Club-tab content */}
 
                 {/* ──────────────────────────────────
@@ -4179,14 +4285,22 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                 ────────────────────────────────── */}
                 {settingsTab==="team" && (<>
                 <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
-                  <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:16}}>ELFTAL</div>
+                  <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:6}}>ELFTAL</div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:14}}>
+                    Kies welk team je beheert. De lijst wordt door de clubbeheerder onderhouden in de club-instellingen.
+                  </div>
 
-                  {/* Team chips */}
+                  {/* Team chips uit clubTeams */}
                   <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:10}}>
-                    {["Heren 1","Heren 2","Heren 3","Heren 4","Dames 1","Dames 2","JO19-1","JO17-1","JO15-1"].map(t=>(
+                    {clubTeams.map(t=>(
                       <Chip key={t} label={t} active={team===t} onClick={()=>setTeam(t)} color={U} xs />
                     ))}
                   </div>
+                  {clubTeams.length === 0 && (
+                    <div style={{padding:12,background:"rgba(255,214,0,0.06)",border:`1px solid ${hex(T.yellow,0.25)}`,borderRadius:10,fontSize:11,color:T.yellow,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:12}}>
+                      ⚠️ Nog geen teams toegevoegd. Ga naar Club-instellingen → Team-overzicht om teams toe te voegen.
+                    </div>
+                  )}
                   <input value={team} onChange={e=>setTeam(e.target.value)} placeholder="Of typ zelf: Heren 5" style={{...INP,marginBottom:16}} />
 
                   {/* ── Heren 1: HollandseVelden competitie ── */}
@@ -4210,42 +4324,20 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       )}
                     </div>
                   ) : (
-                    /* ── Other teams: voetbal.nl ── */
+                    /* ── Other teams: voetbal.nl team-ID ── */
                     <div style={{background:"rgba(0,0,0,0.2)",border:`1px solid ${hex(T.yellow,0.2)}`,borderRadius:14,padding:16}}>
                       <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:10}}>
                         <span style={{fontSize:14}}>🔗</span>
-                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,color:T.yellow,letterSpacing:0.5}}>Voetbal.nl koppeling</div>
+                        <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,color:T.yellow,letterSpacing:0.5}}>Voetbal.nl Team-ID</div>
                       </div>
 
-                      {/* Sportlink Client ID — clublaag, eenmalig */}
-                      <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:10,padding:"10px 12px",marginBottom:12}}>
-                        <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>Sportlink Club.Dataservice</div>
-                        <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>
-                          <strong style={{color:T.text3}}>Client ID</strong> (eenmalig door clubbeheerder in te stellen). Vindplaats: Sportlink Club → Vereniging → Beheer → Gebruikersbeheer → tabblad Clubsite.
-                        </div>
-                        <input value={sportlinkClientId} onChange={e=>setSportlinkClientId(e.target.value)} placeholder="bijv. BBDX62N"
-                          style={{width:"100%",boxSizing:"border-box",background:"rgba(255,255,255,0.04)",border:`1px solid ${sportlinkClientId?hex(U,0.4):T.border3}`,borderRadius:8,padding:"9px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none"}} />
-                        {sportlinkClientId && <div style={{marginTop:5,fontSize:10,color:U,fontFamily:"Barlow,sans-serif"}}>✓ Sportlink Client ID opgeslagen</div>}
-                      </div>
-
-                      {/* Club code — once for whole club */}
-                      <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>
-                        <strong style={{color:T.text3}}>Clubcode</strong> (eenmalig in te stellen door de clubbeheerder via voetbal.nl):
-                      </div>
-                      <div style={{display:"flex",gap:8,marginBottom:12}}>
-                        <input value={clubCode} onChange={e=>setClubCode(e.target.value)} placeholder="Bijv. 67890"
-                          style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,padding:"10px 12px",color:T.text,fontFamily:"monospace",fontSize:13,outline:"none"}} />
-                        {clubCode && (
-                          <a href={`https://www.voetbal.nl/clubs/nederland/${clubCode}/show/`} target="_blank" rel="noopener noreferrer"
-                            style={{padding:"10px 14px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,textDecoration:"none",display:"flex",alignItems:"center"}}>
-                            ↗
-                          </a>
-                        )}
+                      <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:10}}>
+                        Clubcode en Sportlink Client ID staan in de <strong style={{color:T.text3}}>Club-instellingen</strong>. Hier vul je alleen het team-ID voor <strong style={{color:T.text3}}>{fullTeamName}</strong> in.
                       </div>
 
                       {/* Team ID for this specific team */}
                       <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:8}}>
-                        <strong style={{color:T.text3}}>Team-ID</strong> voor {fullTeamName}:
+                        <strong style={{color:T.text3}}>Team-ID</strong>:
                       </div>
                       <div style={{display:"flex",gap:8}}>
                         <input value={teamId} onChange={e=>setTeamId(e.target.value)} placeholder="Bijv. 122561"
