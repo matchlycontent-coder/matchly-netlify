@@ -3227,29 +3227,29 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               </div>
                               <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)"}}>Matchly</span>
                             </div>
-                            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"3% 4%",flexShrink:0}}>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
-                                <div style={{width:"16%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                            <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center",gap:"3%",padding:"3% 4%",flexShrink:0}}>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"3%"}}>
+                                <div style={{width:"70%",aspectRatio:"1/1",borderRadius:"50%",border:`3px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 24px ${thex(TAC,0.35)}`,overflow:"hidden"}}>
                                   {(hvLogoUrl||logo)
                                     ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"5cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                                   }
                                 </div>
-                                <span style={{fontSize:(clubName.length>20?"1.9cqw":clubName.length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"#fff",textAlign:"center"}}>{clubName}</span>
+                                <span style={{fontSize:(clubName.length>20?"2.2cqw":clubName.length>14?"2.5cqw":"2.8cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.15}}>{clubName}</span>
                               </div>
-                              <div style={{display:"flex",alignItems:"baseline",gap:"1%"}}>
-                                <span style={{fontSize:"26cqw",fontWeight:900,color:"#fff",lineHeight:1,textShadow:`0 0 40px ${thex(TAC,0.8)}`}}>{home}</span>
-                                <span style={{fontSize:"9cqw",color:"rgba(255,255,255,0.25)"}}>–</span>
-                                <span style={{fontSize:"26cqw",fontWeight:900,color:"rgba(255,255,255,0.35)",lineHeight:1}}>{away}</span>
+                              <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"3%"}}>
+                                <span style={{fontSize:"22cqw",fontWeight:900,color:"#fff",lineHeight:1,textShadow:`0 0 40px ${thex(TAC,0.8)}`}}>{home}</span>
+                                <span style={{fontSize:"8cqw",color:"rgba(255,255,255,0.25)",fontWeight:300}}>–</span>
+                                <span style={{fontSize:"22cqw",fontWeight:900,color:"rgba(255,255,255,0.4)",lineHeight:1}}>{away}</span>
                               </div>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
-                                <div style={{width:"16%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid rgba(255,255,255,0.25)`,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 16px rgba(255,255,255,0.1)",overflow:"hidden"}}>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"3%"}}>
+                                <div style={{width:"70%",aspectRatio:"1/1",borderRadius:"50%",border:`3px solid rgba(255,255,255,0.25)`,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 24px rgba(255,255,255,0.1)",overflow:"hidden"}}>
                                   {oppLogoUrl
                                     ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"5cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:"rgba(255,255,255,0.45)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                                   }
                                 </div>
-                                <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.9cqw":(opponent||"Tegenstander").length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"rgba(255,255,255,0.4)",textAlign:"center"}}>{opponent||"Tegenstander"}</span>
+                                <span style={{fontSize:((opponent||"Tegenstander").length>20?"2.2cqw":(opponent||"Tegenstander").length>14?"2.5cqw":"2.8cqw"),fontWeight:900,color:"rgba(255,255,255,0.55)",textAlign:"center",lineHeight:1.15}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
                             {/* THEMABALK met badge + quote, gradient ook op single-color thema's */}
@@ -3346,7 +3346,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }}>
                               {/* Linker team - eigen club */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 20px ${thex(TAC,0.35)}`,overflow:"hidden"}}>
+                                <div style={{width:"70%",aspectRatio:"1/1",borderRadius:"50%",border:`3px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 24px ${thex(TAC,0.35)}`,overflow:"hidden"}}>
                                   {(hvLogoUrl||logo)
                                     ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                     :<div style={{fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -3356,18 +3356,18 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               </div>
 
                               {/* Score - centraal */}
-                              <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:"2%"}}>
-                                <span style={{fontSize:"16cqw",fontWeight:900,color:"rgba(255,255,255,0.95)",lineHeight:1,textShadow:`0 0 30px ${thex(TAC,0.6)}`}}>{home}</span>
-                                <span style={{fontSize:"5cqw",color:"rgba(255,255,255,0.3)",lineHeight:1}}>–</span>
-                                <span style={{fontSize:"16cqw",fontWeight:900,color:"rgba(255,255,255,0.4)",lineHeight:1}}>{away}</span>
+                              <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"3%"}}>
+                                <span style={{fontSize:"14cqw",fontWeight:900,color:"rgba(255,255,255,0.95)",lineHeight:1,textShadow:`0 0 30px ${thex(TAC,0.6)}`}}>{home}</span>
+                                <span style={{fontSize:"5cqw",color:"rgba(255,255,255,0.3)",lineHeight:1,fontWeight:300}}>–</span>
+                                <span style={{fontSize:"14cqw",fontWeight:900,color:"rgba(255,255,255,0.4)",lineHeight:1}}>{away}</span>
                               </div>
 
                               {/* Rechter team - tegenstander */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid rgba(255,255,255,0.25)`,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 20px rgba(255,255,255,0.1)",overflow:"hidden"}}>
+                                <div style={{width:"70%",aspectRatio:"1/1",borderRadius:"50%",border:`3px solid rgba(255,255,255,0.25)`,background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 0 24px rgba(255,255,255,0.1)",overflow:"hidden"}}>
                                   {oppLogoUrl
                                     ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                    :<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.45)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                                   }
                                 </div>
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.7cqw":(opponent||"Tegenstander").length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.55)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{opponent||"Tegenstander"}</span>
