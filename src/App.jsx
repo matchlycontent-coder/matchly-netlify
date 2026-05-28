@@ -805,6 +805,7 @@ export default function App() {
   const [someName,setSomeName]       = usePersistedState("someName", "");
   const [someNumber,setSomeNumber]   = usePersistedState("someNumber", "");      // E.164 zonder + (bv. 31612345678)
   const [someCountry,setSomeCountry] = usePersistedState("someCountry", "31");   // landcode default NL
+  const [someEmail,setSomeEmail]     = usePersistedState("someEmail", "");        // e-mailadres SoMe-beheerder (voor content-mail)
   // Clubwebsite (voor verslag-export en deelteksten)
   const [clubWebsite,setClubWebsite] = usePersistedState("clubWebsite", "");
   // Meta-koppeling voorbereiding (placeholders — nog niet actief)
@@ -813,6 +814,10 @@ export default function App() {
   const [metaIgHandle,setMetaIgHandle]   = usePersistedState("metaIgHandle", "");
   // UI feedback voor distributie-scherm
   const [copiedDistr,setCopiedDistr] = useState(null);
+  // E-mail versturen naar SoMe-beheerder
+  const [emailSending,setEmailSending] = useState(false);
+  const [emailSent,setEmailSent]       = useState(false);
+  const [emailError,setEmailError]     = useState(null);
   // Player import
   const [importMode,setImportMode] = useState("");
   const [pasteText,setPasteText]  = useState("");
@@ -1400,9 +1405,136 @@ export default function App() {
     setAiOut(null); setAiErr(null); setScreen("dashboard");
     setEditingMatch(false); setNextMatchMsg(""); setModal(null); setConfirm(false); setContentEditing(false);
     setScanning(null); setScanError(null); setLastScanUndo(null);
+    setEmailSending(false); setEmailSent(false); setEmailError(null);
     // chosenTheme NIET resetten — laatst gekozen design-keuze blijft voor de volgende wedstrijd (gebruiksgemak)
     setChecklist({afb:false,wa:false,mail:false,social:false});
     // autoFetchedRef NIET resetten — na 1e auto-fetch geen automatische ophaal meer (alleen via ↻ knop)
+  };
+
+  // ── Content-mail naar SoMe-beheerder (verslag + caption + samenvatting + doelpunten + bijlages) ──
+  const buildContentEmailHtml = () => {
+    const esc = (s) => String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+    const goals = events.filter(e=>e.type==="GOAL"||e.type==="OWN");
+    let hs=0, as=0;
+    const goalRows = goals.map(e=>{
+      if(e.type==="OWN") as++; else hs++;
+      const who = e.type==="OWN" ? (opponent||"Tegenstander") : (e.player||"—");
+      return `<tr><td style="padding:6px 12px;color:#9333ea;font-size:13px;font-weight:700;white-space:nowrap;">${esc(e.minute||"?")}'</td><td style="padding:6px 12px;color:#888;font-size:13px;white-space:nowrap;">${hs}-${as}</td><td style="padding:6px 12px;color:#111;font-size:14px;font-weight:600;">${esc(who)}</td></tr>`;
+    }).join("");
+    const goalsBlock = goals.length>0
+      ? `<table style="border-collapse:collapse;width:100%;background:#faf8ff;border-radius:8px;">${goalRows}</table>`
+      : `<p style="color:#999;font-size:14px;margin:0;font-style:italic;">Geen doelpunten</p>`;
+
+    const motmBlock = (motm && home>=away)
+      ? `<div style="margin:0 0 28px;">
+           <div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:#ec4899;text-transform:uppercase;margin-bottom:10px;">🏆 Man of the Match</div>
+           <div style="background:linear-gradient(135deg,#faf0ff,#fff5fa);border:1px solid #f0d9ff;border-radius:10px;padding:16px 18px;font-size:18px;font-weight:800;color:#1a1a1a;">${esc(motm)}</div>
+         </div>`
+      : "";
+
+    const verslagHtml = esc(aiOut.verslag).split(/\n+/).filter(Boolean).map(p=>`<p style="margin:0 0 12px;line-height:1.75;color:#333;font-size:14px;">${p}</p>`).join("");
+
+    const resultLabel = home>away ? "Overwinning" : home===away ? "Gelijkspel" : "Nederlaag";
+    const sectionTitle = (icon,txt,color) => `<div style="font-size:11px;font-weight:800;letter-spacing:1.5px;color:${color||"#9333ea"};text-transform:uppercase;margin-bottom:10px;">${icon} ${txt}</div>`;
+
+    return `<!doctype html>
+<html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f3f1f7;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+  <div style="max-width:600px;margin:0 auto;padding:24px 16px;">
+
+    <!-- Header -->
+    <div style="background:linear-gradient(135deg,#4f46e5,#a855f7,#ec4899);border-radius:16px 16px 0 0;padding:28px 28px 24px;">
+      <div style="font-size:12px;font-weight:800;letter-spacing:3px;color:rgba(255,255,255,0.7);text-transform:uppercase;margin-bottom:10px;">Matchly · Content klaar</div>
+      <div style="font-size:24px;font-weight:900;color:#fff;line-height:1.2;">${esc(fullTeamName)} ${esc(home)}-${esc(away)} ${esc(opponent||"Tegenstander")}</div>
+      <div style="font-size:13px;color:rgba(255,255,255,0.85);margin-top:6px;">${resultLabel}</div>
+    </div>
+
+    <!-- Body -->
+    <div style="background:#ffffff;border-radius:0 0 16px 16px;padding:28px;box-shadow:0 4px 24px rgba(0,0,0,0.06);">
+
+      <p style="margin:0 0 24px;font-size:14px;line-height:1.7;color:#444;">
+        Hoi${someName ? " "+esc(someName.split(" ")[0]) : ""},<br>
+        De content voor deze wedstrijd staat klaar om te plaatsen. Hieronder vind je alle teksten; de afbeeldingen (wedstrijdkaart, story${(motm&&home>=away)?" en Man of the Match":""}) zitten als <strong>bijlage</strong> bij deze mail.
+      </p>
+
+      <!-- Instagram caption -->
+      <div style="margin:0 0 28px;">
+        ${sectionTitle("📸","Instagram / Facebook caption")}
+        <div style="background:#faf8ff;border:1px solid #efe9fb;border-radius:10px;padding:16px 18px;font-size:14px;line-height:1.7;color:#222;white-space:pre-wrap;">${esc(aiOut.instagram)}</div>
+      </div>
+
+      ${motmBlock}
+
+      <!-- Doelpunten -->
+      <div style="margin:0 0 28px;">
+        ${sectionTitle("⚽","Doelpunten")}
+        ${goalsBlock}
+      </div>
+
+      <!-- Samenvatting -->
+      <div style="margin:0 0 28px;">
+        ${sectionTitle("📰","Korte samenvatting")}
+        <div style="font-size:15px;font-weight:700;font-style:italic;color:#1a1a1a;margin-bottom:8px;line-height:1.4;">"${esc(aiOut.headline)}"</div>
+        <p style="margin:0;font-size:14px;line-height:1.7;color:#444;">${esc(aiOut.samenvatting)}</p>
+      </div>
+
+      <!-- Volledig verslag -->
+      <div style="margin:0 0 8px;">
+        ${sectionTitle("📝","Volledig wedstrijdverslag")}
+        ${verslagHtml}
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align:center;padding:20px 16px;color:#aaa;font-size:12px;line-height:1.6;">
+      Verstuurd via <strong style="color:#9333ea;">Matchly</strong> — content voor amateurvoetbalclubs.<br>
+      Geplaatst? Laat het de teammanager even weten 👍
+    </div>
+
+  </div>
+</body></html>`;
+  };
+
+  const sendContentEmail = async () => {
+    if (emailSending) return;
+    if (!someEmail || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(someEmail)) {
+      setEmailError("Geen geldig e-mailadres voor de SoMe-beheerder ingesteld. Stel dit in via Clubinstellingen → Distributie.");
+      return;
+    }
+    if (!aiOut) { setEmailError("Geen content om te versturen."); return; }
+    setEmailSending(true); setEmailError(null); setEmailSent(false);
+    try {
+      // 1. Afbeeldingen vastleggen als base64-bijlages
+      const h2c = await loadH2C();
+      const ids = ["classic", "story", ...(motm && home>=away ? ["motm"] : [])];
+      const nameMap = { classic:"wedstrijdkaart", story:"story", motm:"man-of-the-match" };
+      const attachments = [];
+      for (const id of ids) {
+        const el = document.getElementById(`layout-${id}`);
+        if (!el) continue;
+        const canvas = await h2c(el, { scale:2, useCORS:true, backgroundColor:null, logging:false, allowTaint:true });
+        const dataUrl = canvas.toDataURL("image/png");
+        const base64 = (dataUrl.split(",")[1]) || "";
+        if (base64) attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${nameMap[id]}.png`, content: base64 });
+      }
+      // 2. HTML-body + onderwerp
+      const html = buildContentEmailHtml();
+      const subject = `📋 Matchly content — ${fullTeamName} ${home}-${away} ${opponent||"Tegenstander"}`;
+      // 3. Versturen via Netlify-functie
+      const resp = await fetch("/.netlify/functions/send-email", {
+        method:"POST",
+        headers:{ "Content-Type":"application/json" },
+        body: JSON.stringify({ to: someEmail, subject, html, attachments }),
+      });
+      const data = await resp.json().catch(()=>({}));
+      if (!resp.ok) throw new Error(data && data.error ? data.error : "Versturen mislukt");
+      setEmailSent(true);
+    } catch (e) {
+      setEmailError(String(e && e.message ? e.message : e));
+    } finally {
+      setEmailSending(false);
+    }
   };
 
 
@@ -3428,45 +3560,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   ))}
                 </div>
 
-                {/* ══ STUUR NAAR BEHEERDER ══ */}
+                {/* ══ VERSTUUR NAAR BEHEERDER — e-mail (content + bijlages) + WhatsApp notificatie ══ */}
                 {(()=>{
+                  const hasEmail = someEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(someEmail);
                   const hasSome = someNumber && someNumber.length >= 8;
-                  const goals = events.filter(e=>e.type==="GOAL"||e.type==="OWN");
-                  let hs=0,as=0;
-                  const goalLines = goals.map(e=>{
-                    if(e.type==="OWN") as++; else hs++;
-                    return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}`;
-                  });
                   const greeting = someName ? `Hoi ${someName.split(" ")[0]}` : "Hoi";
-                  const msgLines = [
-                    `${greeting}! 👋`,``,
-                    `Content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* staat klaar om te plaatsen.`,``,
-                    `━━━━━━━━━━━━━━━━━━━`,
-                    `📸 *MATCH POST (caption)*`,
-                    `━━━━━━━━━━━━━━━━━━━`,``,
-                    aiOut.instagram,``,
-                  ];
-                  if(motm&&home>=away){
-                    msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                    msgLines.push(`🏆 *MAN OF THE MATCH*`);
-                    msgLines.push(`━━━━━━━━━━━━━━━━━━━`);msgLines.push(``);
-                    msgLines.push(`⭐ Man of the Match: *${motm}*`);msgLines.push(``);
-                    msgLines.push(`Story-afbeelding volgt — geen caption nodig (story).`);msgLines.push(``);
-                  }
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  msgLines.push(`⚽ *DOELPUNTEN*`);
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  goalLines.length>0 ? goalLines.forEach(g=>msgLines.push(g)) : msgLines.push(`Geen doelpunten`);
-                  msgLines.push(``);
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  msgLines.push(`📋 *INSTRUCTIES*`);
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  msgLines.push(`• De afbeeldingen volgen direct hierna in deze chat`);
-                  if(motm&&home>=away) msgLines.push(`• Match-afbeelding, Story én MOTM-afbeelding apart sturen`);
-                  else msgLines.push(`• Match-afbeelding en Story apart sturen`);
-                  msgLines.push(`• Geplaatst? Laat het even weten 🙌`);
-                  const msgText = msgLines.join("\n");
-                  const waUrl = hasSome ? `https://wa.me/${someCountry}${someNumber}?text=${encodeURIComponent(msgText)}` : null;
+                  // Korte WhatsApp-notificatie die naar de mail verwijst
+                  const waShort = `${greeting}! 📬 De content voor ${clubName} ${home}-${away} ${opponent||"Tegenstander"} staat in je mail. Alle afbeeldingen, captions en het volledige verslag zitten erin. Geplaatst? Laat het even weten 👍`;
+                  const waUrl = hasSome ? `https://wa.me/${someCountry}${someNumber}?text=${encodeURIComponent(waShort)}` : null;
 
                   const downloadLayout = async (id) => {
                     const h2c = await loadH2C();
@@ -3488,17 +3589,76 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           <span style={{fontSize:20}}>📤</span>
                         </div>
                         <div>
-                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.3}}>Stuur naar beheerder</div>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.3}}>Verstuur naar beheerder</div>
                           <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:1}}>
-                            {hasSome ? `→ ${someName||`+${someCountry}${someNumber}`}` : "Stel beheerder in via Clubinstellingen"}
+                            {hasEmail ? `→ ${someName||someEmail}` : "Stel e-mailadres in via Clubinstellingen"}
                           </div>
                         </div>
                       </div>
 
-                      {/* Stap 1: afbeeldingen downloaden */}
-                      <div style={{marginBottom:14}}>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 1 — Afbeeldingen downloaden</div>
-                        <div style={{display:"flex",flexDirection:"column",gap:7}}>
+                      {/* Geen e-mail ingesteld → waarschuwing */}
+                      {!hasEmail && (
+                        <div style={{background:"rgba(255,214,0,0.08)",border:"1px solid rgba(255,214,0,0.25)",borderRadius:12,padding:12,marginBottom:14,display:"flex",alignItems:"flex-start",gap:10}}>
+                          <span style={{fontSize:18,lineHeight:1}}>⚠️</span>
+                          <div style={{flex:1}}>
+                            <div style={{fontSize:12,fontWeight:800,color:"#ffd600",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>Nog geen e-mailadres ingesteld</div>
+                            <div style={{fontSize:11.5,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>Stel het e-mailadres van je social media-beheerder in zodat Matchly alle content + afbeeldingen in één mail kan versturen.</div>
+                            <button onClick={()=>{setScreen("club");setClubSection("distributie");}} style={{padding:"7px 12px",background:"rgba(255,214,0,0.15)",border:"1px solid rgba(255,214,0,0.4)",borderRadius:8,color:"#ffd600",fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,cursor:"pointer",letterSpacing:1,textTransform:"uppercase"}}>→ Instellen</button>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Stap 1 — E-mail met content + bijlages */}
+                      <div style={{marginBottom:16}}>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 1 — Mail de content + afbeeldingen</div>
+                        <button
+                          onClick={()=>{ if(!hasEmail){ setScreen("club"); setClubSection("distributie"); return; } sendContentEmail(); }}
+                          disabled={emailSending}
+                          style={{width:"100%",padding:"13px",background: emailSent ? "linear-gradient(90deg,#16a34a,#22c55e)" : hasEmail ? "linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)" : "rgba(255,255,255,0.05)",border:hasEmail||emailSent?"none":"1px solid rgba(255,255,255,0.1)",borderRadius:12,color:hasEmail||emailSent?"#fff":T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,cursor:emailSending?"wait":"pointer",letterSpacing:1,textTransform:"uppercase",display:"flex",alignItems:"center",justifyContent:"center",gap:8,opacity:emailSending?0.8:1}}
+                        >
+                          {emailSending
+                            ? <>⏳ Bezig met versturen…</>
+                            : emailSent
+                              ? <>✓ Mail verstuurd — opnieuw versturen</>
+                              : hasEmail
+                                ? <>📧 Verstuur e-mail naar beheerder</>
+                                : <>⚙️ E-mailadres instellen</>}
+                        </button>
+                        {emailSent && (
+                          <div style={{marginTop:10,padding:"10px 12px",background:"rgba(34,197,94,0.1)",border:"1px solid rgba(34,197,94,0.3)",borderRadius:10,fontSize:11.5,color:"#4ade80",fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>
+                            ✓ De mail met verslag, caption, samenvatting, doelpunten én de afbeeldingen is verstuurd naar <strong>{someEmail}</strong>.
+                          </div>
+                        )}
+                        {emailError && (
+                          <div style={{marginTop:10,padding:"10px 12px",background:"rgba(239,68,68,0.1)",border:"1px solid rgba(239,68,68,0.3)",borderRadius:10,fontSize:11.5,color:"#f87171",fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>
+                            ⚠️ {emailError}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Stap 2 — WhatsApp notificatie */}
+                      <div style={{marginBottom:4}}>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Seintje via WhatsApp</div>
+                        <div style={{display:"flex",gap:8}}>
+                          <button onClick={()=>{navigator.clipboard.writeText(waShort);setCopiedDistr("washort");setTimeout(()=>setCopiedDistr(null),2500);}} style={{flex:1,padding:"11px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:T.text2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textTransform:"uppercase"}}>
+                            {copiedDistr==="washort"?"✓ Gekopieerd":"📋 Kopiëren"}
+                          </button>
+                          <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{flex:2,background:hasSome?"linear-gradient(90deg,#25D366,#128C7E)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
+                            <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
+                              {hasSome?"WhatsApp-seintje":"Nummer instellen"}
+                            </span>
+                          </button>
+                        </div>
+                        <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
+                          💡 Het korte berichtje wijst de beheerder op de mail — daar zit alles in, dus geen losse afbeeldingen meer nodig.
+                        </div>
+                      </div>
+
+                      {/* Fallback: handmatig downloaden */}
+                      <details style={{marginTop:14}}>
+                        <summary style={{cursor:"pointer",fontSize:11,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:1,textTransform:"uppercase",listStyle:"none"}}>⤓ Afbeeldingen handmatig downloaden</summary>
+                        <div style={{display:"flex",flexDirection:"column",gap:7,marginTop:10}}>
                           <button onClick={()=>downloadLayout("classic")} style={{width:"100%",padding:"10px 14px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer",letterSpacing:0.5,display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
                             <span>📸</span><span>Wedstrijdkaart (1:1)</span>
                           </button>
@@ -3511,26 +3671,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             </button>
                           )}
                         </div>
-                      </div>
-
-                      {/* Stap 2: bericht versturen */}
-                      <div>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Tekst versturen via WhatsApp</div>
-                        <div style={{display:"flex",gap:8}}>
-                          <button onClick={()=>{navigator.clipboard.writeText(msgText);setCopiedDistr("handover");setTimeout(()=>setCopiedDistr(null),2500);}} style={{flex:1,padding:"11px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:T.text2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textTransform:"uppercase"}}>
-                            {copiedDistr==="handover"?"✓ Gekopieerd":"📋 Kopiëren"}
-                          </button>
-                          <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{flex:2,background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
-                            <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
-                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
-                              {hasSome?"Stuur via WhatsApp":"Beheerder instellen"}
-                            </span>
-                          </button>
-                        </div>
-                        <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
-                          💡 Stuur daarna de gedownloade afbeeldingen apart in dezelfde WhatsApp-chat.
-                        </div>
-                      </div>
+                      </details>
                     </div>
                   );
                 })()}
@@ -3730,151 +3871,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   );
                 })()}
 
-                {/* ══════════════════════════════════════════
-                    HANDOVER NAAR SOCIAL MEDIA-BEHEERDER
-                    Bundelt alle content (caption, MOTM, samenvatting)
-                    in één WhatsApp-bericht naar de SoMe-beheerder
-                ══════════════════════════════════════════ */}
-                <div style={{display:"flex",alignItems:"center",gap:8,margin:"30px 0 14px"}}>
-                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,${thex(TAC,0.4)},transparent)`}}/>
-                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:3,color:`${TAC}99`,textTransform:"uppercase"}}>Naar Social Media-beheerder</span>
-                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,transparent,${thex(TAC,0.4)})`}}/>
-                </div>
-
-                {(()=>{
-                  const hasSome = someNumber && someNumber.length >= 8;
-                  // Bouw het complete handover-bericht
-                  const goals = events.filter(e=>e.type==="GOAL"||e.type==="OWN");
-                  let hs=0,as=0;
-                  const goalLines = goals.map(e=>{
-                    if(e.type==="OWN") as++; else hs++;
-                    return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}`;
-                  });
-                  const greeting = someName ? `Hoi ${someName.split(" ")[0]}` : "Hoi";
-                  const lines = [
-                    `${greeting}! 👋`,
-                    ``,
-                    `De content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* is klaar om te plaatsen.`,
-                    ``,
-                    `━━━━━━━━━━━━━━━━━━━`,
-                    `📸 *INSTAGRAM / FACEBOOK POST*`,
-                    `━━━━━━━━━━━━━━━━━━━`,
-                    ``,
-                    aiOut.instagram,
-                    ``,
-                  ];
-                  if (motm && home>=away) {
-                    lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                    lines.push(`🏆 *MAN OF THE MATCH STORY*`);
-                    lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                    lines.push(``);
-                    lines.push(`⭐ Man of the Match: *${motm}*`);
-                    lines.push(``);
-                    lines.push(`${motm} kreeg de onderscheiding na onze ${home>away?"overwinning":"gelijkspel"} tegen ${opponent||"de tegenstander"} (${home}-${away}).`);
-                    lines.push(``);
-                    lines.push(`#MOTM #${clubName.replace(/[^A-Za-z0-9]/g,"")} #${team.replace(/[^A-Za-z0-9]/g,"")}`);
-                    lines.push(``);
-                  }
-                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  lines.push(`📰 *KORTE SAMENVATTING*`);
-                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  lines.push(``);
-                  lines.push(`"${aiOut.headline}"`);
-                  lines.push(``);
-                  lines.push(aiOut.samenvatting);
-                  lines.push(``);
-                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  lines.push(`⚽ *DOELPUNTEN*`);
-                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  if (goalLines.length > 0) {
-                    goalLines.forEach(g=>lines.push(g));
-                  } else {
-                    lines.push(`Geen doelpunten`);
-                  }
-                  lines.push(``);
-                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  lines.push(`📋 *INSTRUCTIES*`);
-                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  lines.push(`• De match-afbeelding stuur ik direct hierna apart`);
-                  if (motm && home>=away) lines.push(`• De MOTM-afbeelding stuur ik daarna apart`);
-                  if (clubWebsite) lines.push(`• Het volledige verslag staat op ${clubWebsite}`);
-                  lines.push(`• Geplaatst? Laat het even weten 🙌`);
-                  const handoverText = lines.join("\n");
-
-                  const waUrl = hasSome
-                    ? `https://wa.me/${someCountry}${someNumber}?text=${encodeURIComponent(handoverText)}`
-                    : null;
-
-                  return (
-                    <div style={{background:"rgba(168,85,247,0.05)",border:`1px solid rgba(168,85,247,0.22)`,borderRadius:18,padding:18,marginBottom:24}}>
-                      {!hasSome && (
-                        <div style={{background:"rgba(255,214,0,0.08)",border:"1px solid rgba(255,214,0,0.25)",borderRadius:12,padding:12,marginBottom:14,display:"flex",alignItems:"flex-start",gap:10}}>
-                          <span style={{fontSize:18,lineHeight:1}}>⚠️</span>
-                          <div style={{flex:1}}>
-                            <div style={{fontSize:12,fontWeight:800,color:"#ffd600",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>Nog geen beheerder ingesteld</div>
-                            <div style={{fontSize:11.5,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>Stel het WhatsApp-nummer van je social media-beheerder in zodat je alles in één tik kunt doorsturen.</div>
-                            <button onClick={()=>{setScreen("club");setClubSection("distributie");}} style={{padding:"7px 12px",background:"rgba(255,214,0,0.15)",border:"1px solid rgba(255,214,0,0.4)",borderRadius:8,color:"#ffd600",fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,cursor:"pointer",letterSpacing:1,textTransform:"uppercase"}}>→ Instellen</button>
-                          </div>
-                        </div>
-                      )}
-
-                      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
-                        <div style={{width:38,height:38,borderRadius:"50%",background:"linear-gradient(135deg,#a855f7,#ec4899)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 4px 14px rgba(168,85,247,0.45)"}}>
-                          <span style={{fontSize:18}}>📤</span>
-                        </div>
-                        <div style={{flex:1}}>
-                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:900,color:T.text,letterSpacing:0.3,lineHeight:1.2}}>Alles in één bericht</div>
-                          <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:2}}>
-                            {hasSome
-                              ? `Naar ${someName || `+${someCountry}${someNumber}`}`
-                              : "Voor de SoMe-beheerder van je club"}
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Inhoud preview */}
-                      <div style={{background:"rgba(0,0,0,0.35)",borderRadius:12,padding:14,marginBottom:14,maxHeight:180,overflowY:"auto"}}>
-                        <div style={{fontSize:10,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Inhoud bericht</div>
-                        {[
-                          ["📸","Instagram/Facebook caption"],
-                          // MOTM heeft geen caption — is een story (regel weg)
-                          ["📰","Headline + samenvatting"],
-                          ["⚽",`Doelpunten-overzicht (${goalLines.length})`],
-                          ["📋","Instructies voor plaatsing"],
-                        ].filter(Boolean).map(([ic,lab],i)=>(
-                          <div key={i} style={{display:"flex",alignItems:"center",gap:9,marginBottom:6,fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>
-                            <span style={{fontSize:12,opacity:0.8}}>{ic}</span><span>{lab}</span>
-                          </div>
-                        ))}
-                      </div>
-
-                      <div style={{display:"flex",gap:8}}>
-                        <button
-                          onClick={()=>{navigator.clipboard.writeText(handoverText);setCopiedDistr("handover");setTimeout(()=>setCopiedDistr(null),2500);}}
-                          style={{flex:1,padding:"12px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:11,color:T.text2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textTransform:"uppercase"}}
-                        >
-                          {copiedDistr==="handover" ? "✓ Gekopieerd" : "📋 Kopiëren"}
-                        </button>
-                        <button
-                          onClick={()=>{
-                            if (!hasSome) { setScreen("club"); setClubSection("distributie"); return; }
-                            window.open(waUrl,"_blank");
-                          }}
-                          style={{flex:1.7,background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:11,padding:"12px 16px",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.12)"}}
-                        >
-                          <span style={{fontSize:14}}>{hasSome?"📤":"⚙️"}</span>
-                          <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:1,textTransform:"uppercase"}}>
-                            {hasSome ? "Versturen via WhatsApp" : "Beheerder instellen"}
-                          </span>
-                        </button>
-                      </div>
-
-                      <div style={{marginTop:12,padding:10,background:"rgba(0,0,0,0.2)",borderRadius:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
-                        💡 Tip: stuur na dit bericht ook de match-afbeelding en eventueel de MOTM-afbeelding apart door in dezelfde chat — WhatsApp ondersteunt geen afbeeldingen via deellinks.
-                      </div>
-                    </div>
-                  );
-                })()}
 
                 {/* ══════════════════════════════════════════
                     WEDSTRIJDVERSLAG VOOR DE WEBSITE
@@ -4909,9 +4905,9 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                 <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:18}}>
                   <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:6}}>
                     <span style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.9}}>Social Media Beheerder</span>
-                    {someNumber && <span style={{fontSize:9,padding:"2px 7px",background:hex(U,0.18),border:`1px solid ${hex(U,0.35)}`,borderRadius:10,color:U,fontWeight:800,letterSpacing:1,textTransform:"uppercase"}}>✓ Ingesteld</span>}
+                    {(someEmail||someNumber) && <span style={{fontSize:9,padding:"2px 7px",background:hex(U,0.18),border:`1px solid ${hex(U,0.35)}`,borderRadius:10,color:U,fontWeight:800,letterSpacing:1,textTransform:"uppercase"}}>✓ Ingesteld</span>}
                   </div>
-                  <div style={{fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.55,marginBottom:16}}>De persoon die toegang heeft tot het clublogo van Instagram en Facebook. Matchly bundelt na de wedstrijd alle content en stuurt het in één bericht naar zijn WhatsApp.</div>
+                  <div style={{fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.55,marginBottom:16}}>De persoon die de social media van de club beheert. Na de wedstrijd bundelt Matchly alle content (verslag, caption, samenvatting én de afbeeldingen) en mailt het in één keer naar dit adres. Via WhatsApp krijgt de beheerder een seintje dat de mail klaarstaat.</div>
 
                   <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Naam <span style={{color:T.text4}}>(optioneel)</span></div>
                   <input
@@ -4921,7 +4917,16 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     style={{...INP,marginBottom:14}}
                   />
 
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>WhatsApp-nummer</div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>E-mailadres <span style={{color:U}}>(voor de content + bijlages)</span></div>
+                  <input
+                    type="email"
+                    value={someEmail}
+                    onChange={e=>setSomeEmail(e.target.value.trim())}
+                    placeholder="bv. social@vvonsdorp.nl"
+                    style={{...INP,marginBottom:14}}
+                  />
+
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>WhatsApp-nummer <span style={{color:T.text4}}>(voor de notificatie)</span></div>
                   <div style={{display:"grid",gridTemplateColumns:"100px 1fr",gap:8,marginBottom:8}}>
                     <select
                       value={someCountry}
