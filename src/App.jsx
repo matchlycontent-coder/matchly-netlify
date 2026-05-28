@@ -1601,7 +1601,7 @@ Geef ALLEEN een JSON array terug, niets anders:
 
   // ── Eerstvolgende wedstrijd ophalen via Claude API (web search) ──
   const fetchNextMatch = async () => {
-    if (!isOnline) { setNextMatchErr("📵 Geen internet"); return; }
+    if (!isOnline) { setNextMatchMsg("📵 Geen internet"); return; }
     if (nextMatchLoading) return;
     setNextMatchLoading(true);
     setNextMatchMsg("");
