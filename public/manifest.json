@@ -1,0 +1,18 @@
+{
+  "name": "Matchly",
+  "short_name": "Matchly",
+  "description": "Van wedstrijd. Naar content.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#07090f",
+  "theme_color": "#07090f",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/matchly-icon.png",
+      "sizes": "88x88",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
