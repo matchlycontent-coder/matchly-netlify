@@ -923,6 +923,32 @@ HEADLINE: 1 zin. Positief en simpel.`;
     r.readAsDataURL(file);
   });
 
+  // Verkleint + her-codeert een afbeelding naar geldige JPEG vóór verzending.
+  // Lost de API 400/500 op: directe cameraderfoto's zijn te groot, en exotische
+  // types (heic / lege type) worden door de Vision-API geweigerd. Canvas dwingt
+  // altijd image/jpeg af op max 1568px lange zijde.
+  const imageToJpegBase64 = (file, maxEdge = 1568, quality = 0.85) =>
+    new Promise((res, rej) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (!width || !height) { rej(new Error("Kon afbeelding niet lezen")); return; }
+        const scale = Math.min(1, maxEdge / Math.max(width, height));
+        width  = Math.round(width  * scale);
+        height = Math.round(height * scale);
+        const c = document.createElement("canvas");
+        c.width = width; c.height = height;
+        c.getContext("2d").drawImage(img, 0, 0, width, height);
+        try {
+          res(c.toDataURL("image/jpeg", quality).split(",")[1]);
+        } catch (e) { rej(e); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Bestandstype niet ondersteund — probeer een JPG of PNG")); };
+      img.src = url;
+    });
+
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   // Robuuste JSON parse: probeer strikt, val terug op regex-extractie
@@ -963,7 +989,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
           lastErr = new Error(`API ${res.status}, opnieuw proberen…`);
           continue;
         }
-        if (!res.ok) throw new Error(`API ${res.status}`);
+        if (!res.ok) {
+          let detail = "";
+          try { const j = await res.json(); detail = j?.error?.message || ""; }
+          catch { try { detail = await res.text(); } catch {} }
+          throw new Error(`API ${res.status}${detail ? " — " + detail.slice(0, 160) : ""}`);
+        }
         return await res.json();
       } catch (e) {
         lastErr = e;
@@ -974,13 +1005,21 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
   // Generieke Vision/PDF scan helper
   const scanWithVision = async (file, prompt) => {
-    const b64 = await fileToBase64(file);
     const isPdf = file.type === "application/pdf";
-    const isImg = file.type.startsWith("image/");
+    const isImg = file.type.startsWith("image/") || file.type === "";
     if (!isPdf && !isImg) throw new Error("Alleen PDF of afbeelding ondersteund");
+    let source;
+    if (isPdf) {
+      const b64 = await fileToBase64(file);
+      source = { type: "base64", media_type: "application/pdf", data: b64 };
+    } else {
+      // Altijd verkleinen + her-coderen naar JPEG: voorkomt te grote payloads
+      // (directe foto's) en ongeldige media_types (heic / leeg).
+      const b64 = await imageToJpegBase64(file);
+      source = { type: "base64", media_type: "image/jpeg", data: b64 };
+    }
     const content = [
-      { type: isPdf ? "document" : "image",
-        source: { type: "base64", media_type: file.type, data: b64 } },
+      { type: isPdf ? "document" : "image", source },
       { type: "text", text: prompt }
     ];
     const d = await callClaudeAPI({
