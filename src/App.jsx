@@ -1,16 +1,15 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { GOAL_TYPES, AWAY_TYPES, RED_REASONS, H1_F1, H1_F2, H1_F3, H2_F1, H2_F2, H2_F3, ALG_BEELD, BIJZ, MOTM_REDENEN } from './constants/options';
+import { GOAL_TYPES, AWAY_TYPES, RED_REASONS, H1_F1, H1_F2, H1_F3, H2_F1, H2_F2, H2_F3, ALG_BEELD, BIJZ, MOTM_REDENEN, MATCHLY_LOGO } from './constants/options';
 import { THEMES } from './constants/themes';
 import { LAYOUT_REGISTRY } from './constants/layouts';
 import { IG_ICON, FB_ICON } from './constants/icons';
 import { WEATHER, M, U, T, hex } from './constants/colors';
 import { usePersistedState, clearAllMatchlyStorage } from './hooks/usePersistedState';
 import { safeGet } from './utils/storage';
+
+import { supabase } from './supabaseClient';
+import Login from './Login';
 import { PlayerSelect, Chip, AutoMinRow, MinRow, Sheet, ConfirmSheet, GoalSheet, CardSheet, SubSheet, MomentSheet, MatchHeader, formatMinuut, TimelineRow, GCard, SHead, INP, Empty, PBtn, BackBtn, ClubCard } from './components';
-
-// Matchly-logo (base64) — hoort bij de assets, hier inline zodat App.jsx zelfstandig klopt
-const MATCHLY_LOGO = "data:image/png;base64,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";
-
 // html2canvas shim — keep original loadH2C() calls working
 
 const loadH2C = () => new Promise(res => {
@@ -22,7 +21,6 @@ const loadH2C = () => new Promise(res => {
 });
 
 export default function App() {
-
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
   const [team,setTeam]           = usePersistedState("team", "Heren 1");
@@ -451,67 +449,23 @@ export default function App() {
     return [...clubSlice, { ...currentTeam, _isTeam:true }];
   })();
 
-  // ── HV Logo Search (shared for own + opponent) ──
+  // ── HV Logo Search via Netlify Function (server-side scraping van hollandsevelden.nl) ──
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
     if(!naam.trim()) return;
     setLoading_(true);
     setMsg("");
     try {
-      const vraag = `Zoek op hollandsevelden.nl het clublogo voor de Nederlandse amateurvoetbalclub "${naam}".
-Geef ALLEEN de directe URL van de logo-afbeelding terug (eindigt op .png, .jpg, .jpeg, .svg, .webp of bevat /logo).
-Typische URL structuur: https://www.hollandsevelden.nl/... of https://cms.hollandsevelden.nl/...
-Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
-
-      const res = await fetch("/.netlify/functions/claude",{
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({
-          model:"claude-sonnet-4-20250514",
-          max_tokens:300,
-          tools:[{"type":"web_search_20250305","name":"web_search"}],
-          messages:[{role:"user",content:vraag}]
-        })
-      });
+      const res = await fetch(`/.netlify/functions/fetchLogo?club=${encodeURIComponent(naam.trim())}`);
+      if(!res.ok) throw new Error(`Fout ${res.status}`);
       const data = await res.json();
-      const blocks = data.content || [];
-      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
-
-      let txt = "";
-      if(toolBlocks.length > 0) {
-        const res2 = await fetch("/.netlify/functions/claude",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({
-            model:"claude-sonnet-4-20250514",
-            max_tokens:300,
-            tools:[{"type":"web_search_20250305","name":"web_search"}],
-            messages:[
-              {role:"user",content:vraag},
-              {role:"assistant",content:blocks},
-              {role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Geef ALLEEN de directe logo afbeeldingsURL terug van hollandsevelden.nl. Geen andere tekst."}))}
-            ]
-          })
-        });
-        const d2 = await res2.json();
-        txt = (d2.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
-      } else {
-        txt = (blocks||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
-      }
-
-      // Extract URL from response
-      const urlMatch = txt.match(/https?:\/\/[^\s"'<>\n,]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)/i)
-                    || txt.match(/https?:\/\/[^\s"'<>\n,]+\/(?:logo|clublogo|emblem)[^\s"'<>\n,]*/i)
-                    || txt.match(/https?:\/\/[^\s"'<>\n,]+hollandsevelden[^\s"'<>\n,]+/i);
-
-      if(urlMatch && urlMatch[0]) {
-        const cleanUrl = urlMatch[0].replace(/[.,;!?)]+$/, "");
-        setUrl(cleanUrl);
+      if(data.logoUrl) {
+        setUrl(data.logoUrl);
         setMsg("✓ Logo gevonden");
       } else {
-        setMsg("Niet gevonden — upload handmatig");
+        setMsg("Niet gevonden — upload handmatig of plak URL");
       }
     } catch(e) {
-      setMsg("Zoeken mislukt");
+      setMsg("Zoeken mislukt — " + (e.message||"onbekende fout"));
     }
     setLoading_(false);
   };
@@ -541,24 +495,19 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
     setTeamIdLoading(true); setTeamIdMsg("");
     try {
       const vraag = `Zoek het KNVB team-ID voor "${clubName} ${team}" op voetbal.nl. Het team-ID staat in de URL: voetbal.nl/teams/nederland/team/[ID]/show/. Geef ALLEEN het numerieke ID terug, niets anders.`;
-      const res = await fetch("/.netlify/functions/claude",{
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
+        body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
       });
+      if(!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
-      const blocks = data.content || [];
-      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
-      let finalData = data;
-      if(toolBlocks.length > 0) {
-        const res2 = await fetch("/.netlify/functions/claude",{
-          method:"POST",
-          headers:{"Content-Type":"application/json"},
-          body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
-        });
-        finalData = await res2.json();
-      }
-      const txt = (finalData.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
+      // web_search is server-side: haal tekst direct op
+      const txt = (data.content||[]).map(b=>{
+        if(b.type==="text") return b.text;
+        if(b.type==="tool_result"&&Array.isArray(b.content)) return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
+        return "";
+      }).join("").trim();
       const match = txt.match(/\d{4,8}/);
       if(match) { setTeamId(match[0]); setTeamIdMsg(`Team gevonden: ID ${match[0]}`); }
       else { setTeamIdMsg("Niet gevonden — vul het ID handmatig in via voetbal.nl"); }
@@ -658,7 +607,7 @@ Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
 
 ${compInfo}
 
-Gebruik de web_fetch tool om de pagina op te halen en de eerstvolgende wedstrijd uit het wedstrijdprogramma te halen. Let goed op:
+Gebruik web_search om het wedstrijdprogramma op te zoeken. Let goed op:
 - Pak de eerstvolgende wedstrijd vanaf (en INCLUSIEF) vandaag (${today}). Dus als er vandaag een wedstrijd is, gebruik die.
 - De wedstrijd kan thuis of uit zijn
 - Geef tegenstandernaam exact zoals op de pagina staat
@@ -678,14 +627,18 @@ Geef ALLEEN dit JSON terug, geen tekst eromheen:
 Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, geef terug: {"error":"Geen wedstrijd gevonden"}.`;
 
       const d = await callClaudeAPI({
-        model: "claude-sonnet-4-20250514",
+        model: "claude-sonnet-4-6",
         max_tokens: 1500,
-        tools: [{type:"web_fetch_20250910",name:"web_fetch",max_uses:3}],
+        tools: [{type:"web_search_20250305",name:"web_search"}],
         messages: [{role:"user",content:vraag}],
       });
 
-      // Lees laatste text block
-      const txt = (d.content||[]).filter(b=>b.type==="text").map(b=>b.text).join(" ");
+      // web_search is server-side: haal tekst op uit alle content blocks
+      const txt = (d.content||[]).map(b=>{
+        if(b.type==="text") return b.text;
+        if(b.type==="tool_result"&&Array.isArray(b.content)) return b.content.filter(c=>c.type==="text").map(c=>c.text).join(" ");
+        return "";
+      }).join(" ");
       const jsonMatch = txt.match(/\{[\s\S]*\}/);
       if (!jsonMatch) throw new Error("Geen JSON in antwoord");
       const result = JSON.parse(jsonMatch[0]);
@@ -844,7 +797,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
     const sys = stijl === "Jeugd & Plezier" ? sysJeugd : sysAdult;
     try {
-      const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
+      const d = await callClaudeAPI({ model:"claude-sonnet-4-6", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
       const raw=d.content?.map(b=>b.text||"").join("")||"";
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
@@ -926,32 +879,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
     r.readAsDataURL(file);
   });
 
-  // Verkleint + her-codeert een afbeelding naar geldige JPEG vóór verzending.
-  // Lost de API 400/500 op: directe cameraderfoto's zijn te groot, en exotische
-  // types (heic / lege type) worden door de Vision-API geweigerd. Canvas dwingt
-  // altijd image/jpeg af op max 1568px lange zijde.
-  const imageToJpegBase64 = (file, maxEdge = 1568, quality = 0.85) =>
-    new Promise((res, rej) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        URL.revokeObjectURL(url);
-        let { width, height } = img;
-        if (!width || !height) { rej(new Error("Kon afbeelding niet lezen")); return; }
-        const scale = Math.min(1, maxEdge / Math.max(width, height));
-        width  = Math.round(width  * scale);
-        height = Math.round(height * scale);
-        const c = document.createElement("canvas");
-        c.width = width; c.height = height;
-        c.getContext("2d").drawImage(img, 0, 0, width, height);
-        try {
-          res(c.toDataURL("image/jpeg", quality).split(",")[1]);
-        } catch (e) { rej(e); }
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error("Bestandstype niet ondersteund — probeer een JPG of PNG")); };
-      img.src = url;
-    });
-
   const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
   // Robuuste JSON parse: probeer strikt, val terug op regex-extractie
@@ -983,21 +910,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
     for (const d of delays) {
       if (d > 0) await sleep(d);
       try {
-        const res = await fetch("/.netlify/functions/claude", {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: { "Content-Type": "application/json", "x-api-key": import.meta.env.VITE_ANTHROPIC_API_KEY, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" },
           body: JSON.stringify(payload)
         });
         if (res.status === 429 || res.status >= 500) {
           lastErr = new Error(`API ${res.status}, opnieuw proberen…`);
           continue;
         }
-        if (!res.ok) {
-          let detail = "";
-          try { const j = await res.json(); detail = j?.error?.message || ""; }
-          catch { try { detail = await res.text(); } catch {} }
-          throw new Error(`API ${res.status}${detail ? " — " + detail.slice(0, 160) : ""}`);
-        }
+        if (!res.ok) throw new Error(`API ${res.status}`);
         return await res.json();
       } catch (e) {
         lastErr = e;
@@ -1008,25 +930,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
   // Generieke Vision/PDF scan helper
   const scanWithVision = async (file, prompt) => {
+    const b64 = await fileToBase64(file);
     const isPdf = file.type === "application/pdf";
-    const isImg = file.type.startsWith("image/") || file.type === "";
+    const isImg = file.type.startsWith("image/");
     if (!isPdf && !isImg) throw new Error("Alleen PDF of afbeelding ondersteund");
-    let source;
-    if (isPdf) {
-      const b64 = await fileToBase64(file);
-      source = { type: "base64", media_type: "application/pdf", data: b64 };
-    } else {
-      // Altijd verkleinen + her-coderen naar JPEG: voorkomt te grote payloads
-      // (directe foto's) en ongeldige media_types (heic / leeg).
-      const b64 = await imageToJpegBase64(file);
-      source = { type: "base64", media_type: "image/jpeg", data: b64 };
-    }
     const content = [
-      { type: isPdf ? "document" : "image", source },
+      { type: isPdf ? "document" : "image",
+        source: { type: "base64", media_type: file.type, data: b64 } },
       { type: "text", text: prompt }
     ];
     const d = await callClaudeAPI({
-      model: "claude-sonnet-4-20250514",
+      model: "claude-sonnet-4-6",
       max_tokens: 1500,
       messages: [{ role: "user", content }]
     });
@@ -1113,7 +1027,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       }
       const text = html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").slice(0, 5000);
       const d = await callClaudeAPI({
-        model: "claude-sonnet-4-20250514", max_tokens: 500,
+        model: "claude-sonnet-4-6", max_tokens: 500,
         messages: [{ role: "user", content: `Vind in deze voetbal.nl tekst de eerstvolgende wedstrijd. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${text}` }]
       });
       const raw = d.content?.map(b => b.text || "").join("") || "";
@@ -3368,6 +3282,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                         📁 {logo ? "Vervang eigen logo" : "Upload eigen logo"}
                       </button>
                       <input ref={logoRef} type="file" accept="image/*" onChange={handleLogo} style={{display:"none"}} />
+<input value={hvLogoUrl||""} onChange={e=>setHvLogoUrl(e.target.value)} placeholder="Of plak een logo-URL hier..." style={{width:"100%",marginTop:8,padding:"8px 10px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text3,fontSize:11,fontFamily:"Barlow,sans-serif",outline:"none",boxSizing:"border-box"}} />
                       {/* Status-tekst onder de knop */}
                       {hvLogoLoading && !logo && (
                         <div style={{marginTop:8,fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif"}}>Logo wordt gezocht...</div>
@@ -3428,9 +3343,9 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       {voetbalFallback&&<button onClick={async()=>{
                         setScanning("nextmatch");setScanError(null);
                         try{
-                          const res=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
+                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-6",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
                           const d=await res.json();const raw=d.content?.map(b=>b.text||"").join("")||"";const out=JSON.parse(raw.replace(/```json|```/g,"").trim());
-                          const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean);
+                          const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean)
                           setNextGame(parts.join(" | "));
                         }catch(e){setScanError("Mislukt: "+e.message);}
                         setScanning(null);
