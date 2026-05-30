@@ -81,6 +81,8 @@ export default function App() {
   const [someName,setSomeName]       = usePersistedState("someName", "");
   const [someNumber,setSomeNumber]   = usePersistedState("someNumber", "");      // E.164 zonder + (bv. 31612345678)
   const [someCountry,setSomeCountry] = usePersistedState("someCountry", "31");   // landcode default NL
+  const [someEmail,setSomeEmail]     = usePersistedState("someEmail", "");       // e-mail beheerder (Resend-verzending)
+  const [mailStatus,setMailStatus]   = useState(null);                           // null | "sending" | "ok" | "error:<msg>"
   // Clubwebsite (voor verslag-export en deelteksten)
   const [clubWebsite,setClubWebsite] = usePersistedState("clubWebsite", "");
   // Meta-koppeling voorbereiding (placeholders — nog niet actief)
@@ -2651,6 +2653,34 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     link.click();
                   };
 
+                  // E-mail het hele pakket (verslag + afbeeldingen als bijlage) via Resend
+                  const emailToBeheerder = async () => {
+                    if (!someEmail) { setScreen("club"); setClubSection("distributie"); return; }
+                    setMailStatus("sending");
+                    try {
+                      const h2c = await loadH2C();
+                      const ids = ["classic","story",...(motm&&home>=away?["motm"]:[])];
+                      const attachments = [];
+                      for (const id of ids) {
+                        const el = document.getElementById(`layout-${id}`);
+                        if (!el) continue;
+                        const canvas = await h2c(el,{scale:2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                        const dataUrl = canvas.toDataURL("image/png");
+                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`, content: dataUrl.split(",")[1] });
+                      }
+                      const gls = events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=>formatMinuut(e.minute,e.extra,e.half)+" "+(e.type==="OWN"?(opponent||"Teg."):(e.player||"—"))).join("<br>")||"Geen doelpunten";
+                      const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
+                      const subject = `Wedstrijdverslag: ${clubName} ${home}-${away} ${opponent||"Tegenstander"}`;
+                      const res = await fetch("/.netlify/functions/send-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:someEmail,subject,html,attachments})});
+                      const d = await res.json().catch(()=>({}));
+                      if (!res.ok) throw new Error(d.error||"Versturen mislukt");
+                      setMailStatus("ok");
+                      setTimeout(()=>setMailStatus(null),4000);
+                    } catch(e) {
+                      setMailStatus("error:"+(e.message||"onbekend"));
+                    }
+                  };
+
                   return (
                     <div style={{background:`linear-gradient(135deg,rgba(168,85,247,0.07),rgba(168,85,247,0.02))`,border:"1px solid rgba(168,85,247,0.25)",borderRadius:20,padding:18,marginBottom:20}}>
 
@@ -2702,6 +2732,18 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
                           💡 Stuur daarna de gedownloade afbeeldingen apart in dezelfde WhatsApp-chat.
                         </div>
+                      </div>
+
+                      {/* Stap 3: alles in één keer per e-mail (Resend, met bijlagen) */}
+                      <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Of — Alles in één keer per e-mail</div>
+                        <button onClick={emailToBeheerder} disabled={mailStatus==="sending"} style={{width:"100%",padding:"12px 16px",background:someEmail?(mailStatus==="sending"?"rgba(255,255,255,0.06)":"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)"):"rgba(255,255,255,0.05)",border:someEmail&&mailStatus!=="sending"?"none":"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:someEmail&&mailStatus!=="sending"?"#fff":T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,cursor:mailStatus==="sending"?"wait":"pointer",letterSpacing:0.5,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
+                          <span style={{fontSize:16}}>📧</span>
+                          <span>{mailStatus==="sending"?"Versturen…":someEmail?"E-mail verslag + afbeeldingen":"Beheerder-e-mail instellen"}</span>
+                        </button>
+                        {mailStatus==="ok" && <div style={{marginTop:8,fontSize:11,color:"#34d399",fontFamily:"Barlow,sans-serif",fontWeight:700}}>✓ Verstuurd naar {someEmail}</div>}
+                        {typeof mailStatus==="string" && mailStatus.startsWith("error:") && <div style={{marginTop:8,fontSize:11,color:"#f87171",fontFamily:"Barlow,sans-serif"}}>✗ {mailStatus.slice(6)}</div>}
+                        <div style={{marginTop:8,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>📎 Verslag in de mailtekst, afbeeldingen als bijlage — in één keer naar de beheerder.</div>
                       </div>
                     </div>
                   );
@@ -3966,6 +4008,16 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     />
                   </div>
                   <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>💡 Zonder de 0 vooraan. Voor 06-12345678 vul je <strong style={{color:T.text3}}>612345678</strong> in.</div>
+
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6,marginTop:16}}>E-mailadres <span style={{color:T.text4}}>(voor versturen van content per mail)</span></div>
+                  <input
+                    type="email"
+                    value={someEmail}
+                    onChange={e=>setSomeEmail(e.target.value.trim())}
+                    placeholder="bv. mark@club.nl"
+                    style={{...INP,marginBottom:8}}
+                  />
+                  <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>💡 Hiermee kun je na de wedstrijd het hele pakket (verslag + afbeeldingen) in één keer mailen.</div>
                 </div>
 
                 {/* ────────────────────────────────────
