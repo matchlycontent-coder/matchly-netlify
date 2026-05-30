@@ -810,6 +810,8 @@ REGELS:
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
+- Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
+- Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
 
 VERSLAG: 150–250 woorden. Chronologisch per fase. Sluit af met eindstand.
@@ -847,6 +849,8 @@ REGELS:
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
+- Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
+- Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
 - Schrijf actieve zinnen. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 
@@ -2413,8 +2417,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)"}}>Matchly</span>
                             </div>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"3% 4%",flexShrink:0}}>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
-                                {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"16%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"1%",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}} crossOrigin="anonymous"/>:<div style={{width:"16%",aspectRatio:"1/1",background:thex(TAC,0.2),border:`1px solid ${thex(TAC,0.4)}`,borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"5cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",width:"24%"}}>
+                                <div style={{width:"90%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                                  {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                                </div>
                                 <span style={{fontSize:(clubName.length>20?"1.9cqw":clubName.length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"#fff",textAlign:"center"}}>{clubName}</span>
                               </div>
                               <div style={{display:"flex",alignItems:"baseline",gap:"1%"}}>
@@ -2422,8 +2428,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <span style={{fontSize:"9cqw",color:"rgba(255,255,255,0.25)"}}>–</span>
                                 <span style={{fontSize:"26cqw",fontWeight:900,color:"rgba(255,255,255,0.35)",lineHeight:1}}>{away}</span>
                               </div>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
-                                {oppLogoUrl?<img src={oppLogoUrl} style={{width:"16%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"1%",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}} crossOrigin="anonymous"/>:<div style={{width:"16%",aspectRatio:"1/1",background:"rgba(255,255,255,0.07)",borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"5cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",width:"24%"}}>
+                                <div style={{width:"90%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                                  {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                                </div>
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.9cqw":(opponent||"Tegenstander").length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"rgba(255,255,255,0.4)",textAlign:"center"}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
