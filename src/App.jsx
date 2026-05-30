@@ -133,8 +133,8 @@ export default function App() {
   const [loc,setLoc]         = usePersistedState("loc", "thuis");
   const [kick,setKick]       = usePersistedState("kick", "");
   const [weather,setWeather] = usePersistedState("weather", "");
-  const [elapsed,setElapsed] = useState(0);
-  const [paused,setPaused] = useState(false);
+  const [elapsed,setElapsed] = usePersistedState("elapsed", 0);
+  const [paused,setPaused] = usePersistedState("paused", false);
   const [sponsorOffset,setSponsorOffset] = useState(0);
   const [showDemo,setShowDemo] = useState(false);
   const [blockReminder,setBlockReminder] = useState(null); // {label, end}
@@ -237,10 +237,31 @@ export default function App() {
   const [specialInfo,setSpecialInfo] = usePersistedState("specialInfo", []); // [{type, player?}]
 
   // ── Navigation ──
-  const [screen,setScreen]         = useState("dashboard");
+  // Punt 8: onthoud het laatst gebruikte scherm bij wisselen van apps (sessionStorage
+  // blijft bij app-wissel, maar wordt gewist bij volledig afsluiten → dan weer dashboard).
+  const [screen,setScreen]         = useState(()=>{
+    try { return sessionStorage.getItem("matchly_screen") || "dashboard"; } catch { return "dashboard"; }
+  });
+  useEffect(()=>{
+    try { sessionStorage.setItem("matchly_screen", screen); } catch {}
+  },[screen]);
+  // Punt 6: onthoud welke schermen je bezocht hebt, zodat "Terug" één stap teruggaat.
+  const screenHistory = useRef(["dashboard"]);
+  useEffect(()=>{
+    const h = screenHistory.current;
+    if (h[h.length-1] !== screen) h.push(screen);
+    if (h.length > 12) h.shift();
+  },[screen]);
+  const goBack = () => {
+    const h = screenHistory.current;
+    h.pop();                       // huidige scherm eraf
+    const target = h[h.length-1] || "dashboard";
+    setScreen(target);
+  };
   const [clubSection,setClubSection] = useState("main"); // "main" | "spelerslijst" | "sponsoren" | "distributie"
   const [settingsTab,setSettingsTab] = useState("club"); // "club" | "team"
   const [hasStarted,setHasStarted] = useState(false);
+  const [showBasis,setShowBasis] = useState(false); // punt 11: basisopstelling-chips tonen/verbergen
   const [modal,setModal]           = useState(null);
   const [confirm,setConfirm]       = useState(false);
 
@@ -603,7 +624,7 @@ export default function App() {
     setEvents(p=>p.filter(e=>e.id!==id));
   };
   const cp = (txt,k) => { navigator.clipboard.writeText(txt); setCopied(k); setTimeout(()=>setCopied(null),2500); };
-  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setScreen("dashboard"); };
+  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setElapsed(1); setScreen("dashboard"); };
 
   const resetMatch = () => {
     setHasStarted(false); setStatus("PRE"); setHome(0); setAway(0); setEvents([]);
@@ -788,6 +809,7 @@ REGELS:
 - Wissel zinslengte af: combineer korte, krachtige zinnen (5–8 woorden) met langere, beschrijvende zinnen (15–20 woorden). Vermijd drie of meer zinnen van vergelijkbare lengte achter elkaar.
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
+- Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
 
 VERSLAG: 150–250 woorden. Chronologisch per fase. Sluit af met eindstand.
@@ -824,6 +846,7 @@ REGELS:
 - Gebruik geen emoji's in de tekstoutput.
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
+- Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
 - Schrijf actieve zinnen. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 
@@ -1462,9 +1485,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
           {/* NAV */}
           <div style={{background:T.bg0,borderBottom:`1px solid ${T.border}`,padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             {screen!=="dashboard"
-              ? <button onClick={()=>setScreen("dashboard")} style={{background:"none",border:"none",color:T.text3,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,letterSpacing:0.5,display:"flex",alignItems:"center",gap:6,padding:0}}>
-                  <span style={{fontSize:20,lineHeight:1,fontWeight:300}}>‹</span> Dashboard
-                </button>
+              ? <div style={{display:"flex",alignItems:"center",gap:16}}>
+                  <button onClick={()=>setScreen("dashboard")} style={{background:"none",border:"none",color:T.text3,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,letterSpacing:0.5,display:"flex",alignItems:"center",gap:6,padding:0}}>
+                    <span style={{fontSize:20,lineHeight:1,fontWeight:300}}>‹</span> Dashboard
+                  </button>
+                  {(screen==="overzicht" || (screen==="club" && clubSection!=="main")) && (
+                    <button onClick={()=> (screen==="club" ? setClubSection("main") : goBack())} style={{background:"rgba(255,255,255,0.05)",border:`1px solid ${T.border2}`,color:T.text3,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,letterSpacing:0.5,display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:100}}>
+                      <span style={{fontSize:15,lineHeight:1}}>↩</span> Terug
+                    </button>
+                  )}
+                </div>
               : <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <img src={MATCHLY_LOGO} alt="Matchly" style={{height:32,width:"auto",display:"block",objectFit:"contain"}}/>
                 </div>
@@ -1510,8 +1540,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {kick && <span style={{color:U}}>{kick}</span>}
                           </div>
                         ) : (
-                          <div style={{fontSize:14,fontWeight:800,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1,textTransform:"uppercase",marginBottom:6,fontStyle:"italic"}}>
-                            Nog geen datum gepland
+                          <div style={{fontSize:18,fontWeight:900,color:T.text,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1,textTransform:"uppercase",lineHeight:1.1,marginBottom:6}}>
+                            {new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"})}
+                            <span style={{color:U,margin:"0 8px"}}>·</span>
+                            <span style={{color:U}}>{new Date().toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})}</span>
                           </div>
                         )}
                         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
@@ -1525,7 +1557,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <button onClick={fetchNextMatch} disabled={nextMatchLoading} style={{width:"100%",marginBottom:nextMatchMsg?6:14,padding:"12px",background:nextMatchLoading?"rgba(255,255,255,0.04)":M.gradD,border:"none",borderRadius:100,color:nextMatchLoading?T.text4:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,letterSpacing:0.5,cursor:nextMatchLoading?"wait":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:nextMatchLoading?"none":`0 4px 16px ${hex(M.purple,0.35)}`}}>
                         {nextMatchLoading
                           ? <><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> Opzoeken…</>
-                          : <>🔄 Laadt komende wedstrijd</>
+                          : <>🔄 Laad komende wedstrijd</>
                         }
                       </button>
                       {nextMatchMsg && (
@@ -1647,20 +1679,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     );
                   })()}
 
-                  {/* ── DIT IS JE BASIS — altijd zichtbaar, toont empty state als geen squad ── */}
-                  {true && (
-                    <div style={{background:`linear-gradient(135deg,${hex(U,0.06)},${hex(U,0.02)})`,border:`1px solid ${hex(U,0.18)}`,borderRadius:18,padding:16,marginBottom:18}}>
-                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
-                        <div>
-                          <div style={{fontSize:11,fontWeight:900,letterSpacing:2,color:U,textTransform:"uppercase",fontFamily:"'Barlow Condensed',sans-serif"}}>⭐ Dit is je basis</div>
-                          <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:2}}>Tik op spelers om de basis te kiezen · rest is wissel</div>
-                        </div>
-                        <div style={{display:"flex",alignItems:"center",gap:4}}>
-                          <span style={{fontSize:18,fontWeight:900,color:baseSquad.length===11?U:T.text2,fontFamily:"'Barlow Condensed',sans-serif"}}>{baseSquad.length}</span>
-                          <span style={{fontSize:11,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800}}>/ 11</span>
-                        </div>
-                      </div>
-
+                  {/* ── BASISOPSTELLING — knop die de chips toont (punt 11) ── */}
+                  <button onClick={()=>setShowBasis(s=>!s)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${hex(U,0.1)},${hex(U,0.03)})`,border:`1px solid ${hex(U,0.22)}`,borderRadius:18,padding:"14px 16px",marginBottom:showBasis?0:18,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif"}}>
+                    <span style={{fontSize:13,fontWeight:900,letterSpacing:1.5,color:U,textTransform:"uppercase"}}>⭐ Basisopstelling instellen</span>
+                    <span style={{display:"flex",alignItems:"center",gap:8}}>
+                      <span style={{fontSize:15,fontWeight:900,color:baseSquad.length===11?U:T.text2}}>{baseSquad.length}<span style={{fontSize:11,color:T.text4}}>/11</span></span>
+                      <span style={{fontSize:12,color:U}}>{showBasis?"▲":"▼"}</span>
+                    </span>
+                  </button>
+                  {showBasis && (
+                    <div style={{background:`linear-gradient(135deg,${hex(U,0.06)},${hex(U,0.02)})`,border:`1px solid ${hex(U,0.18)}`,borderTop:"none",borderRadius:"0 0 18px 18px",padding:16,marginBottom:18}}>
+                      <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:12}}>Tik op spelers om de basis te kiezen · rest is wissel · ook te beheren via spelersbeheer</div>
                       {/* Spelers grid — tap to toggle, of empty state als geen squad */}
                       {squad.length===0 ? (
                         <div style={{padding:"20px 12px",textAlign:"center",background:"rgba(255,255,255,0.03)",borderRadius:12,border:`1px dashed ${T.border3}`}}>
@@ -1758,10 +1787,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
                   <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#00e676,#00b248)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(0,230,118,0.4)"}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="#000"/></svg></div>} label="Goals" sub={`${gCount} eigen · ${oCount} tegen`} count={gCount+oCount} onClick={()=>setScreen("goals")} accent={C} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff6f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)",position:"relative"}}><div style={{position:"absolute",width:18,height:24,background:"#ffd600",borderRadius:3,top:4,left:6,border:"1.5px solid rgba(0,0,0,0.2)"}}/><div style={{position:"absolute",width:18,height:24,background:"#ff1744",borderRadius:3,top:7,left:12,border:"1.5px solid rgba(0,0,0,0.2)"}}/></div>} label="Kaarten" sub={`${yCount} geel · ${rCount} rood`} count={yCount+rCount} onClick={()=>setScreen("kaarten")} accent={T.yellow} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff6f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)",position:"relative"}}><div style={{position:"absolute",width:18,height:24,background:"#ffd600",borderRadius:3,top:4,left:6,border:"1.5px solid rgba(0,0,0,0.2)"}}/><div style={{position:"absolute",width:18,height:24,background:"#ff1744",borderRadius:3,top:7,left:12,border:"1.5px solid rgba(0,0,0,0.2)"}}/></div>} label="Kaarten" sub={`${yCount} geel · ${rCount} rood`} count={yCount+rCount} onClick={()=>setScreen("kaarten")} accent={U} />
                   <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#448aff,#1565c0)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(68,138,255,0.35)"}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h13M13 4l3 3-3 3M21 17H8M11 14l-3 3 3 3"/></svg></div>} label="Wissels" sub={`${sCount} doorgevoerd`} count={sCount} onClick={()=>setScreen("wissels")} accent={C} />
                   <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:`linear-gradient(135deg,${U},${hex(U,0.6)})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 14px ${hex(U,0.4)}`}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>} label="Spelbeeld" sub="Wedstrijdanalyse" onClick={()=>setScreen("spelbeeld")} accent={U} progress={[h1f1,h1f2,h1f3,h2f1,h2f2,h2f3,algBeld].filter(Boolean).length} progressMax={7} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff8f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)"}}>🏆</div>} label="Man of the Match" sub={home<away?"Niet bij verlies":(motm?motm:"Kies speler")} onClick={()=>setScreen("uitblinkers")} accent={T.yellow} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff8f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)"}}>🏆</div>} label="Man of the Match" sub={home<away?"Niet bij verlies":(motm?motm:"Kies speler")} onClick={()=>setScreen("uitblinkers")} accent={U} />
                   <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(124,58,237,0.45)",fontSize:20}}>⚡</div>} label="Wedstrijdmomenten" labelSize={14} sub={keyMoments.length+specialInfo.length>0?`${keyMoments.length+specialInfo.length} momenten`:"Kansen, blessures & meer"} count={keyMoments.length+specialInfo.length} onClick={()=>setScreen("wedstrijdinfo")} accent={"#7c3aed"} />
                 </div>
 
@@ -1794,7 +1823,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {screen==="goals" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:28}}>
-                {[{t:"GOAL",icon:"⚽",label:"Doelpunt",c:C},{t:"OWN",icon:"🔴",label:"Tegendoelpunt",c:T.red}].map(({t,icon,label,c})=>(
+                {[{t:"GOAL",icon:"⚽",label:"Doelpunt",c:C},{t:"OWN",icon:"⚽",label:"Tegendoelpunt",c:T.red}].map(({t,icon,label,c})=>(
                   <button key={t} onClick={()=>setModal(t)} style={{padding:"24px 16px",background:hex(c,0.07),border:`1px solid ${hex(c,0.2)}`,borderRadius:22,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:c,cursor:"pointer",textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:12,transition:"all 0.18s",boxShadow:`inset 0 1px 0 ${hex(c,0.15)}`}}>
                     <span style={{fontSize:36,filter:`drop-shadow(0 4px 8px ${hex(c,0.4)})`}}>{icon}</span>{label}
                   </button>
@@ -1813,6 +1842,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </button>
                 ))}
               </div>
+              <button onClick={()=>setModal("RED_OPP")} style={{width:"100%",padding:"16px",marginBottom:28,background:hex(T.red,0.07),border:`1px solid ${hex(T.red,0.2)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:T.red,cursor:"pointer",textTransform:"uppercase",letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:`inset 0 1px 0 ${hex(T.red,0.15)}`}}>
+                <span style={{fontSize:26}}>🟥</span> Rode kaart tegenstander
+              </button>
               {events.filter(e=>e.type==="YELLOW"||e.type==="RED").length===0 ? <Empty icon="🟨" label="Geen kaarten" /> : events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
             </>)}
 
@@ -1829,19 +1861,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {screen==="spelbeeld" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
               <SHead label="1e Helft — Openingsfase (0–20 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>setH1f1(h1f1===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>setH1f1(h1f1===f?"":f)} color={U} gradient />)}</div>
               <SHead label="1e Helft — Middenfase (20–35 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>setH1f2(h1f2===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>setH1f2(h1f2===f?"":f)} color={U} gradient />)}</div>
               <SHead label="1e Helft — Slotfase (35–45 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>setH1f3(h1f3===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>setH1f3(h1f3===f?"":f)} color={U} gradient />)}</div>
               <SHead label="2e Helft — Openingsfase (45–65 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>setH2f1(h2f1===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>setH2f1(h2f1===f?"":f)} color={U} gradient />)}</div>
               <SHead label="2e Helft — Middenfase (65–80 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>setH2f2(h2f2===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>setH2f2(h2f2===f?"":f)} color={U} gradient />)}</div>
               <SHead label="2e Helft — Slotfase (80–90 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>setH2f3(h2f3===f?"":f)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>setH2f3(h2f3===f?"":f)} color={U} gradient />)}</div>
               <SHead label="Eindbeeld van de wedstrijd" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>setAlgBeld(algBeld===w?"":w)} color={U} />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>setAlgBeld(algBeld===w?"":w)} color={U} gradient />)}</div>
               <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${T.border}`}}>
                 <BackBtn onClick={()=>setScreen("dashboard")} label="Terug naar dashboard" />
               </div>
@@ -3396,7 +3428,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   </div>
 
                   {/* Volgende wedstrijd */}
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Volgende wedstrijd (verschijnt op de post)</div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Volgende wedstrijd (komt terug op content)</div>
                   <input value={nextGame} onChange={e=>setNextGame(e.target.value)} placeholder="Zo 25 mei | 14:00 | Uit vs FC Rivieren" style={{...INP,marginBottom:10}} />
                   <div style={{display:"flex",gap:8,marginBottom:8,flexWrap:"wrap"}}>
                     <button onClick={()=>nextMatchRef.current.click()} disabled={scanning} style={{flex:"1 1 45%",padding:"9px 8px",borderRadius:10,cursor:scanning?"default":"pointer",background:scanning==="nextmatch"?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px solid ${scanning==="nextmatch"?U:T.border3}`,color:scanning==="nextmatch"?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,letterSpacing:0.5,opacity:scanning&&scanning!=="nextmatch"?0.5:1}}>
@@ -4042,6 +4074,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
       {modal==="OWN"    && <GoalSheet type="OWN"    onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} />}
       {modal==="YELLOW" && <CardSheet type="YELLOW" onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} />}
       {modal==="RED"    && <CardSheet type="RED"    onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} />}
+      {modal==="RED_OPP" && <CardSheet type="RED"   onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} defaultOpponent />}
       {modal==="SUB"    && <SubSheet               onAdd={addEv} onClose={()=>setModal(null)} activeSquad={activeSquad} benchSquad={benchSquad} C={U} liveMinute={elapsed} paused={paused} />}
       {confirm && <ConfirmSheet message="Wedstrijd beëindigen en content genereren?" onConfirm={endMatch} onCancel={()=>setConfirm(false)} />}
 

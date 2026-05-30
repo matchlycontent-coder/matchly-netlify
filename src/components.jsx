@@ -42,10 +42,11 @@ export function PlayerSelect({ value, onChange, squad, placeholder }) {
   );
 }
 
-export function Chip({ label, active, onClick, color, xs }) {
+export function Chip({ label, active, onClick, color, xs, gradient }) {
   const c = color || U;
+  const activeBg = gradient ? `linear-gradient(135deg, ${c} 0%, ${hex(c,0.5)} 100%)` : c;
   return (
-    <button onClick={onClick} style={{padding:xs?"6px 13px":"10px 18px",borderRadius:100,border:`1px solid ${active?c:T.border3}`,background:active?c:"rgba(255,255,255,0.04)",color:active?"#fff":T.text3,fontSize:xs?11:13,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.4,whiteSpace:"nowrap",transition:"all 0.18s cubic-bezier(0.4,0,0.2,1)",backdropFilter:"blur(8px)",boxShadow:active?`0 0 16px ${hex(c,0.35)}`:"none"}}>
+    <button onClick={onClick} style={{padding:xs?"6px 13px":"10px 18px",borderRadius:100,border:`1px solid ${active?c:T.border3}`,background:active?activeBg:"rgba(255,255,255,0.04)",color:active?"#fff":T.text3,fontSize:xs?11:13,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.4,whiteSpace:"nowrap",transition:"all 0.18s cubic-bezier(0.4,0,0.2,1)",backdropFilter:"blur(8px)",boxShadow:active?`0 0 16px ${hex(c,0.35)}`:"none"}}>
       {label}
     </button>
   );
@@ -162,7 +163,7 @@ export function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused }
   const [half,setHalf]=useState(""); const [min,setMin]=useState(""); const [xt,setXt]=useState(false);
   const [player,setPlayer]=useState(""); const [assist,setAssist]=useState(""); const [gtype,setGtype]=useState("");
   return (
-    <Sheet title={isOwn?"🔴 Tegendoelpunt":"⚽ Doelpunt"} onClose={onClose} accentColor={c}>
+    <Sheet title={isOwn?"⚽ Tegendoelpunt":"⚽ Doelpunt"} onClose={onClose} accentColor={c}>
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
         <AutoMinRow liveMinute={liveMinute} paused={paused} half={half} setHalf={setHalf} minute={min} setMinute={setMin} extra={xt} setExtra={setXt} color={c} />
         {!isOwn && (
@@ -186,13 +187,13 @@ export function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused }
   );
 }
 
-export function CardSheet({ type, onAdd, onClose, squad, liveMinute, paused, opponent, openMoment }) {
+export function CardSheet({ type, onAdd, onClose, squad, liveMinute, paused, opponent, openMoment, defaultOpponent }) {
   const isRed = type==="RED";
   const c = isRed ? T.red : T.yellow;
   const [half,setHalf]=useState(""); const [min,setMin]=useState(""); const [xt,setXt]=useState(false);
   const [player,setPlayer]=useState("");
   const [reason,setReason]=useState("");
-  const [isOpponent,setIsOpponent]=useState(false);
+  const [isOpponent,setIsOpponent]=useState(defaultOpponent||false);
   const canSubmit = isRed ? (!!reason && (isOpponent || !!player)) : (isOpponent || !!player);
   const showPenaltyHint = isRed && reason==="Overtreding in de 16";
   return (
