@@ -8,7 +8,7 @@ exports.handler = async (event) => {
     return { statusCode: 405, body: JSON.stringify({ error: { message: "Alleen POST" } }) };
   }
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const apiKey = process.env.ANTHROPIC_API_KEY || process.env.VITE_ANTHROPIC_API_KEY;
   if (!apiKey) {
     return {
       statusCode: 500,
