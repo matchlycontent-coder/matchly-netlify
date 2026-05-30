@@ -269,6 +269,7 @@ export default function App() {
 
   // ── AI output (PERSISTED — bespaart API calls bij refresh) ──
   const [aiOut,setAiOut]     = usePersistedState("aiOut", null);
+  const [locked,setLocked]   = usePersistedState("locked", false); // punt: na genereren staan wedstrijdgegevens op slot
   const [loading,setLoading] = useState(false);
   const [aiErr,setAiErr]     = useState(null);
   const [archive,setArchive] = usePersistedState("archive", []);
@@ -615,11 +616,13 @@ export default function App() {
 
   // ── Match actions ──
   const addEv = ev => {
+    if(locked) return;
     setEvents(p=>[...p,ev].sort((a,b)=>(+a.minute||0)-(+b.minute||0)));
     if(ev.type==="GOAL") setHome(s=>s+1);
     if(ev.type==="OWN")  setAway(s=>s+1);
   };
   const delEv = id => {
+    if(locked) return;
     const ev=events.find(e=>e.id===id);
     if(ev?.type==="GOAL") setHome(s=>Math.max(0,s-1));
     if(ev?.type==="OWN")  setAway(s=>Math.max(0,s-1));
@@ -637,7 +640,7 @@ export default function App() {
     setMotm(""); setStars([]); setBijzT([]); setBijzN(""); setMotmRedenen([]);
     setKeyMoments([]); setSpecialInfo([]);                  // wedstrijdmomenten + bijzonderheden leegmaken
     setOppLogoUrl(""); setOppLogoMsg("");
-    setAiOut(null); setAiErr(null); setScreen("dashboard");
+    setAiOut(null); setLocked(false); setAiErr(null); setScreen("dashboard");
     // chosenTheme NIET resetten — laatst gekozen design-keuze blijft voor de volgende wedstrijd (gebruiksgemak)
     setChecklist({afb:false,wa:false,mail:false,social:false});
     // autoFetchedRef NIET resetten — na 1e auto-fetch geen automatische ophaal meer (alleen via ↻ knop)
@@ -868,6 +871,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
       setAiOut(parsed);
+      setLocked(true);
       archiveMatch(parsed);
     } catch { setAiErr("Generatie mislukt. Controleer de data en probeer opnieuw."); }
     setLoading(false);
@@ -1812,6 +1816,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </button>
                 )}
 
+                {status==="FINISHED" && locked && (
+                  <div style={{background:`linear-gradient(135deg,${hex(U,0.1)},${hex(U,0.03)})`,border:`1px solid ${hex(U,0.3)}`,borderRadius:18,padding:"14px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
+                    <div style={{fontSize:12,color:T.text2,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>🔒 Wedstrijdgegevens staan op slot. Druk op Wijzigen om aan te passen.</div>
+                    <button onClick={()=>setLocked(false)} style={{flexShrink:0,padding:"9px 16px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,letterSpacing:0.5,cursor:"pointer"}}>✏️ Wijzigen</button>
+                  </div>
+                )}
+                {status==="FINISHED" && !locked && aiOut && (
+                  <button onClick={endMatch} disabled={loading} style={{width:"100%",padding:15,background:"transparent",border:`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:800,color:U,cursor:loading?"wait":"pointer",textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>
+                    🔄 Content opnieuw genereren
+                  </button>
+                )}
                 {status==="FINISHED" && aiOut && (
                   <button onClick={()=>setScreen("output")} style={{width:"100%",padding:17,background:M.gradD,border:"none",borderRadius:100,fontFamily:"'Barlow Condensed',sans-serif",fontSize:17,fontWeight:800,color:"#fff",cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,boxShadow:`0 8px 28px ${hex(M.purple,0.4)}`,marginBottom:12}}>
                     📸 Bekijk content
@@ -1867,19 +1882,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {screen==="spelbeeld" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
               <SHead label="1e Helft — Openingsfase (0–20 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>setH1f1(h1f1===f?"":f)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>{if(locked)return;setH1f1(h1f1===f?"":f);}} color={U} gradient />)}</div>
               <SHead label="1e Helft — Middenfase (20–35 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>setH1f2(h1f2===f?"":f)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>{if(locked)return;setH1f2(h1f2===f?"":f);}} color={U} gradient />)}</div>
               <SHead label="1e Helft — Slotfase (35–45 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>setH1f3(h1f3===f?"":f)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>{if(locked)return;setH1f3(h1f3===f?"":f);}} color={U} gradient />)}</div>
               <SHead label="2e Helft — Openingsfase (45–65 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>setH2f1(h2f1===f?"":f)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>{if(locked)return;setH2f1(h2f1===f?"":f);}} color={U} gradient />)}</div>
               <SHead label="2e Helft — Middenfase (65–80 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>setH2f2(h2f2===f?"":f)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>{if(locked)return;setH2f2(h2f2===f?"":f);}} color={U} gradient />)}</div>
               <SHead label="2e Helft — Slotfase (80–90 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>setH2f3(h2f3===f?"":f)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>{if(locked)return;setH2f3(h2f3===f?"":f);}} color={U} gradient />)}</div>
               <SHead label="Eindbeeld van de wedstrijd" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>setAlgBeld(algBeld===w?"":w)} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>{if(locked)return;setAlgBeld(algBeld===w?"":w);}} color={U} gradient />)}</div>
               <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${T.border}`}}>
                 <BackBtn onClick={()=>setScreen("dashboard")} label="Terug naar dashboard" />
               </div>
@@ -1897,7 +1912,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
               ) : (
                 <>
                   <SHead label="Man of the Match" C={C} />
-                  <div style={{marginBottom:8}}><PlayerSelect value={motm} onChange={setMotm} squad={squad} placeholder="Kies of typ speler..." /></div>
+                  <div style={{marginBottom:8}}><PlayerSelect value={motm} onChange={v=>{if(!locked)setMotm(v);}} squad={squad} placeholder="Kies of typ speler..." /></div>
                   <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,padding:"4px 4px",marginBottom:16}}>De Man of the Match krijgt een aparte spotlight-post na de wedstrijd.</div>
 
                   {/* MOTM redenen — aantik max 9 opties */}
@@ -1908,7 +1923,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         {MOTM_REDENEN.map(r=>{
                           const active = motmRedenen.includes(r.key);
                           return (
-                            <button key={r.key} onClick={()=>toggleMotmReden(r.key)} style={{padding:"10px 13px",background:active?hex(U,0.18):hex(U,0.05),border:`1px solid ${active?U:hex(U,0.2)}`,borderRadius:12,color:active?T.text:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:active?900:700,letterSpacing:0.5,cursor:"pointer",display:"flex",alignItems:"center",gap:6,transition:"all 0.15s"}}>
+                            <button key={r.key} onClick={()=>{if(locked)return;toggleMotmReden(r.key);}} style={{padding:"10px 13px",background:active?hex(U,0.18):hex(U,0.05),border:`1px solid ${active?U:hex(U,0.2)}`,borderRadius:12,color:active?T.text:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:active?900:700,letterSpacing:0.5,cursor:"pointer",display:"flex",alignItems:"center",gap:6,transition:"all 0.15s"}}>
                               <span style={{fontSize:14}}>{r.icon}</span>
                               <span>{r.label}</span>
                             </button>
@@ -2531,10 +2546,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }}>
                               {/* Linker team - eigen club */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                {(hvLogoUrl||logo)
-                                  ?<img src={hvLogoUrl||logo} style={{width:"60%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"6%"}} crossOrigin="anonymous"/>
-                                  :<div style={{width:"60%",aspectRatio:"1/1",background:`linear-gradient(135deg,${TAC},${thex(TAC,0.7)})`,borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"#000"}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                }
+                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                                  {(hvLogoUrl||logo)
+                                    ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"12%"}} crossOrigin="anonymous"/>
+                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                  }
+                                </div>
                                 <span style={{fontSize:(clubName.length>20?"1.7cqw":clubName.length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.85)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{clubName}</span>
                               </div>
 
@@ -2547,10 +2564,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                               {/* Rechter team - tegenstander */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                {oppLogoUrl
-                                  ?<img src={oppLogoUrl} style={{width:"60%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"6%"}} crossOrigin="anonymous"/>
-                                  :<div style={{width:"60%",aspectRatio:"1/1",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                }
+                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                                  {oppLogoUrl
+                                    ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"12%"}} crossOrigin="anonymous"/>
+                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                  }
+                                </div>
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.7cqw":(opponent||"Tegenstander").length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.55)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
