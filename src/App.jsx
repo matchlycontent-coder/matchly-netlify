@@ -2734,35 +2734,39 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
                       </div>
 
-                      {/* Stap 2: bericht versturen */}
+                      {/* Stap 2: kopiëren + mailen naar beheerder (content in de mail) */}
                       <div>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Tekst versturen via WhatsApp</div>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Bericht naar beheerder mailen</div>
                         <div style={{display:"flex",gap:8}}>
                           <button onClick={()=>{navigator.clipboard.writeText(msgText);setCopiedDistr("handover");setTimeout(()=>setCopiedDistr(null),2500);}} style={{flex:1,padding:"11px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:T.text2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textTransform:"uppercase"}}>
                             {copiedDistr==="handover"?"✓ Gekopieerd":"📋 Kopiëren"}
                           </button>
-                          <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{flex:2,background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
-                            <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
-                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
-                              {hasSome?"Stuur via WhatsApp":"Beheerder instellen"}
+                          <button onClick={emailToBeheerder} disabled={mailStatus==="sending"} style={{flex:2,background:someEmail?(mailStatus==="sending"?"rgba(255,255,255,0.06)":"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)"):"rgba(255,255,255,0.05)",borderRadius:10,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:mailStatus==="sending"?"wait":"pointer",border:someEmail&&mailStatus!=="sending"?"none":"1px solid rgba(255,255,255,0.1)"}}>
+                            <span style={{fontSize:16}}>📧</span>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:someEmail&&mailStatus!=="sending"?"#fff":T.text3,letterSpacing:0.5}}>
+                              {mailStatus==="sending"?"Versturen…":someEmail?"Stuur naar SoMe":"E-mail instellen"}
                             </span>
                           </button>
                         </div>
+                        {mailStatus==="ok" && <div style={{marginTop:8,fontSize:11,color:"#34d399",fontFamily:"Barlow,sans-serif",fontWeight:700}}>✓ Verstuurd naar {someEmail}</div>}
+                        {typeof mailStatus==="string" && mailStatus.startsWith("error:") && <div style={{marginTop:8,fontSize:11,color:"#f87171",fontFamily:"Barlow,sans-serif"}}>✗ {mailStatus.slice(6)}</div>}
                         <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
-                          💡 Stuur daarna de gedownloade afbeeldingen apart in dezelfde WhatsApp-chat.
+                          📧 Het verslag en de content staan in de mail; de afbeeldingen zitten als bijlage.
                         </div>
                       </div>
 
-                      {/* Stap 3: alles in één keer per e-mail (Resend, met bijlagen) */}
+                      {/* Stap 3: of versturen via WhatsApp */}
                       <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Of — Alles in één keer per e-mail</div>
-                        <button onClick={emailToBeheerder} disabled={mailStatus==="sending"} style={{width:"100%",padding:"12px 16px",background:someEmail?(mailStatus==="sending"?"rgba(255,255,255,0.06)":"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)"):"rgba(255,255,255,0.05)",border:someEmail&&mailStatus!=="sending"?"none":"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:someEmail&&mailStatus!=="sending"?"#fff":T.text3,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,cursor:mailStatus==="sending"?"wait":"pointer",letterSpacing:0.5,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>
-                          <span style={{fontSize:16}}>📧</span>
-                          <span>{mailStatus==="sending"?"Versturen…":someEmail?"E-mail verslag + afbeeldingen":"Beheerder-e-mail instellen"}</span>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 3 — Of: versturen via WhatsApp</div>
+                        <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{width:"100%",background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
+                          <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
+                          <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
+                            {hasSome?"Stuur via WhatsApp":"Beheerder instellen"}
+                          </span>
                         </button>
-                        {mailStatus==="ok" && <div style={{marginTop:8,fontSize:11,color:"#34d399",fontFamily:"Barlow,sans-serif",fontWeight:700}}>✓ Verstuurd naar {someEmail}</div>}
-                        {typeof mailStatus==="string" && mailStatus.startsWith("error:") && <div style={{marginTop:8,fontSize:11,color:"#f87171",fontFamily:"Barlow,sans-serif"}}>✗ {mailStatus.slice(6)}</div>}
-                        <div style={{marginTop:8,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>📎 Verslag in de mailtekst, afbeeldingen als bijlage — in één keer naar de beheerder.</div>
+                        <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
+                          💡 Stuur daarna de gedownloade afbeeldingen apart in dezelfde WhatsApp-chat.
+                        </div>
                       </div>
                     </div>
                   );
