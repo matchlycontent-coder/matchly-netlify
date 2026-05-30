@@ -32,7 +32,10 @@ exports.handler = async (event) => {
       headers: {
         "Content-Type": contentType,
         "Access-Control-Allow-Origin": "*",
-        "Cache-Control": "public, max-age=86400",
+        "Vary": "Origin",
+        // Niet permanent bewaren: voorkomt dat de telefoon een versie zonder
+        // CORS-toestemming vasthoudt waardoor het logo leeg blijft.
+        "Cache-Control": "no-cache, no-store, must-revalidate",
       },
       body: Buffer.from(buffer).toString("base64"),
       isBase64Encoded: true,
