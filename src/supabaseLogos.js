@@ -1,15 +1,6 @@
-// supabaseLogos.js — beheert het opslaan en ophalen van clublogo's in Supabase
-import { createClient } from "@supabase/supabase-js";
-
-const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || import.meta.env.VITE_SUPABASE_KEY;
-
-let supabase = null;
-if (SUPABASE_URL && SUPABASE_KEY) {
-  supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
-} else {
-  console.warn("⚠️ VITE_SUPABASE_URL of VITE_SUPABASE_ANON_KEY ontbreekt — logo cache uitgeschakeld");
-}
+// supabaseLogos.js — beheert het ophalen en opslaan van clublogo's in Supabase
+// Hergebruikt de bestaande Supabase-verbinding (voorkomt "Multiple GoTrueClient instances").
+import { supabase } from "./supabaseClient.js";
 
 // Normaliseer clubnaam: lowercase, spaties trimmen
 function normalize(name) {
@@ -27,7 +18,6 @@ function proxyUrl(url) {
 
 /**
  * Zoek een logo in Supabase op basis van clubnaam.
- * @returns {Promise<string|null>} logo-URL (via proxy indien nodig) of null
  */
 export async function getLogoFromSupabase(clubName) {
   if (!supabase || !clubName?.trim()) return null;
@@ -47,7 +37,7 @@ export async function getLogoFromSupabase(clubName) {
   }
 
   const url = data?.logo_data || null;
-  return proxyUrl(url); // route via proxy als het hollandsevelden is
+  return proxyUrl(url);
 }
 
 /**
@@ -59,7 +49,6 @@ export async function saveLogoToSupabase(clubName, displayName, logoUrl) {
   const normalized = normalize(clubName);
   const display = (displayName || clubName).trim();
 
-  // Sla altijd de originele URL op (niet de proxy-URL)
   const originalUrl = logoUrl.includes("image-proxy?url=")
     ? decodeURIComponent(logoUrl.split("image-proxy?url=")[1])
     : logoUrl;
