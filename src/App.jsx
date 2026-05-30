@@ -154,6 +154,14 @@ export default function App() {
     }
   }, [isOnline]); // eslint-disable-line
 
+  // Zoek het tegenstander-logo zodra de tegenstander bekend is — ook bij het
+  // opstarten uit opgeslagen staat (los van internet-status wijzigingen).
+  useEffect(() => {
+    if (opponent && opponent.trim().length >= 3 && !oppLogoUrl && !oppLogoLoading) {
+      triggerOppLogoSearch();
+    }
+  }, [opponent]); // eslint-disable-line
+
   // ── Match analysis (PERSISTED) ──
   const [algBeld,setAlgBeld] = usePersistedState("algBeld", "");
   const [h1f1,setH1f1]     = usePersistedState("h1f1", "");
