@@ -2631,34 +2631,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}`;
                   });
                   const greeting = someName ? `Hoi ${someName.split(" ")[0]}` : "Hoi";
-                  const msgLines = [
+                  const msgText = [
                     `${greeting}! 👋`,``,
-                    `Content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* staat klaar om te plaatsen.`,``,
-                    `━━━━━━━━━━━━━━━━━━━`,
-                    `📸 *MATCH POST (caption)*`,
-                    `━━━━━━━━━━━━━━━━━━━`,``,
-                    aiOut.instagram,``,
-                  ];
-                  if(motm&&home>=away){
-                    msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                    msgLines.push(`🏆 *MAN OF THE MATCH*`);
-                    msgLines.push(`━━━━━━━━━━━━━━━━━━━`);msgLines.push(``);
-                    msgLines.push(`⭐ Man of the Match: *${motm}*`);msgLines.push(``);
-                    msgLines.push(`Story-afbeelding volgt — geen caption nodig (story).`);msgLines.push(``);
-                  }
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  msgLines.push(`⚽ *DOELPUNTEN*`);
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  goalLines.length>0 ? goalLines.forEach(g=>msgLines.push(g)) : msgLines.push(`Geen doelpunten`);
-                  msgLines.push(``);
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  msgLines.push(`📋 *INSTRUCTIES*`);
-                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
-                  msgLines.push(`• De afbeeldingen volgen direct hierna in deze chat`);
-                  if(motm&&home>=away) msgLines.push(`• Match-afbeelding, Story én MOTM-afbeelding apart sturen`);
-                  else msgLines.push(`• Match-afbeelding en Story apart sturen`);
-                  msgLines.push(`• Geplaatst? Laat het even weten 🙌`);
-                  const msgText = msgLines.join("\n");
+                    `De content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* staat klaar.`,``,
+                    `📧 Alles staat in je mail: het verslag, de caption${motm&&home>=away?`, de Man of the Match (*${motm}*)`:""} en de afbeeldingen als bijlage.`,``,
+                    `Laat even weten wanneer het geplaatst is. Groet! 🙌`,
+                  ].join("\n");
                   const waUrl = hasSome ? `https://wa.me/${someCountry}${someNumber}?text=${encodeURIComponent(msgText)}` : null;
 
                   const downloadLayout = async (id) => {
