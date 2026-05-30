@@ -523,7 +523,7 @@ export default function App() {
     setTeamIdLoading(true); setTeamIdMsg("");
     try {
       const vraag = `Zoek het KNVB team-ID voor "${clubName} ${team}" op voetbal.nl. Het team-ID staat in de URL: voetbal.nl/teams/nederland/team/[ID]/show/. Geef ALLEEN het numerieke ID terug, niets anders.`;
-      const res = await fetch("/.netlify/functions/claude",{
+      const res = await fetch("/.netlify/functions/anthropic",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
@@ -533,7 +533,7 @@ export default function App() {
       const toolBlocks = blocks.filter(b=>b.type==="tool_use");
       let finalData = data;
       if(toolBlocks.length > 0) {
-        const res2 = await fetch("/.netlify/functions/claude",{
+        const res2 = await fetch("/.netlify/functions/anthropic",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
@@ -965,7 +965,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
     for (const d of delays) {
       if (d > 0) await sleep(d);
       try {
-        const res = await fetch("/.netlify/functions/claude", {
+        const res = await fetch("/.netlify/functions/anthropic", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -3410,7 +3410,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       {voetbalFallback&&<button onClick={async()=>{
                         setScanning("nextmatch");setScanError(null);
                         try{
-                          const res=await fetch("/.netlify/functions/claude",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
+                          const res=await fetch("/.netlify/functions/anthropic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
                           const d=await res.json();const raw=d.content?.map(b=>b.text||"").join("")||"";const out=JSON.parse(raw.replace(/```json|```/g,"").trim());
                           const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean);
                           setNextGame(parts.join(" | "));
