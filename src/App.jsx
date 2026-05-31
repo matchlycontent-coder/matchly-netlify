@@ -22,7 +22,7 @@ const loadH2C = () => new Promise(res => {
   document.head.appendChild(s);
 });
 
-export default function App() {
+export default function App({ boot }) {
 
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
@@ -115,6 +115,33 @@ export default function App() {
   const [opponent,setOpp]    = usePersistedState("opponent", "");
   const [oppDraft,setOppDraft] = useState(opponent);
   useEffect(() => { setOppDraft(opponent); }, [opponent]); // sync extern (bv. AI-fetch)
+
+  // ── Koppeling met Supabase (admin): laad club, team en sponsoren van het ingelogde account ──
+  useEffect(() => {
+    if (!boot) return;
+    const c = boot.club, sp = boot.sponsors || [], tms = boot.teams || [];
+    if (c) {
+      if (c.name) setClubName(c.name);
+      if (c.logo_url) setHvLogoUrl(c.logo_url);
+      if (c.ig_handle != null) setIgHandle(c.ig_handle);
+      if (c.fb_handle != null) setFbHandle(c.fb_handle);
+      if (c.website != null) setClubWebsite(c.website);
+      if (c.club_code != null) setClubCode(c.club_code);
+    }
+    let activeTeam = null;
+    if (boot.profile && boot.profile.team_id) activeTeam = tms.find(t => t.id === boot.profile.team_id);
+    if (!activeTeam) activeTeam = tms.find(t => (t.name || "").toLowerCase() === (team || "").toLowerCase());
+    if (!activeTeam && tms.length) activeTeam = tms[0];
+    if (activeTeam && activeTeam.name) setTeam(activeTeam.name);
+    const tId = activeTeam ? activeTeam.id : null;
+    const toSp = (r) => ({ name: r.name || "", url: r.logo_url || null });
+    setSponsors(sp.filter(r => r.tier === "goud").map(toSp));
+    setSilverSponsors(sp.filter(r => r.tier === "zilver").map(toSp));
+    setTeamSponsors(sp.filter(r => r.tier === "brons" && r.team_id === tId).map(toSp));
+    const motm = sp.find(r => r.tier === "motm" && r.team_id === tId);
+    setMotmSponsor(motm ? toSp(motm) : { name: "", url: null });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [boot]);
 
   // ── ONLINE/OFFLINE detectie ──
   const [isOnline,setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);

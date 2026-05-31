@@ -5,9 +5,12 @@ import Login from './Login.jsx';
 import { supabase } from './supabaseClient.js';
 import './index.css';
 
+const SCREEN = { color:'#f0f0ff', background:'#050208', minHeight:'100vh', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'Barlow, sans-serif' };
+
 function AuthWrapper() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [boot, setBoot] = useState(undefined); // undefined = nog niet geladen
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -21,9 +24,35 @@ function AuthWrapper() {
     return () => subscription.unsubscribe();
   }, []);
 
-  if (loading) return <div style={{color:'white',padding:'20px'}}>Laden...</div>;
+  // Na inloggen: profiel, club, teams en sponsoren laden uit Supabase
+  useEffect(() => {
+    if (!user) { setBoot(undefined); return; }
+    let cancelled = false;
+    (async () => {
+      let profile = null, club = null, teams = [], sponsors = [];
+      try {
+        const { data: prof } = await supabase.from('user_profiles').select('*').eq('id', user.id).maybeSingle();
+        profile = prof || null;
+        if (prof && prof.club_id) {
+          const [{ data: c }, { data: ts }, { data: sp }] = await Promise.all([
+            supabase.from('clubs').select('*').eq('id', prof.club_id).maybeSingle(),
+            supabase.from('teams').select('*').eq('club_id', prof.club_id).order('id'),
+            supabase.from('sponsors').select('*').eq('club_id', prof.club_id).eq('is_active', true).order('id'),
+          ]);
+          club = c || null; teams = ts || []; sponsors = sp || [];
+        }
+      } catch (e) {
+        // stil falen: de app draait door met lokale gegevens
+      }
+      if (!cancelled) setBoot({ user, profile, club, teams, sponsors });
+    })();
+    return () => { cancelled = true; };
+  }, [user]);
+
+  if (loading) return <div style={SCREEN}>Laden...</div>;
   if (!user) return <Login />;
-  return <App />;
+  if (boot === undefined) return <div style={SCREEN}>Gegevens laden...</div>;
+  return <App boot={boot} />;
 }
 
 ReactDOM.createRoot(document.getElementById('root')).render(
