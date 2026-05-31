@@ -137,6 +137,10 @@ export default function App() {
   const [weather,setWeather] = usePersistedState("weather", "");
   const [elapsed,setElapsed] = usePersistedState("elapsed", 0);
   const [paused,setPaused] = usePersistedState("paused", false);
+  // Wall-clock ankers — tijd op basis van echte klok zodat hij niet achterloopt bij app-switch
+  const [startTs,setStartTs]         = usePersistedState("startTs", 0);       // ms-tijdstip van minuut 1
+  const [pausedMs,setPausedMs]       = usePersistedState("pausedMs", 0);      // opgebouwde rust in ms
+  const [pauseStartTs,setPauseStartTs] = usePersistedState("pauseStartTs", 0); // start van huidige rust (0 = niet in rust)
   const [sponsorOffset,setSponsorOffset] = useState(0);
   const [showDemo,setShowDemo] = useState(false);
   const [blockReminder,setBlockReminder] = useState(null); // {label, end}
@@ -182,11 +186,11 @@ export default function App() {
     // Combinaties (worden eerst gecheckt)
     if (has("hattrick") && has("leader"))  return "MATCHWINNER";
     if (has("hattrick") && has("goal"))    return "GENADELOOS";
-    if (has("saves") && has("penstop"))    return "ONKLOPBAAR";
+    if (has("saves") && has("penstop"))    return "ONOVERWINNELIJK";
     if (has("defender") && has("leader"))  return "ROTSVAST";
     if (has("goal") && has("assist"))      return "ALLESBEPALEND";
     if (has("saves") && has("leader"))     return "STEUNPILAAR";
-    if (has("workrate") && has("leader"))  return "DE BEZIELER";
+    if (has("workrate") && has("leader"))  return "DE HARDE WERKER";
     if (has("playmaker") && has("assist")) return "DE REGISSEUR";
     // Enkele redenen
     if (has("hattrick"))  return "DE KILLER";
@@ -194,9 +198,9 @@ export default function App() {
     if (has("saves"))     return "DE REDDER IN NOOD";
     if (has("goal"))      return "BESLISSEND";
     if (has("assist"))    return "DE AANGEVER";
-    if (has("playmaker")) return "SPELVERDELER";
-    if (has("defender"))  return "DE MUUR";
-    if (has("leader"))    return "DE KAPITEIN";
+    if (has("playmaker")) return "DE MOTOR VAN DE PLOEG";
+    if (has("defender"))  return "HET SLOT";
+    if (has("leader"))    return "DE CAPTAIN";
     if (has("workrate"))  return "ONVERZETTELIJK";
     return "UITBLINKER";
   };
@@ -208,28 +212,28 @@ export default function App() {
     const n = nameParts.length > 0 && !TUSSENV.has(nameParts[0].toLowerCase())
       ? nameParts[0]
       : (nameParts.length > 1 ? nameParts[nameParts.length-1] : (nameParts[0] || "Hij"));
-    if (!redenen || redenen.length === 0) return `${n} stak er bovenuit en bekroonde z'n optreden met de spotlight.`;
+    if (!redenen || redenen.length === 0) return `${n} stak er bovenuit en bekroonde z'n optreden als Man of the Match.`;
     const has = (k) => redenen.includes(k);
     // Combinaties krijgen voorrang
     if (has("saves") && has("penstop"))   return `Een muur tussen de palen. ${n} hield z'n team in de wedstrijd — inclusief een gestopte strafschop.`;
-    if (has("hattrick") && has("leader")) return `Drie keer raak én leidinggevend in elk duel: ${n} ging vandaag voorop.`;
+    if (has("hattrick") && has("leader")) return `Drie keer raak én bovenliggend in elk duel: ${n} ging vandaag voorop in de strijd.`;
     if (has("hattrick") && has("goal"))   return `Genadeloos voor de goal. ${n} besliste het duel met een hattrick.`;
-    if (has("defender") && has("leader")) return `Onverstoorbaar in de defensie, kapitein in elke duel — ${n} ging vandaag voorop.`;
+    if (has("defender") && has("leader")) return `Foutloos in de defensie, de baas in elke duel — ${n} leidde de ploeg.`;
     if (has("goal") && has("assist"))     return `Allesbepalend in de eindfase: ${n} bezorgde z'n ploeg het beslissende moment.`;
-    if (has("saves") && has("leader"))    return `Steunpilaar op het belangrijkste moment. ${n} hield het team rechtop.`;
-    if (has("workrate") && has("leader")) return `Met onverzettelijkheid en gezag joeg ${n} z'n ploeg naar de overwinning.`;
-    if (has("playmaker") && has("assist"))return `De spelverdeler die elke aanval startte. ${n} regisseerde van A tot Z.`;
+    if (has("saves") && has("leader"))    return `Steunpilaar op de belangrijkste momenten. ${n} hield het team overeind.`;
+    if (has("workrate") && has("leader")) return `Met onverzettelijkheid en kracht leidde ${n} z'n ploeg naar de overwinning.`;
+    if (has("playmaker") && has("assist"))return `De speler die elke aanval startte. ${n} regisseerde de wedstrijd van A tot Z.`;
     // Enkele redenen
     if (has("hattrick"))  return `Drie keer raak: ${n} besliste de wedstrijd in z'n eentje.`;
-    if (has("penstop"))   return `De held van de middag: ${n} stopte een levensgrote strafschop.`;
+    if (has("penstop"))   return `De held van de middag: ${n} stopte een cruciale strafschop.`;
     if (has("saves"))     return `Een keeper kan een wedstrijd winnen — vandaag bewees ${n} dat opnieuw.`;
     if (has("goal"))      return `Het beslissende moment kwam van ${n} — koelbloedig op het juiste moment.`;
     if (has("assist"))    return `Onmisbaar in de aanval: ${n} stond aan de basis van iedere goal.`;
     if (has("playmaker")) return `De man die alles dirigeerde vanaf het middenveld: ${n} liet z'n elftal lopen.`;
-    if (has("defender"))  return `Geen bal voorbij gelaten. ${n} was vandaag een muur in de defensie.`;
-    if (has("leader"))    return `Met gezag en geloof joeg ${n} z'n ploeg naar de overwinning.`;
+    if (has("defender"))  return `Geen speler kwam hem voorbij. ${n} was vandaag de baas in de defensie.`;
+    if (has("leader"))    return `Met overtuiging en klasse hielp ${n} z'n ploeg aan de overwinning.`;
     if (has("workrate"))  return `Onvermoeibaar, onverzettelijk, onmisbaar — ${n} liet zien wat karakter is.`;
-    return `${n} stak er bovenuit en bekroonde z'n optreden met de spotlight.`;
+    return `${n} stak er bovenuit en bekroonde z'n optreden als Man of the Match.`;
   };
   const [stars,setStars]     = usePersistedState("stars", []);
   const [newStar,setNewStar] = useState("");
@@ -409,12 +413,28 @@ export default function App() {
     if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:"instant"});
   },[screen, status]);
 
-  // Live timer
+  // Live timer — gebaseerd op de echte klok (loopt niet achter bij app-switch)
   useEffect(()=>{
-    if(status==="LIVE" && !paused) timer.current=setInterval(()=>setElapsed(t=>t+1),60000);
-    else clearInterval(timer.current);
-    return ()=>clearInterval(timer.current);
-  },[status,paused]);
+    if(status!=="LIVE") return;
+    const syncElapsed = () => {
+      if(!startTs) return;
+      const now = Date.now();
+      const curPause = (paused && pauseStartTs) ? (now - pauseStartTs) : 0;
+      const min = Math.max(1, Math.floor((now - startTs - pausedMs - curPause)/60000) + 1);
+      setElapsed(min);
+    };
+    syncElapsed();                                   // direct bijwerken
+    let id = null;
+    if(!paused) id = setInterval(syncElapsed, 15000); // elke 15s herberekenen
+    const onVis = () => { if(document.visibilityState==="visible") syncElapsed(); };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("focus", syncElapsed);
+    return ()=>{
+      if(id) clearInterval(id);
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("focus", syncElapsed);
+    };
+  },[status,paused,startTs,pausedMs,pauseStartTs]);
 
   // Spelbeeld blok-grenzen → reminder
   useEffect(()=>{
@@ -483,6 +503,11 @@ export default function App() {
     const currentTeam = teamSponsors[sponsorOffset % teamSponsors.length];
     return [...clubSlice, { ...currentTeam, _isTeam:true }];
   })();
+
+  // Match post: altijd eerste 5 hoofdsponsoren, geen team, geen rotatie
+  const postSponsors = sponsors.slice(0, 5);
+  // Story + MOTM: eerste 8 hoofdsponsoren + max 2 teamsponsoren, geen rotatie
+  const storySponsors = [...sponsors.slice(0, 8), ...teamSponsors.slice(0, 2).map(s=>({...s,_isTeam:true}))];
 
   // ── Logo Search: eerst Supabase cache, dan find-logo als fallback ──
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
@@ -629,12 +654,28 @@ export default function App() {
     setEvents(p=>p.filter(e=>e.id!==id));
   };
   const cp = (txt,k) => { navigator.clipboard.writeText(txt); setCopied(k); setTimeout(()=>setCopied(null),2500); };
-  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setElapsed(1); setScreen("dashboard"); };
+  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setStartTs(Date.now()); setPausedMs(0); setPauseStartTs(0); setElapsed(1); setScreen("dashboard"); };
+  // Rust starten/hervatten — telt de rusttijd correct mee in de klok
+  const togglePause = () => {
+    const now = Date.now();
+    if(!paused){
+      setPauseStartTs(now);            // rust begint
+    } else {
+      if(pauseStartTs) setPausedMs(m => m + (now - pauseStartTs));  // rust optellen
+      setPauseStartTs(0);
+    }
+    setPaused(p => !p);
+  };
+  // Handmatige tijdcorrectie — verschuift het starttijdstip zodat de klok-sync dit respecteert
+  const adjustTime = (deltaMin) => {
+    setStartTs(ts => ts ? ts - deltaMin*60000 : ts);
+    setElapsed(e => Math.max(1, e + deltaMin));
+  };
 
   const resetMatch = () => {
     setHasStarted(false); setStatus("PRE"); setHome(0); setAway(0); setEvents([]);
     setOpp(""); setMKind(""); setLoc("thuis"); setKick(""); setMatchDate(""); setWeather(""); setElapsed(0);
-    setReminderShown({}); setBlockReminder(null); setPaused(false);
+    setReminderShown({}); setBlockReminder(null); setPaused(false); setStartTs(0); setPausedMs(0); setPauseStartTs(0);
     setAlgBeld(""); setH1f1(""); setH1f2(""); setH1f3("");
     setH2f1(""); setH2f2(""); setH2f3("");
     setMotm(""); setStars([]); setBijzT([]); setBijzN(""); setMotmRedenen([]);
@@ -778,7 +819,8 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
       const picked = THEMES[Math.floor(Math.random() * THEMES.length)];
       setChosenTheme(picked.id);
     }
-    const evData = events.map(e=>({type:e.type,half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?90:45}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
+    const TYPE_NL = { GOAL:"doelpunt eigen ploeg", OWN:"tegendoelpunt (tegenstander scoorde)", YELLOW:"gele kaart", RED:"rode kaart", SUB:"wissel" };
+    const evData = events.map(e=>({type:TYPE_NL[e.type]||e.type,team:e.type==="GOAL"?"eigen ploeg":e.type==="OWN"?"tegenstander":(e.isOpponent?"tegenstander":"eigen ploeg"),half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?90:45}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
     const wedstrijdMomenten = keyMoments.map(m=>`${m.minute}' ${m.type.label}${m.player?` (${m.player}${m.player2?` ⇄ ${m.player2}`:""})`:""}`).join(", ")||null;
     const bijzondereInfo = specialInfo.map(s=>`${s.type.label}${s.player?` (${s.player})`:""}`).join(", ")||null;
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
@@ -815,6 +857,7 @@ REGELS:
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
+- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
@@ -854,6 +897,7 @@ REGELS:
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
+- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
@@ -1471,7 +1515,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
         <div style={{width:"100%",maxWidth:430,background:T.bg1,height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
           {/* HEADER */}
-          <MatchHeader clubName={clubName} opponent={opponent} homeScore={home} awayScore={away} status={status} elapsed={elapsed} paused={paused} clubLogo={logo} hvLogoUrl={hvLogoUrl} oppLogoUrl={oppLogoUrl} C={C} sec={sec} setElapsed={setElapsed} />
+          <MatchHeader clubName={clubName} opponent={opponent} homeScore={home} awayScore={away} status={status} elapsed={elapsed} paused={paused} clubLogo={logo} hvLogoUrl={hvLogoUrl} oppLogoUrl={oppLogoUrl} C={C} sec={sec} setElapsed={setElapsed} adjustTime={adjustTime} />
 
           {/* Offline banner - global */}
           {!isOnline && (
@@ -1805,7 +1849,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 </div>
 
                 {status==="LIVE" && (
-                  <button onClick={()=>setPaused(p=>!p)} style={{width:"100%",padding:14,background:paused?M.gradD:"transparent",border:paused?"none":`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:paused?"#fff":U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginBottom:10,boxShadow:paused?`0 8px 28px ${hex(M.purple,0.4)}`:"none",animation:paused?"pulsePause 1.6s ease-in-out infinite":"none"}}>
+                  <button onClick={togglePause} style={{width:"100%",padding:14,background:paused?M.gradD:"transparent",border:paused?"none":`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:paused?"#fff":U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginBottom:10,boxShadow:paused?`0 8px 28px ${hex(M.purple,0.4)}`:"none",animation:paused?"pulsePause 1.6s ease-in-out infinite":"none"}}>
                     {paused?"▶️ Wedstrijdtijd hervatten":"⏸️ Wedstrijdtijd pauzeren (rust)"}
                   </button>
                 )}
@@ -2404,12 +2448,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         {/* SPONSOR BALK */}
                         <div style={{flexShrink:0,marginTop:"1.5%"}}>
                           <div style={{background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>
-                            {visSponsors.length>0&&(
+                            {postSponsors.length>0&&(
                               <>
                                 <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                                 <div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>
-                                  {visSponsors.map((s,i)=>(
-                                    <div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:s._isTeam?`2px solid ${TAC}`:"none"}}>
+                                  {postSponsors.map((s,i)=>(
+                                    <div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%"}}>
                                       {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:18,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}
                                     </div>
                                   ))}
@@ -2508,7 +2552,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               {igHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={IG_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{igHandle}</span></div>}
                               {fbHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={FB_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{fbHandle}</span></div>}
                             </div>}
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{visSponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>{visSponsors.map((s,i)=><div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"4%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:12,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"4%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:12,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -2600,7 +2644,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <div style={{fontSize:(fullTeamName.length>30?"1.5cqw":fullTeamName.length>22?"1.7cqw":"2cqw"),color:`${TAC}88`,letterSpacing:1,fontWeight:700,marginTop:"1.5%",textTransform:"uppercase",textAlign:"center"}}>{fullTeamName}</div>
                               <div style={{fontSize:(((opponent||"Tegenstander").length>20)?"1.7cqw":"2cqw"),color:"rgba(255,255,255,0.3)",marginTop:"1%"}}>{home>away?"Gewonnen":home===away?"Gelijkspel":"Verloren"} · {home}-{away} vs {opponent||"Tegenstander"}</div>
                             </div>
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{visSponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>{visSponsors.map((s,i)=><div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"5%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:16,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"5%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:16,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}

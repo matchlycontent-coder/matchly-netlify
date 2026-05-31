@@ -325,7 +325,7 @@ export function MomentSheet({ config, liveMinute, squad, C, onClose, onAdd }) {
 /* ══════════════════════════════════════════════
    MATCH HEADER
 ══════════════════════════════════════════════ */
-export function MatchHeader({ clubName, opponent, homeScore, awayScore, status, elapsed, paused, clubLogo, hvLogoUrl, oppLogoUrl, C, sec, setElapsed }) {
+export function MatchHeader({ clubName, opponent, homeScore, awayScore, status, elapsed, paused, clubLogo, hvLogoUrl, oppLogoUrl, C, sec, setElapsed, adjustTime }) {
   const isLive = status==="LIVE";
   const isDone = status==="FINISHED";
   const homeLogo = (clubLogo && clubLogo.trim()) || (hvLogoUrl && hvLogoUrl.trim()) || null;
@@ -348,19 +348,19 @@ export function MatchHeader({ clubName, opponent, homeScore, awayScore, status, 
             {isLive?(paused?"PAUZE":"LIVE"):isDone?"AFGELOPEN":"AANKOMEND"}
           </span>
           {isLive && elapsed>0 && <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,color:T.text3}}>• {elapsed}'</span>}
-          {isLive && setElapsed && (
+          {isLive && adjustTime && (
             <button onClick={()=>setTimeAdjustOpen(o=>!o)} title="Wedstrijdtijd aanpassen" style={{background:timeAdjustOpen?hex(U,0.25):"transparent",border:"none",cursor:"pointer",padding:"2px 5px",marginLeft:2,borderRadius:100,fontSize:11,lineHeight:1,color:T.text3}}>
               {timeAdjustOpen?"✕":"✏️"}
             </button>
           )}
         </div>
       </div>
-      {isLive && timeAdjustOpen && setElapsed && (
+      {isLive && timeAdjustOpen && adjustTime && (
         <div style={{display:"flex",justifyContent:"center",alignItems:"center",gap:6,marginBottom:14}}>
-          <button onClick={()=>setElapsed(e=>Math.max(0,e-5))} title="5 minuten terug" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>−5</button>
-          <button onClick={()=>setElapsed(e=>Math.max(0,e-1))} title="1 minuut terug" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>−1</button>
-          <button onClick={()=>setElapsed(e=>e+1)} title="1 minuut vooruit" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>+1</button>
-          <button onClick={()=>setElapsed(e=>e+5)} title="5 minuten vooruit" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>+5</button>
+          <button onClick={()=>adjustTime(-5)} title="5 minuten terug" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>−5</button>
+          <button onClick={()=>adjustTime(-1)} title="1 minuut terug" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>−1</button>
+          <button onClick={()=>adjustTime(1)} title="1 minuut vooruit" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>+1</button>
+          <button onClick={()=>adjustTime(5)} title="5 minuten vooruit" style={{padding:"5px 10px",background:"rgba(255,255,255,0.06)",border:`1px solid ${T.border2}`,borderRadius:8,color:T.text2,fontSize:11,fontWeight:800,fontFamily:"'Barlow Condensed',sans-serif",cursor:"pointer"}}>+5</button>
         </div>
       )}
       <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:8}}>
