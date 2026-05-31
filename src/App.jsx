@@ -3525,65 +3525,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   </div>
                 )}
                 <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
-                  <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:16}}>CLUB IDENTITEIT</div>
-
-                  {/* Club naam — auto-zoekt logo bij blur of Enter */}
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Clubnaam</div>
-                  <input
-                    value={clubName}
-                    onChange={e=>{
-                      const v = e.target.value;
-                      setClubName(v);
-                      // Logo wissen als naam verandert (alleen HV-gevonden logo, niet eigen upload)
-                      if (hvLogoUrl) setHvLogoUrl("");
-                      if (hvLogoMsg) setHvLogoMsg("");
-                    }}
-                    onBlur={triggerClubLogoSearch}
-                    onKeyDown={e=>{ if(e.key==="Enter"){ e.target.blur(); } }}
-                    placeholder="VV Ons Dorp"
-                    style={{...INP,marginBottom:16}}
-                  />
-
-                  {/* Logo row */}
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:10}}>Clublogo</div>
-                  <div style={{display:"flex",alignItems:"center",gap:14}}>
-                    {/* Preview */}
-                    <div style={{width:72,height:72,borderRadius:18,background:(hvLogoUrl||logo)?"#fff":T.bg3,border:`1px solid ${T.border2}`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0,boxShadow:"0 4px 16px rgba(0,0,0,0.4)",position:"relative"}}>
-                      {hvLogoLoading && !logo && !hvLogoUrl
-                        ? <span style={{fontSize:22,opacity:0.6}}>⏳</span>
-                        : (hvLogoUrl||logo)
-                          ? <img src={logo||hvLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:4}} onError={e=>{e.target.style.opacity="0.2";}} />
-                          : <span style={{fontSize:28,opacity:0.2}}>🛡️</span>
-                      }
-                    </div>
-                    {/* Upload + status */}
-                    <div style={{flex:1}}>
-                      <button onClick={()=>logoRef.current.click()} style={{width:"100%",padding:"10px 14px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:12,color:T.text3,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textAlign:"left"}}>
-                        📁 {logo ? "Vervang eigen logo" : "Upload eigen logo"}
-                      </button>
-                      <input ref={logoRef} type="file" accept="image/*" onChange={handleLogo} style={{display:"none"}} />
-                      {/* Status-tekst onder de knop */}
-                      {hvLogoLoading && !logo && (
-                        <div style={{marginTop:8,fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif"}}>Logo wordt gezocht...</div>
-                      )}
-                      {!hvLogoLoading && hvLogoMsg && !hvLogoMsg.startsWith("✓") && !logo && (
-                        <div style={{marginTop:8,fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif"}}>Geen logo gevonden</div>
-                      )}
-                      {logo && (
-                        <button onClick={()=>setLogo(null)} style={{marginTop:8,background:"none",border:"none",color:T.text4,fontFamily:"Barlow,sans-serif",fontSize:11,cursor:"pointer",padding:0,textDecoration:"underline",textDecorationStyle:"dotted"}}>Eigen logo verwijderen</button>
-                      )}
-                    </div>
-                  </div>
-                  {(hvLogoUrl||logo) && <div style={{marginTop:10,fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif"}}>✓ Logo actief in match header en content</div>}
-
-                  {/* Instagram handle */}
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Instagram handle</div>
-                  <input value={igHandle} onChange={e=>setIgHandle(e.target.value)} placeholder="@vjouvclub" style={{...INP,marginBottom:16}} />
-
-                  {/* Facebook handle */}
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Facebook handle</div>
-                  <input value={fbHandle} onChange={e=>setFbHandle(e.target.value)} placeholder="@vjouvclub of facebook.com/vjouvclub" style={{...INP,marginBottom:16}} />
-
                   {/* AI consent toggle */}
                   <div style={{background:aiConsent?"rgba(255,255,255,0.02)":hex(T.red,0.05),border:`1px solid ${aiConsent?T.border3:hex(T.red,0.25)}`,borderRadius:14,padding:14,marginBottom:16}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
