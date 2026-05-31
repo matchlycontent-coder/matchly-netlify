@@ -27,6 +27,7 @@ export default function App({ boot }) {
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
   const [team,setTeam]           = usePersistedState("team", "Heren 1");
+  const [teamLocked,setTeamLocked] = useState(false);
   const [comp,setComp]           = usePersistedState("comp", "3e Klasse KNVB");
   const [stijlByTeam,setStijlByTeam] = usePersistedState("stijlByTeam", {});
   const stijl    = stijlByTeam[team] || safeGet("stijl","") || "Zakelijk & Nuchter"; // per team; valt terug op oude globale waarde voor backward-compat
@@ -133,6 +134,7 @@ export default function App({ boot }) {
     if (!activeTeam) activeTeam = tms.find(t => (t.name || "").toLowerCase() === (team || "").toLowerCase());
     if (!activeTeam && tms.length) activeTeam = tms[0];
     if (activeTeam && activeTeam.name) setTeam(activeTeam.name);
+    setTeamLocked(!!(boot.profile && boot.profile.team_id));
     const tId = activeTeam ? activeTeam.id : null;
     const toSp = (r) => ({ name: r.name || "", url: r.logo_url || null });
     setSponsors(sp.filter(r => r.tier === "goud").map(toSp));
@@ -3639,6 +3641,12 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                 <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
                   <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:16}}>ELFTAL</div>
 
+                  {teamLocked ? (
+                    <div style={{padding:"14px 16px",background:hex(U,0.1),border:`1px solid ${hex(U,0.3)}`,borderRadius:12,marginBottom:16}}>
+                      <div style={{fontSize:11,color:T.text3,marginBottom:3,fontFamily:"Barlow,sans-serif"}}>Je vult in voor</div>
+                      <div style={{fontSize:18,fontWeight:800,color:T.text,fontFamily:"'Barlow Condensed',sans-serif"}}>{team}</div>
+                    </div>
+                  ) : (<>
                   {/* Team chips */}
                   <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:10}}>
                     {["Heren 1","Heren 2","Heren 3","Heren 4","Dames 1","Dames 2","JO19-1","JO17-1","JO15-1"].map(t=>(
@@ -3646,6 +3654,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     ))}
                   </div>
                   <input value={team} onChange={e=>setTeam(e.target.value)} placeholder="Of typ zelf: Heren 5" style={{...INP,marginBottom:16}} />
+                  </>)}
 
                   {/* ── Heren 1: HollandseVelden competitie ── */}
                   {isHeren1 ? (
