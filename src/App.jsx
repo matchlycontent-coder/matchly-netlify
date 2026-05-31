@@ -455,7 +455,7 @@ export default function App() {
     if (elapsed !== 45) return;
     if (reminderShown.rust45) return;
     setReminderShown(p => ({...p, rust45: true}));
-    pushNotify("⏸️ Tijd voor de rust", "Druk zo op 'Wedstrijdtijd pauzeren' om de rust in te luiden.");
+    pushNotify("⏸️ Tijd voor de rust", "Druk op de knop 'Wedstrijdtijd pauzeren' om de rust in te luiden.");
   },[elapsed,status]);
 
   // Push: 12 minuten na pauze → klaar voor 2e helft
@@ -768,7 +768,7 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
       const dateStr = result.datum ? new Date(result.datum).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) : "";
       setNextMatchMsg(`✓ ${result.tegenstander}${dateStr?` · ${dateStr}`:""}${conf==="laag"?" (controleer)":""}`);
     } catch(e) {
-      setNextMatchMsg("⚠ Ophalen mislukt: "+(e.message||"onbekende fout"));
+      setNextMatchMsg("⚠ Ophalen mislukt — "+(e.message||"onbekende fout"));
     } finally {
       setNextMatchLoading(false);
     }
@@ -808,7 +808,7 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
       // Sla wedstrijd lokaal op, sla AI-generatie over tot weer online
       setStatus("FINISHED");
       setScreen("output");
-      setAiErr("📵 Geen internet — content kon niet gegenereerd worden. Match staat opgeslagen. Probeer opnieuw via 'Hergenereer' zodra je online bent.");
+      setAiErr("📵 Geen internet — De content kon niet gemaakt worden. Wedstrijd is opgeslagen. Probeer opnieuw via 'Hergenereer' zodra je online bent.");
       archiveMatch(null);
       return;
     }
@@ -835,15 +835,33 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
 SCHRIJFSTIJL: ${stijl}.
 Qua vorm en toon sluit je aan bij hoe Voetbalzone.nl, AD Sport en Telesport wedstrijden beschrijven: feitelijk, vloeiend en leesbaar. Geen droge opsomming, maar een lopend verhaal. Zinslengte varieert bewust — kort en lang door elkaar — voor ritme. Geen omhaal van woorden. Schrijf alsof je het aan een voetballiefhebber vertelt die de wedstrijd niet zag maar wel snapt hoe het spel werkt. Varieer openingszin en structuur per verslag.
 
-VOORBEELDEN VAN GOEDE OPENINGEN (qua toon, niet verzinnen):
+VOORBEELDEN VAN GOEDE OPENINGEN (qua toon en variatie voor elke uitslag — gebruik de echte clubnamen, niet verzinnen):
 - "VV GroenWit pakte op karakter de drie punten tegen SV Blauw-Wit."
 - "Een vroege voorsprong gaf VV GroenWit vertrouwen tegen SV Blauw-Wit."
-- "Na een rustig begin schakelde VV GroenWit door en versloeg SV Blauw-Wit met 3-2."
+- "Na een rustig begin voerde VV GroenWit het tempo op en versloeg SV Blauw-Wit met 3-2."
+- "SV Blauw-Wit was te sterk voor VV GroenWit en pakte terecht de drie punten."
+- "VV GroenWit kon het verschil niet maken en ging onderuit tegen SV Blauw-Wit."
+- "Een vroege tegentreffer zette de toon — VV GroenWit kwam er niet meer aan te pas."
+- "VV GroenWit en SV Blauw-Wit hielden elkaar in evenwicht en deelden de punten."
+- "Een punt was het maximale voor VV GroenWit na een gelijkopgaande wedstrijd."
+- "VV GroenWit greep net naast de winst en moest genoegen nemen met een gelijkspel."
+- "VV GroenWit was oppermachtig en gunde SV Blauw-Wit geen moment om op adem te komen."
+- "Een dik verdiende overwinning voor VV GroenWit, dat SV Blauw-Wit volledig overklaste."
+- "Van meet af aan de baas — VV GroenWit liet SV Blauw-Wit kansloos."
 
-VOORBEELDEN VAN GOEDE HEADLINES:
+VOORBEELDEN VAN GOEDE HEADLINES (variatie voor elke uitslag):
 - "Tom van der Meer kopt VV GroenWit in slotfase langs SV Blauw-Wit"
-- "Karakter brengt VV GroenWit drie punten tegen SV Blauw-Wit"
-- "VV GroenWit houdt stand na twee tegentreffers"
+- "Karakter levert VV GroenWit de drie punten op tegen SV Blauw-Wit"
+- "VV GroenWit houdt stand ondanks twee tegentreffers"
+- "VV GroenWit bezwijkt onder druk van SV Blauw-Wit"
+- "Vroege achterstand fataal voor VV GroenWit"
+- "SV Blauw-Wit te sterk voor vechtend VV GroenWit"
+- "VV GroenWit en SV Blauw-Wit komen niet tot een winnaar"
+- "Gelijkspel voor VV GroenWit na sterke tweede helft"
+- "VV GroenWit pakt een punt maar had meer verdiend"
+- "VV GroenWit walst over SV Blauw-Wit heen"
+- "Ruime zege voor dominant VV GroenWit"
+- "VV GroenWit sloopt SV Blauw-Wit met doelpuntenfestijn"
 
 TAAL: Schrijf in helder Nederlands op B1-niveau. Gebruik gewone, herkenbare woorden. Zeg altijd "coach", nooit "trainer".
 
@@ -860,6 +878,8 @@ REGELS:
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
+- Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
+- Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
 
 VERSLAG: 150–250 woorden. Chronologisch per fase. Sluit af met eindstand.
@@ -900,6 +920,8 @@ REGELS:
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
+- Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
+- Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
 - Schrijf actieve zinnen. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 
@@ -917,7 +939,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
       setAiOut(parsed);
       setLocked(true);
       archiveMatch(parsed);
-    } catch { setAiErr("Generatie mislukt. Controleer de data en probeer opnieuw."); }
+    } catch { setAiErr("Mislukt. Controleer de data en probeer opnieuw."); }
     setLoading(false);
   };
 
