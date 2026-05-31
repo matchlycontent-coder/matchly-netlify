@@ -516,6 +516,11 @@ export default function App() {
   // Story + MOTM-story: 5 goud + 4 zilver + 1 brons (zelfde sponsors op beide)
   const storySponsors = [...goldSp, ...silverSp, ...bronzeSp];
   const tierColor = (s) => s._tier==="goud"?TIER_GOLD : s._tier==="zilver"?TIER_SILVER : s._tier==="brons"?TIER_BRONZE : null;
+  // Gradient per niveau (render-veilig voor html2canvas: gradient als achtergrond van een wrapper)
+  const tierGradient = (s) => s._tier==="goud"   ? "linear-gradient(135deg,#fcefb4 0%,#e6c14e 35%,#b8860b 70%,#f5d97a 100%)"
+                            : s._tier==="zilver" ? "linear-gradient(135deg,#f4f5fa 0%,#cdced6 35%,#8e8e99 70%,#e3e4ea 100%)"
+                            : s._tier==="brons"  ? "linear-gradient(135deg,#eab97e 0%,#cd7f32 35%,#8f5420 70%,#dca066 100%)"
+                            : "#cccccc";
 
   // ── Logo Search: eerst Supabase cache, dan find-logo als fallback ──
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
@@ -2492,8 +2497,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                                 <div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>
                                   {postSponsors.map((s,i)=>(
-                                    <div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:`2px solid ${tierColor(s)||TIER_GOLD}`,boxShadow:`0 0 5px ${(tierColor(s)||TIER_GOLD)}66`}}>
+                                    <div key={i} style={{flex:1,maxWidth:"18%",borderRadius:"8%",padding:"2px",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}>
+                                      <div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>
                                       {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:18,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}
+                                      </div>
                                     </div>
                                   ))}
                                 </div>
@@ -2591,7 +2598,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               {igHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={IG_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{igHandle}</span></div>}
                               {fbHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={FB_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{fbHandle}</span></div>}
                             </div>}
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"4%",padding:"2% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:`2.5px solid ${tierColor(s)||"#ccc"}`,boxShadow:`0 0 5px ${(tierColor(s)||"#ccc")}66`}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:15,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,borderRadius:"6%",padding:"0.7%",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}><div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"4%",padding:"2% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:15,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div></div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -2683,7 +2690,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <div style={{fontSize:(fullTeamName.length>30?"1.5cqw":fullTeamName.length>22?"1.7cqw":"2cqw"),color:`${TAC}88`,letterSpacing:1,fontWeight:700,marginTop:"1.5%",textTransform:"uppercase",textAlign:"center"}}>{fullTeamName}</div>
                               <div style={{fontSize:(((opponent||"Tegenstander").length>20)?"1.7cqw":"2cqw"),color:"rgba(255,255,255,0.3)",marginTop:"1%"}}>{home>away?"Gewonnen":home===away?"Gelijkspel":"Verloren"} · {home}-{away} vs {opponent||"Tegenstander"}</div>
                             </div>
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"5%",padding:"2% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:`2.5px solid ${tierColor(s)||"#ccc"}`,boxShadow:`0 0 5px ${(tierColor(s)||"#ccc")}66`}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:20,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,borderRadius:"7%",padding:"0.7%",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}><div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"5%",padding:"2% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:20,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div></div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -2916,11 +2923,13 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.25)",textTransform:"uppercase",textAlign:"center",marginBottom:10}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                       <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
                         {storySponsors.map((s,i)=>(
-                          <div key={i} style={{background:"#e8e8e8",borderRadius:7,padding:"6px 14px",display:"flex",alignItems:"center",border:`2.5px solid ${tierColor(s)||"#ccc"}`,boxShadow:`0 0 5px ${(tierColor(s)||"#ccc")}66`}}>
+                          <div key={i} style={{borderRadius:9,padding:"2px",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}>
+                            <div style={{background:"#e8e8e8",borderRadius:7,padding:"6px 14px",display:"flex",alignItems:"center"}}>
                             {s.url
                               ? <img src={s.url} style={{height:18,maxWidth:60,objectFit:"contain"}} crossOrigin="anonymous"/>
                               : <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:900,color:"#222"}}>{s.name||"—"}</span>
                             }
+                            </div>
                           </div>
                         ))}
                       </div>
@@ -3883,17 +3892,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   <span style={{fontSize:9,fontWeight:900,color:U,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:hex(U,0.12),border:`1px solid ${hex(U,0.3)}`,borderRadius:6,textTransform:"uppercase"}}>Goud · 5</span>
                 </div>
                 <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55,marginBottom:14}}>Altijd zichtbaar op alle content. Worden later centraal beheerd door de clubbeheerder.</div>
-
-                {sponsors.length>5 && (
-                  <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:14,padding:14,marginBottom:14}}>
-                    <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:8}}>🔁 Rotatie-snelheid ({sponsors.length} sponsors, wisselen elke {sponsorSpeed/1000}s)</div>
-                    <div style={{display:"flex",gap:6}}>
-                      {[["Langzaam",5000],["Normaal",3500],["Snel",2000]].map(([lab,ms])=>(
-                        <button key={ms} onClick={()=>setSponsorSpeed(ms)} style={{flex:1,padding:"8px 6px",borderRadius:10,cursor:"pointer",background:sponsorSpeed===ms?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px solid ${sponsorSpeed===ms?U:T.border3}`,color:sponsorSpeed===ms?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,letterSpacing:0.5}}>{lab}</button>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
                 {/* Sponsor logos preview */}
                 {sponsors.length>0 && (
