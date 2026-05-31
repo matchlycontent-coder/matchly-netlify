@@ -122,7 +122,7 @@ export default function App({ boot }) {
     const c = boot.club, sp = boot.sponsors || [], tms = boot.teams || [];
     if (c) {
       if (c.name) setClubName(c.name);
-      if (c.logo_url) setHvLogoUrl(c.logo_url);
+      if (c.logo_url) setHvLogoUrl('https://images.weserv.nl/?url=' + encodeURIComponent(c.logo_url));
       if (c.ig_handle != null) setIgHandle(c.ig_handle);
       if (c.fb_handle != null) setFbHandle(c.fb_handle);
       if (c.website != null) setClubWebsite(c.website);
