@@ -31,7 +31,20 @@ function AuthWrapper() {
     (async () => {
       let profile = null, club = null, teams = [], sponsors = [];
       try {
-        const { data: prof } = await supabase.from('user_profiles').select('*').eq('id', user.id).maybeSingle();
+        let { data: prof } = await supabase.from('user_profiles').select('*').eq('id', user.id).maybeSingle();
+        // Openstaande uitnodiging koppelen als dit account nog geen team heeft
+        if (!prof || !prof.team_id) {
+          const { data: inv } = await supabase.from('invites').select('*').eq('email', user.email).eq('status', 'pending').order('created_at', { ascending: false }).limit(1).maybeSingle();
+          if (inv) {
+            const patch = { club_id: inv.club_id, team_id: inv.team_id, role: inv.role };
+            const { data: upd } = await supabase.from('user_profiles').update(patch).eq('id', user.id).select();
+            if (!upd || upd.length === 0) {
+              await supabase.from('user_profiles').insert({ id: user.id, email: user.email, club_id: inv.club_id, team_id: inv.team_id, role: inv.role });
+            }
+            await supabase.from('invites').update({ status: 'accepted' }).eq('id', inv.id);
+            prof = (await supabase.from('user_profiles').select('*').eq('id', user.id).maybeSingle()).data;
+          }
+        }
         profile = prof || null;
         if (prof && prof.club_id) {
           const [{ data: c }, { data: ts }, { data: sp }] = await Promise.all([
