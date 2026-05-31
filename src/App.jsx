@@ -48,6 +48,7 @@ export default function App() {
     return [];
   })());
   const [motmSponsor,setMotmSponsor] = usePersistedState("motmSponsor", { name:"", url:null });
+  const [silverSponsors,setSilverSponsors] = usePersistedState("silverSponsors", []); // zilver-laag (max 4, op beide stories)
   const [squad,setSquad]         = usePersistedState("squad", []);
   const [baseSquad,setBaseSquad] = usePersistedState("baseSquad", []);
   const toggleBase = (name) => setBaseSquad(prev => prev.includes(name) ? prev.filter(n=>n!==name) : [...prev,name]);
@@ -102,6 +103,7 @@ export default function App() {
   const sponsorScanRef = useRef(null);
   const motmSponsorRef = useRef(null);
   const teamSponsorRef = useRef(null);
+  const silverSponsorRef = useRef(null);
   const playerScanRef = useRef(null);
   const nextMatchRef = useRef(null);
 
@@ -504,10 +506,16 @@ export default function App() {
     return [...clubSlice, { ...currentTeam, _isTeam:true }];
   })();
 
-  // Match post: altijd eerste 5 hoofdsponsoren, geen team, geen rotatie
-  const postSponsors = sponsors.slice(0, 5);
-  // Story + MOTM: eerste 8 hoofdsponsoren + max 2 teamsponsoren, geen rotatie
-  const storySponsors = [...sponsors.slice(0, 8), ...teamSponsors.slice(0, 2).map(s=>({...s,_isTeam:true}))];
+  // Sponsor-niveaus met randkleur (goud/zilver/brons)
+  const TIER_GOLD = "#d4af37", TIER_SILVER = "#c4c4cc", TIER_BRONZE = "#cd7f32";
+  const goldSp   = sponsors.slice(0, 5).map(s=>({...s, _tier:"goud"}));
+  const silverSp = silverSponsors.slice(0, 4).map(s=>({...s, _tier:"zilver"}));
+  const bronzeSp = teamSponsors.slice(0, 1).map(s=>({...s, _tier:"brons"}));
+  // Match post: alleen 5 goud (hoofdsponsoren)
+  const postSponsors = goldSp;
+  // Story + MOTM-story: 5 goud + 4 zilver + 1 brons (zelfde sponsors op beide)
+  const storySponsors = [...goldSp, ...silverSp, ...bronzeSp];
+  const tierColor = (s) => s._tier==="goud"?TIER_GOLD : s._tier==="zilver"?TIER_SILVER : s._tier==="brons"?TIER_BRONZE : null;
 
   // ── Logo Search: eerst Supabase cache, dan find-logo als fallback ──
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
@@ -1005,6 +1013,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
     // Voegt nieuwe teamsponsor toe met de bestandsnaam als startwaarde voor de naam
     const cleanName = f.name.replace(/\.[^/.]+$/, ""); // strip extensie
     setTeamSponsors(prev => [...prev, { name: cleanName, url }]);
+    e.target.value = "";
+  };
+  const handleSilverSponsorLogo = async e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const url = await compressImage(f);
+    const cleanName = f.name.replace(/\.[^/.]+$/, "");
+    setSilverSponsors(prev => prev.length>=4 ? prev : [...prev, { name: cleanName, url }]);
     e.target.value = "";
   };
 
@@ -2476,7 +2492,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                                 <div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>
                                   {postSponsors.map((s,i)=>(
-                                    <div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%"}}>
+                                    <div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:`2px solid ${tierColor(s)||TIER_GOLD}`,boxShadow:`0 0 5px ${(tierColor(s)||TIER_GOLD)}66`}}>
                                       {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:18,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}
                                     </div>
                                   ))}
@@ -2575,7 +2591,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               {igHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={IG_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{igHandle}</span></div>}
                               {fbHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={FB_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{fbHandle}</span></div>}
                             </div>}
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"4%",padding:"2% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:15,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"4%",padding:"2% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:`2.5px solid ${tierColor(s)||"#ccc"}`,boxShadow:`0 0 5px ${(tierColor(s)||"#ccc")}66`}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:15,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -2667,7 +2683,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <div style={{fontSize:(fullTeamName.length>30?"1.5cqw":fullTeamName.length>22?"1.7cqw":"2cqw"),color:`${TAC}88`,letterSpacing:1,fontWeight:700,marginTop:"1.5%",textTransform:"uppercase",textAlign:"center"}}>{fullTeamName}</div>
                               <div style={{fontSize:(((opponent||"Tegenstander").length>20)?"1.7cqw":"2cqw"),color:"rgba(255,255,255,0.3)",marginTop:"1%"}}>{home>away?"Gewonnen":home===away?"Gelijkspel":"Verloren"} · {home}-{away} vs {opponent||"Tegenstander"}</div>
                             </div>
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"5%",padding:"2% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:20,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,background:"#e8e8e8",borderRadius:"5%",padding:"2% 2%",display:"flex",alignItems:"center",justifyContent:"center",border:`2.5px solid ${tierColor(s)||"#ccc"}`,boxShadow:`0 0 5px ${(tierColor(s)||"#ccc")}66`}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:20,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -2895,12 +2911,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       })()}
                     </div>
 
-                    {(sponsors.length>0 || teamSponsors.length>0) && <>
+                    {(sponsors.length>0 || silverSponsors.length>0 || teamSponsors.length>0) && <>
                       <div style={{borderBottom:"1px solid rgba(255,255,255,0.06)",margin:"20px 0"}}/>
                       <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.25)",textTransform:"uppercase",textAlign:"center",marginBottom:10}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                       <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
-                        {[...sponsors, ...teamSponsors.map(s=>({...s,_isTeam:true}))].map((s,i)=>(
-                          <div key={i} style={{background:"#e8e8e8",borderRadius:7,padding:"6px 14px",display:"flex",alignItems:"center",border:s._isTeam?`2px solid ${TAC}`:"none"}}>
+                        {storySponsors.map((s,i)=>(
+                          <div key={i} style={{background:"#e8e8e8",borderRadius:7,padding:"6px 14px",display:"flex",alignItems:"center",border:`2.5px solid ${tierColor(s)||"#ccc"}`,boxShadow:`0 0 5px ${(tierColor(s)||"#ccc")}66`}}>
                             {s.url
                               ? <img src={s.url} style={{height:18,maxWidth:60,objectFit:"contain"}} crossOrigin="anonymous"/>
                               : <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:900,color:"#222"}}>{s.name||"—"}</span>
@@ -3858,13 +3874,13 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
               {clubSection==="sponsoren" && (<>
                 <BackBtn onClick={()=>setClubSection("main")} label="Instellingen" />
                 <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:20,fontWeight:900,color:T.text,marginBottom:8,letterSpacing:0.5}}>🏅 Sponsoren</div>
-                <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:20}}>Sponsoren worden automatisch verwerkt in Instagram posts, afbeeldingen en verslagen. Drie niveaus: hoofdsponsoren (club), teamsponsor (één slot) en MOTM-sponsor (alleen op MOTM-story).</div>
+                <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:20}}>Sponsoren krijgen een gekleurd randje per niveau. 🥇 Goud (hoofdsponsoren, 5) staat overal: post, story én MOTM-story. 🥈 Zilver (4) en 🥉 brons (teamsponsor, 1) staan op beide stories. De MOTM-sponsor blijft een aparte plek bovenaan de MOTM-story.</div>
 
                 {/* ── Sectie kop: HOOFDSPONSOREN (Club-laag) ── */}
                 <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
                   <span style={{fontSize:18}}>🏛️</span>
                   <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.5}}>Hoofdsponsoren</div>
-                  <span style={{fontSize:9,fontWeight:900,color:U,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:hex(U,0.12),border:`1px solid ${hex(U,0.3)}`,borderRadius:6,textTransform:"uppercase"}}>Club</span>
+                  <span style={{fontSize:9,fontWeight:900,color:U,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:hex(U,0.12),border:`1px solid ${hex(U,0.3)}`,borderRadius:6,textTransform:"uppercase"}}>Goud · 5</span>
                 </div>
                 <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55,marginBottom:14}}>Altijd zichtbaar op alle content. Worden later centraal beheerd door de clubbeheerder.</div>
 
@@ -3927,12 +3943,69 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   ))}
                 </div>
 
+                {/* ── ZILVER-SPONSOREN — Zilver-laag, 4 slots, beide stories ── */}
+                <div style={{marginTop:24,paddingTop:20,borderTop:`1px solid ${T.border2}`}}>
+                  <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,flexWrap:"wrap"}}>
+                    <span style={{fontSize:18}}>🥈</span>
+                    <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:T.text,letterSpacing:0.5}}>Zilver-sponsoren</div>
+                    <span style={{fontSize:9,fontWeight:900,color:"#c4c4cc",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:"rgba(196,196,204,0.12)",border:"1px solid rgba(196,196,204,0.4)",borderRadius:6,textTransform:"uppercase"}}>{silverSponsors.length}/4 slots</span>
+                  </div>
+                  <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:16}}>Extra te verkopen aan nieuwe of kleinere sponsoren. Verschijnen op de match-story én de MOTM-story (met een zilveren randje). Maximaal 4.</div>
+
+                  {silverSponsors.length > 0 && (
+                    <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:14}}>
+                      {silverSponsors.map((s,i)=>(
+                        <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:12,padding:"10px 12px"}}>
+                          {s.url ? (
+                            <div style={{background:"#fff",borderRadius:8,padding:"4px 8px",display:"inline-flex",alignItems:"center",flexShrink:0,border:"2px solid #c4c4cc"}}>
+                              <img src={s.url} style={{height:24,maxWidth:64,objectFit:"contain"}} />
+                            </div>
+                          ) : (
+                            <div style={{width:36,height:36,background:"rgba(196,196,204,0.1)",border:"1px dashed rgba(196,196,204,0.4)",borderRadius:8,display:"flex",alignItems:"center",justifyContent:"center",fontSize:14,flexShrink:0}}>🥈</div>
+                          )}
+                          <input
+                            type="text"
+                            value={s.name || ""}
+                            onChange={e=>{
+                              const v = e.target.value;
+                              setSilverSponsors(prev => prev.map((p,j)=>j===i?{...p,name:v}:p));
+                            }}
+                            placeholder="Naam zilver-sponsor"
+                            style={{flex:1,background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:8,padding:"8px 10px",color:T.text,fontFamily:"Barlow,sans-serif",fontSize:13,outline:"none",minWidth:0}}
+                          />
+                          <button onClick={()=>setSilverSponsors(prev=>prev.filter((_,j)=>j!==i))} style={{background:"#ff4444",border:"none",borderRadius:"50%",width:22,height:22,color:"#fff",fontSize:12,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1,flexShrink:0}}>×</button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {silverSponsors.length === 0 && (
+                    <div style={{padding:"16px 14px",background:"rgba(255,255,255,0.02)",border:`1px dashed ${T.border3}`,borderRadius:12,color:T.text4,fontSize:12,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:14,textAlign:"center"}}>
+                      Nog geen zilver-sponsoren · deze slots blijven leeg tot je ze invult
+                    </div>
+                  )}
+
+                  {silverSponsors.length < 4 ? (
+                    <div style={{display:"flex",gap:8}}>
+                      <button onClick={()=>setSilverSponsors(prev=>prev.length>=4?prev:[...prev,{name:"",url:null}])} style={{flex:1,padding:12,background:"rgba(255,255,255,0.04)",border:`1px dashed ${T.border3}`,borderRadius:12,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:0.5}}>
+                        + Naam toevoegen
+                      </button>
+                      <button onClick={()=>silverSponsorRef.current.click()} style={{flex:1,padding:12,background:"rgba(255,255,255,0.04)",border:`1px dashed ${T.border3}`,borderRadius:12,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:700,cursor:"pointer",letterSpacing:0.5}}>
+                        📁 Logo uploaden
+                      </button>
+                    </div>
+                  ) : (
+                    <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",textAlign:"center",padding:"6px 0"}}>Alle 4 zilver-slots zijn gevuld.</div>
+                  )}
+                  <input ref={silverSponsorRef} type="file" accept="image/*" onChange={handleSilverSponsorLogo} style={{display:"none"}} />
+                </div>
+
                 {/* ── TEAMSPONSOREN — Team-laag, 1 wisselend slot ── */}
                 <div style={{marginTop:24,paddingTop:20,borderTop:`1px solid ${T.border2}`}}>
                   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,flexWrap:"wrap"}}>
                     <span style={{fontSize:18}}>👕</span>
                     <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:T.text,letterSpacing:0.5}}>Teamsponsoren</div>
-                    <span style={{fontSize:9,fontWeight:900,color:"#7dd3fc",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:"rgba(125,211,252,0.12)",border:"1px solid rgba(125,211,252,0.3)",borderRadius:6,textTransform:"uppercase"}}>Team · 1 slot</span>
+                    <span style={{fontSize:9,fontWeight:900,color:"#7dd3fc",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:"rgba(125,211,252,0.12)",border:"1px solid rgba(125,211,252,0.3)",borderRadius:6,textTransform:"uppercase"}}>Brons · 1</span>
                   </div>
                   <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:16}}>Sponsoren specifiek voor dit team. Krijgen samen één vast slot op de sponsorbalk — bij meerdere wisselt het slot automatisch door tussen alle teamsponsoren (zelfde tempo als hoofdsponsoren). Als de lijst leeg is, vult een hoofdsponsor het slot op.</div>
 
