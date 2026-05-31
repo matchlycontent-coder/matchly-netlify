@@ -290,11 +290,13 @@ export function SubSheet({ onAdd, onClose, activeSquad, benchSquad, C, liveMinut
   );
 }
 
-export function MomentSheet({ config, liveMinute, squad, C, onClose, onAdd }) {
+export function MomentSheet({ config, liveMinute, squad, C, clubName, onClose, onAdd }) {
   const [min, setMin] = useState(liveMinute > 0 ? String(liveMinute) : "");
   const [player, setPlayer] = useState("");
   const [player2, setPlayer2] = useState("");
+  const [team, setTeam] = useState("wij");
   const [editing, setEditing] = useState(false);
+  const showPlayer = config.teamChoice ? (team === "wij") : config.needsPlayer;
   return (
     <Sheet title={`${config.icon} ${config.label}`} onClose={onClose} accentColor={C}>
       <div style={{display:"flex",flexDirection:"column",gap:14}}>
@@ -308,13 +310,19 @@ export function MomentSheet({ config, liveMinute, squad, C, onClose, onAdd }) {
         {editing && (
           <input type="number" inputMode="numeric" value={min} onChange={e=>setMin(e.target.value.replace(/\D/g,"").slice(0,3))} placeholder="Minuut" style={{width:"100%",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,padding:"10px 12px",color:T.text,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,outline:"none",textAlign:"center"}}/>
         )}
-        {config.needsPlayer && (
+        {config.teamChoice && (
+          <div style={{display:"flex",gap:8}}>
+            <button onClick={()=>setTeam("wij")} style={{flex:1,padding:"11px",borderRadius:10,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,cursor:"pointer",letterSpacing:0.5,border:team==="wij"?"none":`1px solid ${T.border3}`,background:team==="wij"?U:"rgba(255,255,255,0.04)",color:team==="wij"?"#000":T.text3}}>{clubName||"Wij"}</button>
+            <button onClick={()=>setTeam("tegenstander")} style={{flex:1,padding:"11px",borderRadius:10,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,cursor:"pointer",letterSpacing:0.5,border:team==="tegenstander"?"none":`1px solid ${T.border3}`,background:team==="tegenstander"?U:"rgba(255,255,255,0.04)",color:team==="tegenstander"?"#000":T.text3}}>Tegenstander</button>
+          </div>
+        )}
+        {showPlayer && (
           <PlayerSelect value={player} onChange={setPlayer} squad={squad} placeholder={config.needsPlayer2?"Geblesseerde speler":"Speler..."} />
         )}
         {config.needsPlayer2 && (
           <PlayerSelect value={player2} onChange={setPlayer2} squad={squad} placeholder="Wisselspeler erin" />
         )}
-        <button onClick={()=>onAdd({type:config,minute:min,player,player2})} style={{width:"100%",padding:16,background:U,border:"none",borderRadius:16,fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:"#000",cursor:"pointer",textTransform:"uppercase",letterSpacing:1,boxShadow:`0 12px 32px ${hex(U,0.4)}`}}>
+        <button onClick={()=>onAdd({type:config,minute:min,player:showPlayer?player:"",player2,team:config.ownOnly?"wij":team})} style={{width:"100%",padding:16,background:U,border:"none",borderRadius:16,fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:"#000",cursor:"pointer",textTransform:"uppercase",letterSpacing:1,boxShadow:`0 12px 32px ${hex(U,0.4)}`}}>
           ✓ Toevoegen
         </button>
       </div>

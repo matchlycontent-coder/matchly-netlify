@@ -287,7 +287,7 @@ export default function App() {
       club: clubName, team, opponent: opponent || "Onbekend",
       home, away, mKind, loc,
       events: events.map(e=>({type:e.type,half:e.half||null,minute:e.minute||null,extra:!!e.extra,player:e.player||null,assist:e.assist||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null,note:e.note||null})),
-      keyMoments: keyMoments.map(k=>({type:k.type.label,minute:k.minute,player:k.player||null,player2:k.player2||null})),
+      keyMoments: keyMoments.map(k=>({type:k.type.label,team:k.team==="tegenstander"?"tegenstander":(clubName||"eigen ploeg"),minute:k.minute,player:k.player||null,player2:k.player2||null})),
       specialInfo: specialInfo.map(s=>({type:s.type.label,player:s.player||null})),
       motm: motm || null,
       motmRedenen: [...motmRedenen],
@@ -821,7 +821,7 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     }
     const TYPE_NL = { GOAL:"doelpunt eigen ploeg", OWN:"tegendoelpunt (tegenstander scoorde)", YELLOW:"gele kaart", RED:"rode kaart", SUB:"wissel" };
     const evData = events.map(e=>({type:TYPE_NL[e.type]||e.type,team:e.type==="GOAL"?"eigen ploeg":e.type==="OWN"?"tegenstander":(e.isOpponent?"tegenstander":"eigen ploeg"),half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?90:45}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
-    const wedstrijdMomenten = keyMoments.map(m=>`${m.minute}' ${m.type.label}${m.player?` (${m.player}${m.player2?` ⇄ ${m.player2}`:""})`:""}`).join(", ")||null;
+    const wedstrijdMomenten = keyMoments.map(m=>{const tm=m.team==="tegenstander"?"tegenstander":(clubName||"eigen ploeg");return `${m.minute}' ${m.type.label} — ${tm}${m.player?` (${m.player}${m.player2?` ⇄ ${m.player2}`:""})`:""}`;}).join(", ")||null;
     const bijzondereInfo = specialInfo.map(s=>`${s.type.label}${s.player?` (${s.player})`:""}`).join(", ")||null;
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
@@ -875,6 +875,8 @@ REGELS:
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
+- Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
+- Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
@@ -917,6 +919,8 @@ REGELS:
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
+- Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
+- Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
@@ -2013,22 +2017,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:`${hex(U,0.06)}`,border:`1px solid ${hex(U,0.18)}`,borderRadius:12,padding:"10px 14px",marginBottom:8}}>
                   <span style={{fontSize:14}}>{m.type.icon}</span>
                   <span style={{fontSize:12,fontWeight:800,color:U,fontFamily:"'Barlow Condensed',sans-serif",minWidth:30}}>{m.minute}'</span>
-                  <span style={{flex:1,fontSize:13,color:T.text2,fontFamily:"Barlow,sans-serif"}}>{m.type.label}{m.player?` — ${m.player}`:""}{m.player2?` ⇄ ${m.player2}`:""}</span>
+                  <span style={{flex:1,fontSize:13,color:T.text2,fontFamily:"Barlow,sans-serif"}}>{m.type.label}{m.team?` · ${m.team==="tegenstander"?"tegenstander":(clubName||"wij")}`:""}{m.player?` — ${m.player}`:""}{m.player2?` ⇄ ${m.player2}`:""}</span>
                   <button onClick={()=>setKeyMoments(p=>p.filter((_,j)=>j!==i))} style={{background:"none",border:"none",color:T.text4,cursor:"pointer",fontSize:18}}>×</button>
                 </div>
               ))}
               <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:24,marginTop:keyMoments.length?6:0}}>
                 {[
-                  {key:"chance",      icon:"⚡", label:"Grote kans",               needsPlayer:true},
-                  {key:"penalty_miss",icon:"🥅", label:"Penalty gemist",            needsPlayer:true},
-                  {key:"penalty_miss_opp",icon:"😮",label:"Penalty gemist teg.",   needsPlayer:false},
-                  {key:"penalty",     icon:"⚖️", label:"Niet gegeven penalty",     needsPlayer:true},
-                  {key:"penalty_opp", icon:"⚖️", label:"Niet gegeven teg. penalty",needsPlayer:false},
-                  {key:"disallowed",  icon:"❌", label:"Afgekeurde goal",           needsPlayer:true},
-                  {key:"disallowed_opp",icon:"🚩",label:"Afgekeurde goal teg.",    needsPlayer:false},
-                  {key:"bar",         icon:"🏃", label:"Paal/lat",                 needsPlayer:true},
-                  {key:"big_save",    icon:"🧤", label:"Belangrijke redding",      needsPlayer:true},
-                  {key:"injury",      icon:"🩹", label:"Blessure + wissel",        needsPlayer:true, needsPlayer2:true},
+                  {key:"chance",      icon:"⚡", label:"Grote kans",             teamChoice:true},
+                  {key:"penalty_miss",icon:"🥅", label:"Penalty gemist",          teamChoice:true},
+                  {key:"penalty",     icon:"⚖️", label:"Niet gegeven penalty",    teamChoice:true},
+                  {key:"disallowed",  icon:"❌", label:"Afgekeurde goal",         teamChoice:true},
+                  {key:"bar",         icon:"🏃", label:"Paal/lat",               teamChoice:true},
+                  {key:"big_save",    icon:"🧤", label:"Belangrijke redding",     teamChoice:true},
+                  {key:"injury",      icon:"🩹", label:"Blessure + wissel",       ownOnly:true, needsPlayer:true, needsPlayer2:true},
                 ].map(t=>(
                   <button key={t.key} onClick={()=>setAddMoment(t)} style={{padding:"10px 14px",background:hex(U,0.08),border:`1px solid ${hex(U,0.22)}`,borderRadius:11,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:800,cursor:"pointer",letterSpacing:0.5,boxShadow:`0 0 8px ${hex(U,0.1)}`}}>+ {t.icon} {t.label}</button>
                 ))}
@@ -4166,7 +4167,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
       {/* MODALS */}
       {/* WEDSTRIJDMOMENT TOEVOEGEN MODAL */}
       {addMoment && (
-        <MomentSheet config={addMoment} liveMinute={elapsed} squad={activeSquad} C={U} onClose={()=>setAddMoment(null)}
+        <MomentSheet config={addMoment} liveMinute={elapsed} squad={activeSquad} C={U} clubName={clubName} onClose={()=>setAddMoment(null)}
           onAdd={(m)=>{setKeyMoments(p=>[...p,m]);setAddMoment(null);}} />
       )}
       {addSpecial && (
