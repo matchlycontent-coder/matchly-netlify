@@ -868,10 +868,10 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
     const samenvattingSpec = goalCount<=2
-      ? "1 zin, 15-25 woorden. Hou het kort want er gebeurde weinig."
+      ? "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Een complete, lopende samenvatting van de wedstrijd — geen losse flard of afgeknipte zin. Hou het bondig want er gebeurde weinig."
       : goalCount>=5
-        ? "2-3 zinnen, 40-60 woorden. Beschrijf het verloop en de beslissende fase."
-        : "Maximaal 2 zinnen, 25-35 woorden.";
+        ? "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Vat het verloop en de beslissende fase samen in een complete, lopende tekst — nooit langer dan 150 tekens, dus kies de kern."
+        : "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin.";
 
     const sysAdult=`Je schrijft wedstrijdverslagen voor Matchly, een app voor amateurvoetbalclubs.
 SCHRIJFSTIJL: ${stijl}.
@@ -2373,11 +2373,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{clubName}</span>
                           </div>
 
-                          {/* CIJFERS — domineren het midden */}
+                          {/* CIJFERS — domineren het midden, groter dan de logo's */}
                           <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:"1%"}}>
-                            <span style={{fontSize:"42cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
+                            <span style={{fontSize:"46cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
                             <span style={{fontSize:"12cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-4%"}}>-</span>
-                            <span style={{fontSize:"42cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
+                            <span style={{fontSize:"46cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
@@ -2489,8 +2489,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <div style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC}cc`,textTransform:"uppercase",flexShrink:0}}>In het kort</div>
                             {(()=>{
                               const txt=aiOut.samenvatting||aiOut.verslag||"";
-                              const fs=txt.length>250?"2cqw":txt.length>200?"2.3cqw":txt.length>150?"2.5cqw":"2.8cqw";
-                              return <p style={{fontSize:fs,color:"rgba(255,255,255,0.82)",lineHeight:1.5,margin:0,overflow:"hidden"}}>{txt}</p>;
+                              // Schaal afgestemd op max ~150 tekens: blijft groot en leesbaar, vangt uitschieters op
+                              const len=txt.length;
+                              const fsNum=Math.max(1.8,Math.min(2.9,2.9-(len-110)*0.011));
+                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.45,margin:0,overflow:"hidden"}}>{txt}</p>;
                             })()}
                           </div>
                         </div>
@@ -2502,13 +2504,13 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           {igHandle&&(
                             <div style={{flex:1.6,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC,0.08),border:`1px solid ${thex(TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%"}}>
                               <img src={IG_ICON} alt="ig" style={{width:14,height:14,flexShrink:0,borderRadius:3}}/>
-                              <span style={{fontSize:"2.2cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{igHandle}</span>
+                              <span style={{fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{igHandle}</span>
                             </div>
                           )}
                           {fbHandle&&(
                             <div style={{flex:1.6,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC,0.08),border:`1px solid ${thex(TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%"}}>
                               <img src={FB_ICON} alt="fb" style={{width:14,height:14,flexShrink:0,borderRadius:3}}/>
-                              <span style={{fontSize:"2.2cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{fbHandle}</span>
+                              <span style={{fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{fbHandle}</span>
                             </div>
                           )}
                           {nextGame&&(
