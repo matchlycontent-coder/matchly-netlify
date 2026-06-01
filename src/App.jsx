@@ -922,6 +922,7 @@ REGELS:
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
+- Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
 - Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
 - Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
@@ -966,6 +967,7 @@ REGELS:
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
+- Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
 - Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
 - Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
@@ -993,7 +995,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
     if(!instaRef.current) return; setDl(true);
     try {
       const h2c=await loadH2C();
-      const cv=await h2c(instaRef.current,{backgroundColor:T.bg0,scale:3,useCORS:true,logging:false});
+      const dpr=Math.max(window.devicePixelRatio||1,2);
+      const cv=await h2c(instaRef.current,{backgroundColor:T.bg0,scale:dpr*2,useCORS:true,logging:false});
       const w=window.open();
       w.document.write(`<html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;"><p style="color:#555;font-family:sans-serif;font-size:13px;">📱 Houd de afbeelding ingedrukt om op te slaan</p><img src="${cv.toDataURL("image/png")}" style="max-width:92vw;max-height:92vh;border-radius:16px;" /></body></html>`);
     } catch { alert("Mislukt."); }
@@ -2728,7 +2731,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         const h2c=await loadH2C();
                         const el=document.getElementById(`layout-${l.id}`);
                         if(!el) return;
-                        const canvas=await h2c(el,{scale:2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                        const dpr=Math.max(window.devicePixelRatio||1,2);
+                        const canvas=await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
                         const link=document.createElement("a");
                         link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.png`;
                         link.href=canvas.toDataURL("image/png");
@@ -2762,7 +2766,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     const h2c = await loadH2C();
                     const el = document.getElementById(`layout-${id}`);
                     if(!el) return;
-                    const canvas = await h2c(el,{scale:2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                    const dpr = Math.max(window.devicePixelRatio||1,2);
+                    const canvas = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
                     const link = document.createElement("a");
                     link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`;
                     link.href = canvas.toDataURL("image/png");
@@ -2780,7 +2785,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       for (const id of ids) {
                         const el = document.getElementById(`layout-${id}`);
                         if (!el) continue;
-                        const canvas = await h2c(el,{scale:2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                        const dpr = Math.max(window.devicePixelRatio||1,2);
+                        const canvas = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
                         const dataUrl = canvas.toDataURL("image/png");
                         attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`, content: dataUrl.split(",")[1] });
                       }
