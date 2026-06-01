@@ -1,5 +1,5 @@
-export const GOAL_TYPES  = ["Vrije trap","Strafschop","Corner","Omschakeling","Kopbal","Afstandsschot","Intikker","Eigen goal"];
-export const AWAY_TYPES  = ["Corner","Vrije trap","Strafschop","Omschakeling","Kopbal","Afstandsschot","Eigen fout","Eigen goal","Intikker","Steekpass"];
+export const GOAL_TYPES  = ["Vrije trap","Strafschop","Corner","Counter","Kopbal","Afstandsschot","Intikker","Eigen goal"];
+export const AWAY_TYPES  = ["Corner","Vrije trap","Strafschop","Counter","Kopbal","Afstandsschot","Eigen fout","Eigen goal","Intikker","Steekpass"];
 export const RED_REASONS = ["Ernstige overtreding","Overtreding in de 16","Doorgebroken speler","2x geel","Ontoelaatbaar gedrag"];
 export const H1_F1 = ["Sterk begonnen","Slordig","Afwachtend","Meer grip op de wedstrijd","Initiatief kwijt","Onder controle","Gelijk opgaand","Komt beter in de wedstrijd","Ingezakt","Golft op en neer"];
 export const H1_F2 = ["Meer grip op de wedstrijd","Initiatief kwijt","Onder controle","Weinig veranderd","Aandringen","Gelijk opgaand","Beter dan vorig spelbeeld","Komt beter in de wedstrijd","Ingezakt","Golft op en neer"];

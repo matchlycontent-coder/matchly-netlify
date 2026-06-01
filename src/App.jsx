@@ -919,7 +919,7 @@ REGELS:
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
 - Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
 - Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
-- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
+- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling/uitbraak, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
@@ -964,7 +964,7 @@ REGELS:
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
 - Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
 - Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
-- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Penalty" = strafschop, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
+- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling/uitbraak, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk".
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
