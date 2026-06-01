@@ -2373,11 +2373,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{clubName}</span>
                           </div>
 
-                          {/* CIJFERS — domineren het midden, groter dan de logo's */}
+                          {/* CIJFERS — dominant maar in verhouding */}
                           <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:"1%"}}>
-                            <span style={{fontSize:"46cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
-                            <span style={{fontSize:"12cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-4%"}}>-</span>
-                            <span style={{fontSize:"46cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
+                            <span style={{fontSize:"34cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
+                            <span style={{fontSize:"10cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-4%"}}>-</span>
+                            <span style={{fontSize:"34cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
@@ -2485,14 +2485,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           )}
 
                           {/* In het kort */}
-                          <div style={{flex:1,display:"flex",flexDirection:"column",gap:"2%",overflow:"hidden",paddingBottom:"2%"}}>
+                          <div style={{flex:1,display:"flex",flexDirection:"column",gap:"2%",minHeight:0,paddingBottom:"2%"}}>
                             <div style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC}cc`,textTransform:"uppercase",flexShrink:0}}>In het kort</div>
                             {(()=>{
                               const txt=aiOut.samenvatting||aiOut.verslag||"";
-                              // Schaal afgestemd op max ~150 tekens: blijft groot en leesbaar, vangt uitschieters op
+                              // Sterke dynamische schaal: korte tekst groot, lange tekst krimpt fors mee zodat alles past
                               const len=txt.length;
-                              const fsNum=Math.max(1.8,Math.min(2.9,2.9-(len-110)*0.011));
-                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.45,margin:0,overflow:"hidden"}}>{txt}</p>;
+                              const fsNum=Math.max(1.4,Math.min(2.9,2.9-Math.max(0,len-90)*0.0095));
+                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.4,margin:0,flex:1,overflow:"hidden"}}>{txt}</p>;
                             })()}
                           </div>
                         </div>
