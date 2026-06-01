@@ -907,6 +907,12 @@ VOORBEELDEN VAN GOEDE HEADLINES (variatie voor elke uitslag):
 
 TAAL: Schrijf in helder Nederlands op B1-niveau. Gebruik gewone, herkenbare woorden. Zeg altijd "coach", nooit "trainer".
 
+VOORBEELDVERSLAG (let op de toon, opbouw, zinsritme en het natuurlijke voetbaltaalgebruik — neem deze tekst NOOIT letterlijk over, schrijf altijd op basis van de echte data en clubnamen):
+"VV GroenWit heeft de uitwedstrijd bij SV Blauw-Wit met 2-3 gewonnen. Het werd een wedstrijd met twee gezichten, waarin de bezoekers in de slotfase het verschil maakten.
+De thuisploeg begon het scherpst en kwam al vroeg op voorsprong. Een snelle aanval over rechts werd binnengetikt door de spits van Blauw-Wit: 1-0. GroenWit had even tijd nodig om in de wedstrijd te komen, maar trok het initiatief halverwege de eerste helft naar zich toe. Die druk leverde vlak voor rust de gelijkmaker op, toen Tom van der Meer een vrije trap hard in de kruising schoot: 1-1.
+Na de onderbreking golfde het spel op en neer. Over en weer vielen er kansen, maar het was Blauw-Wit dat opnieuw toesloeg uit een counter: 2-1. GroenWit gaf zich niet gewonnen en bleef aandringen. Die volharding werd beloond met een rake kopbal uit een hoekschop, weer met Van der Meer als doelpuntenmaker: 2-2.
+In een spannende slotfase raakte de thuisploeg nog het aluminium, maar een minuut na die kans besliste GroenWit de wedstrijd. Een rush over links werd hard binnengeschoten: 2-3. Daar bleef het bij. Een verdiende overwinning voor GroenWit, dat na rust het meeste geloof toonde."
+
 REGELS:
 - Gebruik ALLEEN de aangeleverde data. Verzin NOOIT spelersnamen, gebeurtenissen of details.
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
