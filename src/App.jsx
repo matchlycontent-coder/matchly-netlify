@@ -3833,6 +3833,22 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     🗑️ Alle data wissen
                   </button>
                 </div>
+
+                {/* ──────────────────────────────────
+                    ACCOUNT
+                ────────────────────────────────── */}
+                <div style={{fontSize:10,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",marginBottom:12,opacity:0.6}}>ACCOUNT</div>
+                <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid ${T.border2}`,borderRadius:14,padding:16,marginBottom:24}}>
+                  {boot?.user?.email && (
+                    <div style={{fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",marginBottom:12}}>Ingelogd als <strong style={{color:T.text2}}>{boot.user.email}</strong></div>
+                  )}
+                  <button
+                    onClick={async()=>{ if(window.confirm("Weet je zeker dat je wilt uitloggen?")){ await supabase.auth.signOut(); window.location.reload(); } }}
+                    style={{width:"100%",padding:"12px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer",letterSpacing:0.5}}
+                  >
+                    ↩ Uitloggen
+                  </button>
+                </div>
               </>)}
 
               {/* ── SPELERSLIJST sub-screen ── */}
