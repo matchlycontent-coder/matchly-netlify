@@ -2828,11 +2828,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       for (const id of ids) {
                         const el = document.getElementById(`layout-${id}`);
                         if (!el) continue;
-                        // Vaste schaal 2 + JPEG: houdt de bijlage klein genoeg voor mobiel.
-                        // (dpr*2 werd op mobiel 6x = veel te zware PNG, waardoor verzenden faalde.)
-                        const canvas = await h2c(el,{scale:2,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
-                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`, content: dataUrl.split(",")[1] });
+                        // Scale 3 + PNG: scherpe logo's en randen, maar begrensd op 3 (niet dpr*2 wat
+                        // op mobiel 6 werd en te zware bestanden gaf). Goede balans kwaliteit/grootte.
+                        const canvas = await h2c(el,{scale:3,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
+                        const dataUrl = canvas.toDataURL("image/png");
+                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`, content: dataUrl.split(",")[1] });
                       }
                       const gls = events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=>formatMinuut(e.minute,e.extra,e.half)+" "+(e.type==="OWN"?(opponent||"Teg."):(e.player||"—"))).join("<br>")||"Geen doelpunten";
                       const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Verslag (voor de website)</h3><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Social media caption</h3><p style="background:#f5f5f7;padding:12px 14px;border-radius:8px;white-space:pre-wrap">${(aiOut.instagram||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
@@ -2856,16 +2856,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           <span style={{fontSize:20}}>📤</span>
                         </div>
                         <div>
-                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.3}}>Stuur naar beheerder</div>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.3}}>Stuur naar social media beheerder</div>
                           <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:1}}>
-                            {hasSome ? `→ ${someName||`+${someCountry}${someNumber}`}` : "Stel beheerder in via Clubinstellingen"}
+                            {hasSome ? `→ ${someName||`+${someCountry}${someNumber}`}` : "In te stellen onder Teaminstellingen → Distributie & communicatie"}
                           </div>
                         </div>
                       </div>
 
                       {/* Stap 1: mail naar beheerder met alle content */}
                       <div>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 1 — Stuur de mail naar de beheerder</div>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 1 — Stuur de mail naar de social media beheerder</div>
                         <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"12px 14px",marginBottom:12}}>
                           <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>In de mail zit:</div>
                           <div style={{display:"flex",flexDirection:"column",gap:6,fontSize:13,color:T.text2,fontFamily:"Barlow,sans-serif"}}>
@@ -2877,7 +2877,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         <button onClick={emailToBeheerder} disabled={mailStatus==="sending"} style={{width:"100%",background:someEmail?(mailStatus==="sending"?"rgba(255,255,255,0.06)":"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)"):"rgba(255,255,255,0.05)",borderRadius:10,padding:"13px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:mailStatus==="sending"?"wait":"pointer",border:someEmail&&mailStatus!=="sending"?"none":"1px solid rgba(255,255,255,0.1)"}}>
                           <span style={{fontSize:16}}>📧</span>
                           <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,color:someEmail&&mailStatus!=="sending"?"#fff":T.text3,letterSpacing:0.5}}>
-                            {mailStatus==="sending"?"Versturen…":someEmail?"Stuur mail naar beheerder":"E-mail instellen"}
+                            {mailStatus==="sending"?"Versturen…":someEmail?"Stuur mail naar social media beheerder":"E-mail instellen"}
                           </span>
                         </button>
                         {mailStatus==="ok" && <div style={{marginTop:8,fontSize:11,color:"#34d399",fontFamily:"Barlow,sans-serif",fontWeight:700}}>✓ Verstuurd naar {someEmail}</div>}
@@ -2902,7 +2902,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                       {/* Stap 2: WhatsApp-melding dat de mail klaarstaat */}
                       <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Laat de beheerder weten dat de mail klaarstaat</div>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Laat de social media beheerder weten dat de mail klaarstaat</div>
                         <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{width:"100%",background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
                           <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
                           <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
@@ -2910,7 +2910,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </span>
                         </button>
                         <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
-                          💬 Een kort WhatsApp-berichtje aan de beheerder dat de content (verslag, caption en afbeeldingen) in de mail klaarstaat.
+                          💬 Een kort WhatsApp-berichtje aan de social media beheerder dat de content (verslag, caption en afbeeldingen) in de mail klaarstaat.
                         </div>
                       </div>
                     </div>
