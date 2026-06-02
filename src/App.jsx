@@ -2828,11 +2828,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       for (const id of ids) {
                         const el = document.getElementById(`layout-${id}`);
                         if (!el) continue;
-                        // Scale 3 + PNG: scherpe logo's en randen, maar begrensd op 3 (niet dpr*2 wat
-                        // op mobiel 6 werd en te zware bestanden gaf). Goede balans kwaliteit/grootte.
-                        const canvas = await h2c(el,{scale:3,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                        const dataUrl = canvas.toDataURL("image/png");
-                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`, content: dataUrl.split(",")[1] });
+                        // Scale 4 + JPEG 0.95: hoge scherpte (logo's en randen) met een klein bestand.
+                        // JPEG op 0.95 oogt als PNG maar is veel lichter, dus ruime marge voor mobiel.
+                        const canvas = await h2c(el,{scale:4,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
+                        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
+                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`, content: dataUrl.split(",")[1] });
                       }
                       const gls = events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=>formatMinuut(e.minute,e.extra,e.half)+" "+(e.type==="OWN"?(opponent||"Teg."):(e.player||"—"))).join("<br>")||"Geen doelpunten";
                       const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Verslag (voor de website)</h3><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Social media caption</h3><p style="background:#f5f5f7;padding:12px 14px;border-radius:8px;white-space:pre-wrap">${(aiOut.instagram||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
