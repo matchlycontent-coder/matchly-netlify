@@ -3032,6 +3032,95 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 </div>
 
 
+                {/* ── SECTION LABEL ── */}
+                <div style={{display:"flex",alignItems:"center",gap:8,margin:"24px 0 10px"}}>
+                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,${thex(TAC,0.4)},transparent)`}}/>
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:3,color:`${TAC}99`,textTransform:"uppercase"}}>WhatsApp Deelbericht</span>
+                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,transparent,${thex(TAC,0.4)})`}}/>
+                </div>
+
+                {/* WhatsApp — v24 stijl */}
+                {(()=>{
+                  const goals=events.filter(e=>e.type==="GOAL"||e.type==="OWN");
+                  let hs=0,as=0;
+                  const goalLines=goals.map(e=>{
+                    if(e.type==="OWN") as++; else hs++;
+                    return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?`${opponent||"Tegenstander"}`:(e.player||"—")}`;
+                  });
+                  const waDatum = matchDate
+                    ? new Date(matchDate).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})
+                    : new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+                  const waLines=[
+                    `🏆 *${clubName} ${home}-${away} ${opponent||"Tegenstander"}*`,
+                    `👕 ${fullTeamName}`,
+                    `📅 ${waDatum}`,
+                    ``,
+                    `"${aiOut.headline}"`,
+                    ``,
+                    aiOut.samenvatting,
+                    ``,
+                    `⚽ *Doelpunten:*`,
+                    ...goalLines,
+                    motm?``:undefined,
+                    motm?`🏆 *Man of the Match: ${motm}*`:undefined,
+                    nextGame?``:undefined,
+                    nextGame?`📅 *Volgende wedstrijd:*`:undefined,
+                    nextGame?nextGame:undefined,
+                    ``,
+                    `📄 Lees het volledige verslag op onze website`,
+                    igHandle?`📸 Volg ons op Instagram: ${igHandle}`:undefined,
+                    fbHandle?`👍 Like ons op Facebook: ${fbHandle}`:undefined,
+                  ].filter(l=>l!==undefined);
+                  const waText=waLines.filter(l=>l!=="").join("\n").replace(/\*/g,"*");
+                  return (
+                    <div style={{background:"#0a0a0a",borderRadius:14,overflow:"hidden",boxShadow:"0 8px 30px rgba(0,0,0,0.6)",fontFamily:"Barlow,sans-serif",marginBottom:24}}>
+                      {/* WhatsApp header */}
+                      <div style={{background:"#1a1a2e",padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
+                        <div style={{width:36,height:36,borderRadius:"50%",background:thex(TAC,0.13),border:`2px solid ${thex(TAC,0.27)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,overflow:"hidden"}}>
+                          {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",background:"#fff"}}/>:<span>⚽</span>}
+                        </div>
+                        <div>
+                          <div style={{fontWeight:700,fontSize:13,color:"#fff"}}>{fullTeamName}</div>
+                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)"}}>WhatsApp Groep</div>
+                        </div>
+                      </div>
+                      {/* Message bubble */}
+                      <div style={{background:"#111827",padding:"16px 12px"}}>
+                        <div style={{background:"#1a1230",borderRadius:"12px 12px 12px 4px",padding:"10px 12px",maxWidth:"88%",borderLeft:"3px solid #a855f7"}}>
+                          {waLines.map((line,i)=>{
+                            const bold=line.startsWith("*")&&line.endsWith("*");
+                            const isInsta=line.startsWith("📸");
+                            const isFb=line.startsWith("👍");
+                            if(isInsta) return (
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:5,marginBottom:0}}>
+                                <img src={IG_ICON} alt="ig" style={{width:14,height:14,borderRadius:3,flexShrink:0}}/>
+                                <span style={{fontSize:12,color:"#cccccc"}}>Volg ons op Instagram: {igHandle}</span>
+                              </div>
+                            );
+                            if(isFb) return (
+                              <div key={i} style={{display:"flex",alignItems:"center",gap:5,marginBottom:0}}>
+                                <img src={FB_ICON} alt="fb" style={{width:14,height:14,borderRadius:3,flexShrink:0}}/>
+                                <span style={{fontSize:12,color:"#cccccc"}}>Like ons op Facebook: {fbHandle}</span>
+                              </div>
+                            );
+                            return <div key={i} style={{fontSize:12,lineHeight:1.65,color:bold?"#fff":"#cccccc",fontWeight:bold?700:400,marginBottom:line===""?5:0}}>{line.replace(/\*/g,"")||"\u00A0"}</div>;
+                          })}
+                          <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",textAlign:"right",marginTop:6}}>{new Date().toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})} ✓✓</div>
+                        </div>
+                        <div style={{display:"flex",gap:8,marginTop:14}}>
+                          <button onClick={()=>cp(waText,"wa")} style={{flex:1,padding:"10px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:"rgba(255,255,255,0.7)",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5}}>
+                            {copied==="wa"?"✓ Gekopieerd":"📋 Kopiëren"}
+                          </button>
+                          <button onClick={()=>{window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`,"_blank");}} style={{flex:1.5,background:`linear-gradient(90deg,${TAC},${TAC2})`,borderRadius:10,padding:"10px 16px",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",border:"none"}}>
+                            <span style={{fontSize:14}}>📤</span>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:900,color:"#fff",letterSpacing:1,textTransform:"uppercase"}}>Deel via WhatsApp</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 {/* ══════════════════════════════════════════
                     HANDOVER NAAR SOCIAL MEDIA-BEHEERDER
                     Bundelt alle content (caption, MOTM, samenvatting)
