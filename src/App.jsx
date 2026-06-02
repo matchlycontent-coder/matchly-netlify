@@ -961,6 +961,7 @@ REGELS:
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk". Verwijs er later ook NOOIT naar terug als "die paal" of "de lat"; een bal op het aluminium is een gemiste kans, dus refereer er aan als "die kans" of "die mogelijkheid" (bijv. "een minuut na die kans viel de 3-1").
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
+- Schrijf nooit "een raket" voor een hard schot of doelpunt — dat is geen natuurlijk Nederlands. Gebruik in plaats daarvan "een knal", "een pegel", "een rotschot", "een schitterend doelpunt" of "van afstand raak". Varieer met deze termen.
 - Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
 - Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
@@ -1007,6 +1008,7 @@ REGELS:
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk". Verwijs er later ook NOOIT naar terug als "die paal" of "de lat"; een bal op het aluminium is een gemiste kans, dus refereer er aan als "die kans" of "die mogelijkheid" (bijv. "een minuut na die kans viel de 3-1").
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
+- Schrijf nooit "een raket" voor een hard schot of doelpunt — dat is geen natuurlijk Nederlands. Gebruik in plaats daarvan "een knal", "een pegel", "een rotschot", "een schitterend doelpunt" of "van afstand raak". Varieer met deze termen.
 - Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
 - Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
