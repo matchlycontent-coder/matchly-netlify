@@ -297,6 +297,7 @@ export default function App({ boot }) {
     setScreen(target);
   };
   const [clubSection,setClubSection] = useState("main"); // "main" | "spelerslijst" | "sponsoren" | "distributie"
+  const [showGuide,setShowGuide] = useState(false); // handleiding-overlay
   const [settingsTab,setSettingsTab] = useState("club"); // "club" | "team"
   const [hasStarted,setHasStarted] = useState(false);
   const [showBasis,setShowBasis] = useState(false); // punt 11: basisopstelling-chips tonen/verbergen
@@ -461,8 +462,12 @@ export default function App({ boot }) {
     : "";
 
   // ── Computed ──
-  const isHeren1 = team === "Heren 1";
-  // Bij Heren 1 gewoon de clubnaam, anders clubnaam + teamnaam
+  // Herken het eerste elftal soepel (Heren 1, heren 1, 1e, eerste, 1) → dan gewoon de clubnaam
+  const isHeren1 = (()=>{
+    const t = (team||"").trim().toLowerCase();
+    return t === "heren 1" || t === "heren1" || t === "1e" || t === "eerste" || t === "1" || t === "het eerste";
+  })();
+  // Bij het eerste gewoon de clubnaam, anders clubnaam + teamnaam
   const teamLabel = isHeren1 ? "" : team;
   const fullTeamName = teamLabel ? `${clubName} ${teamLabel}` : clubName;
 
@@ -779,10 +784,10 @@ export default function App({ boot }) {
     setNextMatchMsg("");
     try {
       const today = new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
-      const fullTeam = `${clubName} ${isHeren1?team:team}`.trim();
+      const fullTeam = isHeren1 ? clubName : `${clubName} ${team}`.trim();
       const compInfo = hvCompUrl
         ? `De competitie staat op deze HollandsVelden URL: ${hvCompUrl}`
-        : `Zoek op voetbal.nl of de KNVB competitiepagina voor ${clubName} ${team}.`;
+        : `Zoek op voetbal.nl of de KNVB competitiepagina voor ${isHeren1?clubName:`${clubName} ${team}`}.`;
 
       const vraag = `Zoek de eerstvolgende geplande wedstrijd voor "${fullTeam}" — inclusief vandaag (${today}) of later.
 
@@ -946,6 +951,7 @@ In een spannende slotfase raakte de thuisploeg nog het aluminium, maar een minuu
 
 REGELS:
 - Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd — geen verzonnen kansen, blessures, weersomstandigheden of sfeerbeelden tenzij die letterlijk zijn aangeleverd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
+- Noem de eigen ploeg precies zoals aangeleverd in het "club"-veld. Voeg er NOOIT zelf een teamaanduiding zoals "Heren 1", "het eerste" of een elftalnummer aan toe als dat niet in de aangeleverde naam staat. Staat er "Kethel Spaland", schrijf dan "Kethel Spaland", niet "Kethel Spaland Heren 1".
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
 - Verwerk het spelbeeld chronologisch per fase in het verslag.
 - Vermijd clichés als "spannend duel", "de jongens", "goed gestreden", "beide ploegen", "belangrijke punten", "onder toeziend oog van", "knappe prestatie", "uitstekend werk".
@@ -962,6 +968,8 @@ REGELS:
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
 - Schrijf nooit "een raket" voor een hard schot of doelpunt — dat is geen natuurlijk Nederlands. Gebruik in plaats daarvan "een knal", "een pegel", "een rotschot", "een schitterend doelpunt" of "van afstand raak". Varieer met deze termen.
+- Gebruik nooit gekunstelde duidingen als "een lichte verstoring", "een kleine domper" of vergelijkbaar bij een kaart of moment. Blijf feitelijk: meld gewoon dat de speler geel/rood pakte, zonder geforceerde interpretatie.
+- Let op thuis of uit (zie het "locatie"-veld). Bij een THUISwedstrijd hou je "de punten thuis" of "houdt de ploeg de drie punten in eigen huis" — schrijf dan NOOIT dat de ploeg "de zege naar huis brengt" of "de punten meeneemt". Bij een UITwedstrijd "neemt de ploeg de punten mee" of "neemt de drie punten mee naar huis". Kies de juiste uitdrukking op basis van thuis/uit.
 - Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
 - Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
@@ -992,6 +1000,7 @@ TAAL: heel eenvoudige, toegankelijke woorden. Korte zinnen. Geen moeilijke terme
 
 REGELS:
 - Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
+- Noem de eigen ploeg precies zoals aangeleverd in het "club"-veld. Voeg er NOOIT zelf een teamaanduiding zoals "Heren 1", "het eerste" of een elftalnummer aan toe als dat niet in de aangeleverde naam staat.
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
 - Schrijf korte zinnen (gemiddeld 6–12 woorden). Een enkele langere zin mag, maar wees zuinig.
 - Beschrijf wat er gebeurde in begrijpelijke taal. Geen tactiek, geen analyse, geen technische bespiegelingen.
@@ -1009,6 +1018,8 @@ REGELS:
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
 - Schrijf nooit "een raket" voor een hard schot of doelpunt — dat is geen natuurlijk Nederlands. Gebruik in plaats daarvan "een knal", "een pegel", "een rotschot", "een schitterend doelpunt" of "van afstand raak". Varieer met deze termen.
+- Gebruik nooit gekunstelde duidingen als "een lichte verstoring", "een kleine domper" of vergelijkbaar bij een kaart of moment. Blijf feitelijk: meld gewoon dat de speler geel/rood pakte, zonder geforceerde interpretatie.
+- Let op thuis of uit (zie het "locatie"-veld). Bij een THUISwedstrijd hou je "de punten thuis" of "houdt de ploeg de drie punten in eigen huis" — schrijf dan NOOIT dat de ploeg "de zege naar huis brengt" of "de punten meeneemt". Bij een UITwedstrijd "neemt de ploeg de punten mee" of "neemt de drie punten mee naar huis". Kies de juiste uitdrukking op basis van thuis/uit.
 - Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
 - Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
@@ -1698,6 +1709,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,maxWidth:280,margin:"0 auto 14px"}}>
                         {teamId ? "Wedstrijd staat klaar — voer de tegenstander in en start." : <>Begin met instellen via <span style={{color:U,fontWeight:700}}>⚙️ Club-instellingen</span> rechtsboven.</>}
                       </div>
+                      <button onClick={()=>setShowGuide(true)} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"9px 16px",background:hex(U,0.12),border:`1px solid ${hex(U,0.3)}`,borderRadius:100,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,letterSpacing:0.5,cursor:"pointer",textTransform:"uppercase"}}>
+                        <span style={{fontSize:15}}>📖</span> Hoe werkt het?
+                      </button>
                     </div>
                   )}
 
@@ -4163,6 +4177,19 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
               </div>
               <button onClick={()=>setShowTeamIdInfo(false)} style={{width:"100%",marginTop:20,padding:"13px",background:hex(U,0.15),border:`1px solid ${hex(U,0.3)}`,borderRadius:14,color:U,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,letterSpacing:0.5}}>Begrepen</button>
             </div>
+          </div>
+        </div>
+      )}
+      {showGuide && (
+        <div onClick={()=>setShowGuide(false)} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(4px)",display:"flex",flexDirection:"column",animation:"splashFadeIn 0.2s ease"}}>
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",flexShrink:0}}>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:"#fff",letterSpacing:0.5,display:"flex",alignItems:"center",gap:8}}>
+              <span style={{fontSize:18}}>📖</span> Hoe werkt Matchly?
+            </div>
+            <button onClick={()=>setShowGuide(false)} style={{width:38,height:38,borderRadius:"50%",background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
+          </div>
+          <div onClick={(e)=>e.stopPropagation()} style={{flex:1,margin:"0 12px 12px",borderRadius:16,overflow:"hidden",background:"#050208",border:"1px solid rgba(255,255,255,0.12)"}}>
+            <iframe src="/handleiding.html" title="Handleiding" style={{width:"100%",height:"100%",border:"none",display:"block"}} />
           </div>
         </div>
       )}
