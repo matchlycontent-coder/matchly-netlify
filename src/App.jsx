@@ -2824,10 +2824,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       for (const id of ids) {
                         const el = document.getElementById(`layout-${id}`);
                         if (!el) continue;
-                        const dpr = Math.max(window.devicePixelRatio||1,2);
-                        const canvas = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
-                        const dataUrl = canvas.toDataURL("image/png");
-                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`, content: dataUrl.split(",")[1] });
+                        // Vaste schaal 2 + JPEG: houdt de bijlage klein genoeg voor mobiel.
+                        // (dpr*2 werd op mobiel 6x = veel te zware PNG, waardoor verzenden faalde.)
+                        const canvas = await h2c(el,{scale:2,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
+                        const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
+                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`, content: dataUrl.split(",")[1] });
                       }
                       const gls = events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=>formatMinuut(e.minute,e.extra,e.half)+" "+(e.type==="OWN"?(opponent||"Teg."):(e.player||"—"))).join("<br>")||"Geen doelpunten";
                       const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
