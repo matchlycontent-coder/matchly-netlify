@@ -945,7 +945,7 @@ Na de onderbreking golfde het spel op en neer. Over en weer vielen er kansen, ma
 In een spannende slotfase raakte de thuisploeg nog het aluminium, maar een minuut na die kans besliste GroenWit de wedstrijd. Een rush over links werd hard binnengeschoten: 2-3. Daar bleef het bij. Een verdiende overwinning voor GroenWit, dat na rust het meeste geloof toonde."
 
 REGELS:
-- Gebruik ALLEEN de aangeleverde data. Verzin NOOIT spelersnamen, gebeurtenissen of details.
+- Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd — geen verzonnen kansen, blessures, weersomstandigheden of sfeerbeelden tenzij die letterlijk zijn aangeleverd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
 - Verwerk het spelbeeld chronologisch per fase in het verslag.
 - Vermijd clichés als "spannend duel", "de jongens", "goed gestreden", "beide ploegen", "belangrijke punten", "onder toeziend oog van", "knappe prestatie", "uitstekend werk".
@@ -956,7 +956,8 @@ REGELS:
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
 - Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
 - Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
-- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling/uitbraak, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
+- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
+- Varieer bij het beschrijven van een "Counter" met natuurlijke synoniemen voor meer dynamiek: "counter", "omschakelmoment", "snelle uitval", "snelle omschakeling", "tegenaanval" of "uitbraak". Gebruik niet steeds hetzelfde woord; kies wat in de zin het beste past.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk". Verwijs er later ook NOOIT naar terug als "die paal" of "de lat"; een bal op het aluminium is een gemiste kans, dus refereer er aan als "die kans" of "die mogelijkheid" (bijv. "een minuut na die kans viel de 3-1").
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
@@ -989,7 +990,7 @@ VOORBEELDEN VAN GOEDE HEADLINES:
 TAAL: heel eenvoudige, toegankelijke woorden. Korte zinnen. Geen moeilijke termen. Zeg "coach", niet "trainer". Gebruik natuurlijke jeugdvoetbalwoorden: spelertjes, team, jongens en meiden, het elftal, wedstrijd, inzet, plezier.
 
 REGELS:
-- Gebruik ALLEEN de aangeleverde data. Verzin NOOIT spelersnamen, gebeurtenissen of details.
+- Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
 - Schrijf korte zinnen (gemiddeld 6–12 woorden). Een enkele langere zin mag, maar wees zuinig.
 - Beschrijf wat er gebeurde in begrijpelijke taal. Geen tactiek, geen analyse, geen technische bespiegelingen.
@@ -1002,6 +1003,7 @@ REGELS:
 - Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
 - Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling/uitbraak, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
+- Varieer bij een "Counter" met eenvoudige synoniemen: "snelle uitval", "omschakeling" of "tegenaanval". Gebruik niet steeds hetzelfde woord.
 - Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk". Verwijs er later ook NOOIT naar terug als "die paal" of "de lat"; een bal op het aluminium is een gemiste kans, dus refereer er aan als "die kans" of "die mogelijkheid" (bijv. "een minuut na die kans viel de 3-1").
 - Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
 - Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
@@ -2831,7 +2833,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`, content: dataUrl.split(",")[1] });
                       }
                       const gls = events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=>formatMinuut(e.minute,e.extra,e.half)+" "+(e.type==="OWN"?(opponent||"Teg."):(e.player||"—"))).join("<br>")||"Geen doelpunten";
-                      const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
+                      const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Verslag (voor de website)</h3><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Social media caption</h3><p style="background:#f5f5f7;padding:12px 14px;border-radius:8px;white-space:pre-wrap">${(aiOut.instagram||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
                       const subject = `Wedstrijdverslag: ${clubName} ${home}-${away} ${opponent||"Tegenstander"}`;
                       const res = await fetch("/.netlify/functions/send-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:someEmail,subject,html,attachments})});
                       const d = await res.json().catch(()=>({}));
@@ -3027,90 +3029,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </div>
                 </div>
 
-                {/* ── SECTION LABEL ── */}
-                <div style={{display:"flex",alignItems:"center",gap:8,margin:"24px 0 10px"}}>
-                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,${thex(TAC,0.4)},transparent)`}}/>
-                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:3,color:`${TAC}99`,textTransform:"uppercase"}}>WhatsApp Deelbericht</span>
-                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,transparent,${thex(TAC,0.4)})`}}/>
-                </div>
-
-                {/* WhatsApp — v24 stijl */}
-                {(()=>{
-                  const goals=events.filter(e=>e.type==="GOAL"||e.type==="OWN");
-                  let hs=0,as=0;
-                  const goalLines=goals.map(e=>{
-                    if(e.type==="OWN") as++; else hs++;
-                    return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?`${opponent||"Tegenstander"}`:(e.player||"—")}`;
-                  });
-                  const waLines=[
-                    `🏆 *${clubName} ${home}-${away} ${opponent||"Tegenstander"}*`,
-                    `📅 ${fullTeamName}`,
-                    ``,
-                    `"${aiOut.headline}"`,
-                    ``,
-                    aiOut.samenvatting,
-                    ``,
-                    `⚽ *Doelpunten:*`,
-                    ...goalLines,
-                    motm?``:undefined,
-                    motm?`🏆 *Man of the Match: ${motm}*`:undefined,
-                    nextGame?``:undefined,
-                    nextGame?`📅 *Volgende wedstrijd:*`:undefined,
-                    nextGame?nextGame:undefined,
-                    ``,
-                    `📄 Lees het volledige verslag op onze website`,
-                    igHandle?`📸 Volg ons op Instagram: ${igHandle}`:undefined,
-                    fbHandle?`👍 Like ons op Facebook: ${fbHandle}`:undefined,
-                  ].filter(l=>l!==undefined);
-                  const waText=waLines.filter(l=>l!=="").join("\n").replace(/\*/g,"*");
-                  return (
-                    <div style={{background:"#0a0a0a",borderRadius:14,overflow:"hidden",boxShadow:"0 8px 30px rgba(0,0,0,0.6)",fontFamily:"Barlow,sans-serif",marginBottom:24}}>
-                      {/* WhatsApp header */}
-                      <div style={{background:"#1a1a2e",padding:"12px 16px",display:"flex",alignItems:"center",gap:10}}>
-                        <div style={{width:36,height:36,borderRadius:"50%",background:thex(TAC,0.13),border:`2px solid ${thex(TAC,0.27)}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:16,overflow:"hidden"}}>
-                          {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",background:"#fff"}}/>:<span>⚽</span>}
-                        </div>
-                        <div>
-                          <div style={{fontWeight:700,fontSize:13,color:"#fff"}}>{fullTeamName}</div>
-                          <div style={{fontSize:10,color:"rgba(255,255,255,0.3)"}}>WhatsApp Groep</div>
-                        </div>
-                      </div>
-                      {/* Message bubble */}
-                      <div style={{background:"#111827",padding:"16px 12px"}}>
-                        <div style={{background:"#1a1230",borderRadius:"12px 12px 12px 4px",padding:"10px 12px",maxWidth:"88%",borderLeft:"3px solid #a855f7"}}>
-                          {waLines.map((line,i)=>{
-                            const bold=line.startsWith("*")&&line.endsWith("*");
-                            const isInsta=line.startsWith("📸");
-                            const isFb=line.startsWith("👍");
-                            if(isInsta) return (
-                              <div key={i} style={{display:"flex",alignItems:"center",gap:5,marginBottom:0}}>
-                                <img src={IG_ICON} alt="ig" style={{width:14,height:14,borderRadius:3,flexShrink:0}}/>
-                                <span style={{fontSize:12,color:"#cccccc"}}>Volg ons op Instagram: {igHandle}</span>
-                              </div>
-                            );
-                            if(isFb) return (
-                              <div key={i} style={{display:"flex",alignItems:"center",gap:5,marginBottom:0}}>
-                                <img src={FB_ICON} alt="fb" style={{width:14,height:14,borderRadius:3,flexShrink:0}}/>
-                                <span style={{fontSize:12,color:"#cccccc"}}>Like ons op Facebook: {fbHandle}</span>
-                              </div>
-                            );
-                            return <div key={i} style={{fontSize:12,lineHeight:1.65,color:bold?"#fff":"#cccccc",fontWeight:bold?700:400,marginBottom:line===""?5:0}}>{line.replace(/\*/g,"")||"\u00A0"}</div>;
-                          })}
-                          <div style={{fontSize:9,color:"rgba(255,255,255,0.25)",textAlign:"right",marginTop:6}}>{new Date().toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})} ✓✓</div>
-                        </div>
-                        <div style={{display:"flex",gap:8,marginTop:14}}>
-                          <button onClick={()=>cp(waText,"wa")} style={{flex:1,padding:"10px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:"rgba(255,255,255,0.7)",fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5}}>
-                            {copied==="wa"?"✓ Gekopieerd":"📋 Kopiëren"}
-                          </button>
-                          <button onClick={()=>{window.open(`https://wa.me/?text=${encodeURIComponent(waText)}`,"_blank");}} style={{flex:1.5,background:`linear-gradient(90deg,${TAC},${TAC2})`,borderRadius:10,padding:"10px 16px",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",border:"none"}}>
-                            <span style={{fontSize:14}}>📤</span>
-                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:900,color:"#fff",letterSpacing:1,textTransform:"uppercase"}}>Deel via WhatsApp</span>
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })()}
 
                 {/* ══════════════════════════════════════════
                     HANDOVER NAAR SOCIAL MEDIA-BEHEERDER
