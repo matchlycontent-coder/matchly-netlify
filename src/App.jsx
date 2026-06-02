@@ -1684,8 +1684,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   <img src={MATCHLY_LOGO} alt="Matchly" style={{height:32,width:"auto",display:"block",objectFit:"contain"}}/>
                 </div>
             }
-            <button onClick={()=>{setScreen(screen==="club"?"dashboard":"club");}} style={{width:38,height:38,background:screen==="club"?hex(U,0.15):"rgba(255,255,255,0.05)",border:`1px solid ${screen==="club"?hex(U,0.4):T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:17,transition:"all 0.18s",boxShadow:screen==="club"?`0 0 12px ${hex(U,0.25)}`:"none"}}>⚙️</button>
-          </div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <button onClick={()=>setShowGuide(true)} title="Hoe werkt het?" style={{width:38,height:38,background:"rgba(255,255,255,0.05)",border:`1px solid ${T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:16}}>📖</button>
+              <button onClick={()=>{setScreen(screen==="club"?"dashboard":"club");}} style={{width:38,height:38,background:screen==="club"?hex(U,0.15):"rgba(255,255,255,0.05)",border:`1px solid ${screen==="club"?hex(U,0.4):T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:17,transition:"all 0.18s",boxShadow:screen==="club"?`0 0 12px ${hex(U,0.25)}`:"none"}}>⚙️</button>
+            </div>
 
           {/* CONTENT */}
           <div ref={scrollRef} style={{flex:1,overflowY:"auto",padding:"20px 20px 40px",animation:"slideUp 0.22s ease"}}>
