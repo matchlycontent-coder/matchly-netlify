@@ -100,6 +100,7 @@ export default function App({ boot }) {
   const [newP,setNewP]           = useState("");
   // Refs
   const csvRef     = useRef(null);
+  const viaPasRef  = useRef(false);
   const logoRef    = useRef(null);
   const sponsorRef = useRef(null);
   const sponsorScanRef = useRef(null);
@@ -928,17 +929,19 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     setLoading(true); setAiErr(null); setAiOut(null);
 
     // ── Wedstrijdpas-check: mag deze club content maken? ──
-    // (Abonnement/trial actief OF betaalde wedstrijdpas. In de testfase
-    //  geeft dit altijd TRUE via de trial, dus de knop blijft onzichtbaar.
+    // mag_content_maken geeft 'abonnement', 'pas' of 'geen' terug.
+    // (In de testfase geeft dit 'abonnement' via de trial, dus de knop blijft onzichtbaar.
     //  Bij een fout/geen verbinding gaan we gewoon door — nooit onterecht blokkeren.)
     const _clubId = boot?.profile?.club_id;
+    viaPasRef.current = false;
     if (_clubId) {
       try {
-        const { data: magMaken } = await supabase.rpc('mag_content_maken', { p_club_id: _clubId });
-        if (magMaken === false) {
+        const { data: reden } = await supabase.rpc('mag_content_maken', { p_club_id: _clubId });
+        if (reden === 'geen') {
           setLoading(false); setAiOut(null); setGeenToegang(true);
           return;
         }
+        if (reden === 'pas') viaPasRef.current = true;  // pas verbruiken na geslaagde generatie
       } catch (e) { /* bij twijfel doorgaan */ }
     }
     setGeenToegang(false);
@@ -1090,6 +1093,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
       setAiOut(parsed);
       setLocked(true);
       archiveMatch(parsed);
+      // Kwam de toegang van een wedstrijdpas? Stempel die nu af (eenmalig gebruik).
+      if (viaPasRef.current) {
+        const _cid = boot?.profile?.club_id;
+        if (_cid) { try { await supabase.rpc('verbruik_wedstrijdpas', { p_club_id: _cid, p_wedstrijd_id: null }); } catch (e) {} }
+        viaPasRef.current = false;
+      }
     } catch { setAiErr("Mislukt. Controleer de data en probeer opnieuw."); }
     setLoading(false);
   };
