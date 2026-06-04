@@ -157,11 +157,11 @@ export function ConfirmSheet({ message, onConfirm, onCancel }) {
   );
 }
 
-export function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused }) {
+export function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused, edit }) {
   const isOwn = type==="OWN";
   const c = isOwn ? T.red : C;
-  const [half,setHalf]=useState(""); const [min,setMin]=useState(""); const [xt,setXt]=useState(false);
-  const [player,setPlayer]=useState(""); const [assist,setAssist]=useState(""); const [gtype,setGtype]=useState("");
+  const [half,setHalf]=useState(edit?.half||""); const [min,setMin]=useState(edit?.minute||""); const [xt,setXt]=useState(!!edit?.extra);
+  const [player,setPlayer]=useState(edit?.player||""); const [assist,setAssist]=useState(edit?.assist||""); const [gtype,setGtype]=useState(edit?.goalType||"");
   return (
     <Sheet title={isOwn?"⚽ Tegendoelpunt":"⚽ Doelpunt"} onClose={onClose} accentColor={c}>
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
@@ -178,7 +178,7 @@ export function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused }
         <button onClick={()=>{
           const fHalf = half || (liveMinute>45?"2":"1");
           const fMin = min || (liveMinute>0?String(liveMinute):"");
-          onAdd({id:Date.now(),type,half:fHalf,minute:fMin,extra:xt,player,assist,goalType:gtype});onClose();
+          onAdd({id:edit?.id||Date.now(),type,half:fHalf,minute:fMin,extra:xt,player,assist,goalType:gtype});onClose();
         }} style={{width:"100%",padding:18,background:isOwn?T.red:C,border:"none",borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:isOwn?"#fff":"#000",cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginTop:4,boxShadow:`0 12px 32px ${hex(c,0.4)}`}}>
           ✓ Registreren
         </button>
@@ -187,13 +187,13 @@ export function GoalSheet({ type, onAdd, onClose, squad, C, liveMinute, paused }
   );
 }
 
-export function CardSheet({ type, onAdd, onClose, squad, liveMinute, paused, opponent, openMoment, defaultOpponent }) {
+export function CardSheet({ type, onAdd, onClose, squad, liveMinute, paused, opponent, openMoment, defaultOpponent, edit }) {
   const isRed = type==="RED";
   const c = isRed ? T.red : T.yellow;
-  const [half,setHalf]=useState(""); const [min,setMin]=useState(""); const [xt,setXt]=useState(false);
-  const [player,setPlayer]=useState("");
-  const [reason,setReason]=useState("");
-  const [isOpponent,setIsOpponent]=useState(defaultOpponent||false);
+  const [half,setHalf]=useState(edit?.half||""); const [min,setMin]=useState(edit?.minute||""); const [xt,setXt]=useState(!!edit?.extra);
+  const [player,setPlayer]=useState(edit?.isOpponent?"":(edit?.player||""));
+  const [reason,setReason]=useState(edit?.reason||"");
+  const [isOpponent,setIsOpponent]=useState(edit?edit.isOpponent:(defaultOpponent||false));
   const canSubmit = isRed ? (!!reason && (isOpponent || !!player)) : (isOpponent || !!player);
   const showPenaltyHint = isRed && reason==="Overtreding in de 16";
   return (
@@ -247,7 +247,7 @@ export function CardSheet({ type, onAdd, onClose, squad, liveMinute, paused, opp
             const fHalf = half || (liveMinute>45?"2":"1");
             const fMin = min || (liveMinute>0?String(liveMinute):"");
             const finalPlayer = isOpponent ? (opponent||"Tegenstander") : player;
-            onAdd({id:Date.now(),type,half:fHalf,minute:fMin,extra:xt,player:finalPlayer,reason:isRed?reason:undefined,isOpponent});
+            onAdd({id:edit?.id||Date.now(),type,half:fHalf,minute:fMin,extra:xt,player:finalPlayer,reason:isRed?reason:undefined,isOpponent});
             onClose();
           }}
           style={{width:"100%",padding:18,background:canSubmit?c:"rgba(255,255,255,0.04)",border:`1px solid ${canSubmit?"transparent":T.border3}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:900,letterSpacing:1,color:canSubmit?"#000":T.text4,cursor:canSubmit?"pointer":"not-allowed"}}
@@ -260,9 +260,9 @@ export function CardSheet({ type, onAdd, onClose, squad, liveMinute, paused, opp
 }
 
 
-export function SubSheet({ onAdd, onClose, activeSquad, benchSquad, C, liveMinute, paused }) {
-  const [half,setHalf]=useState(""); const [min,setMin]=useState(""); const [xt,setXt]=useState(false);
-  const [out,setOut]=useState(""); const [inn,setInn]=useState("");
+export function SubSheet({ onAdd, onClose, activeSquad, benchSquad, C, liveMinute, paused, edit }) {
+  const [half,setHalf]=useState(edit?.half||""); const [min,setMin]=useState(edit?.minute||""); const [xt,setXt]=useState(!!edit?.extra);
+  const [out,setOut]=useState(edit?.playerOut||""); const [inn,setInn]=useState(edit?.playerIn||"");
   return (
     <Sheet title="🔄 Wissel" onClose={onClose} accentColor={C}>
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
@@ -281,7 +281,7 @@ export function SubSheet({ onAdd, onClose, activeSquad, benchSquad, C, liveMinut
         <button onClick={()=>{
           const fHalf = half || (liveMinute>45?"2":"1");
           const fMin = min || (liveMinute>0?String(liveMinute):"");
-          onAdd({id:Date.now(),type:"SUB",half:fHalf,minute:fMin,extra:xt,playerOut:out,playerIn:inn});onClose();
+          onAdd({id:edit?.id||Date.now(),type:"SUB",half:fHalf,minute:fMin,extra:xt,playerOut:out,playerIn:inn});onClose();
         }} style={{width:"100%",padding:18,background:U,border:"none",borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:"#000",cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginTop:4,boxShadow:`0 12px 32px ${hex(U,0.4)}`}}>
           ✓ Wissel registreren
         </button>
@@ -418,7 +418,8 @@ export function formatMinuut(minute, extra, half) {
   return `${base}+${m}'`;
 }
 
-export function TimelineRow({ e, onDelete, live, C }) {
+export function TimelineRow({ e, onDelete, onEdit, live, canEdit, C }) {
+  const mag = canEdit !== undefined ? canEdit : live;
   const cfgs = {
     GOAL:{icon:"⚽",color:U,label:"Doelpunt"},
     OWN:{icon:"⚽",color:T.red,label:"Tegendoelpunt"},
@@ -453,7 +454,12 @@ export function TimelineRow({ e, onDelete, live, C }) {
           {e.half && <span style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif"}}>• {e.half}e helft</span>}
         </div>
       </div>
-      {live && <button onClick={()=>onDelete(e.id)} style={{background:"none",border:"none",color:T.text4,cursor:"pointer",fontSize:20,padding:"4px 8px",flexShrink:0,lineHeight:1,transition:"color 0.15s"}}>×</button>}
+      {mag && (
+        <div style={{display:"flex",alignItems:"center",gap:2,flexShrink:0}}>
+          {onEdit && <button onClick={()=>onEdit(e)} style={{background:"none",border:"none",color:T.text4,cursor:"pointer",fontSize:15,padding:"4px 6px",lineHeight:1,transition:"color 0.15s"}}>✏️</button>}
+          <button onClick={()=>onDelete(e.id)} style={{background:"none",border:"none",color:T.text4,cursor:"pointer",fontSize:20,padding:"4px 8px",lineHeight:1,transition:"color 0.15s"}}>×</button>
+        </div>
+      )}
     </div>
   );
 }

@@ -302,6 +302,7 @@ export default function App({ boot }) {
   const [hasStarted,setHasStarted] = useState(false);
   const [showBasis,setShowBasis] = useState(false); // punt 11: basisopstelling-chips tonen/verbergen
   const [modal,setModal]           = useState(null);
+  const [editingEvent,setEditingEvent] = useState(null);
   const [confirm,setConfirm]       = useState(false);
 
   // ── AI output (PERSISTED — bespaart API calls bij refresh) ──
@@ -720,9 +721,21 @@ export default function App({ boot }) {
   // ── Match actions ──
   const addEv = ev => {
     if(locked) return;
-    setEvents(p=>[...p,ev].sort((a,b)=>(+a.minute||0)-(+b.minute||0)));
-    if(ev.type==="GOAL") setHome(s=>s+1);
-    if(ev.type==="OWN")  setAway(s=>s+1);
+    setEvents(prev=>{
+      const bestaand = prev.find(e=>e.id===ev.id);
+      if(bestaand){
+        // Bewerken: score bijwerken als goal-type veranderde
+        if(bestaand.type==="GOAL" && ev.type!=="GOAL") setHome(s=>Math.max(0,s-1));
+        if(bestaand.type!=="GOAL" && ev.type==="GOAL") setHome(s=>s+1);
+        if(bestaand.type==="OWN" && ev.type!=="OWN") setAway(s=>Math.max(0,s-1));
+        if(bestaand.type!=="OWN" && ev.type==="OWN") setAway(s=>s+1);
+        return prev.map(e=>e.id===ev.id?ev:e).sort((a,b)=>(+a.minute||0)-(+b.minute||0));
+      }
+      // Nieuw event
+      if(ev.type==="GOAL") setHome(s=>s+1);
+      if(ev.type==="OWN")  setAway(s=>s+1);
+      return [...prev,ev].sort((a,b)=>(+a.minute||0)-(+b.minute||0));
+    });
   };
   const delEv = id => {
     if(locked) return;
@@ -730,6 +743,14 @@ export default function App({ boot }) {
     if(ev?.type==="GOAL") setHome(s=>Math.max(0,s-1));
     if(ev?.type==="OWN")  setAway(s=>Math.max(0,s-1));
     setEvents(p=>p.filter(e=>e.id!==id));
+  };
+  // Een bestaand event bewerken: open de juiste sheet met het event vooringevuld
+  const editEv = ev => {
+    if(locked) return;
+    setEditingEvent(ev);
+    if(ev.type==="GOAL"||ev.type==="OWN") setModal(ev.type==="OWN"?"OWN":"GOAL");
+    else if(ev.type==="YELLOW"||ev.type==="RED") setModal(ev.type);
+    else if(ev.type==="SUB") setModal("SUB");
   };
   const cp = (txt,k) => { navigator.clipboard.writeText(txt); setCopied(k); setTimeout(()=>setCopied(null),2500); };
   const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setStartTs(Date.now()); setPausedMs(0); setPauseStartTs(0); setElapsed(1); setScreen("dashboard"); };
@@ -2031,7 +2052,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </button>
                 ))}
               </div>
-              {events.filter(e=>e.type==="GOAL"||e.type==="OWN").length===0 ? <Empty icon="⚽" label="Nog geen doelpunten" /> : events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
+              {events.filter(e=>e.type==="GOAL"||e.type==="OWN").length===0 ? <Empty icon="⚽" label="Nog geen doelpunten" /> : events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />)}
             </>)}
 
             {/* KAARTEN */}
@@ -2047,7 +2068,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
               <button onClick={()=>setModal("RED_OPP")} style={{width:"100%",padding:"16px",marginBottom:28,background:hex(T.red,0.07),border:`1px solid ${hex(T.red,0.2)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:T.red,cursor:"pointer",textTransform:"uppercase",letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:`inset 0 1px 0 ${hex(T.red,0.15)}`}}>
                 <span style={{fontSize:26}}>🟥</span> Rode kaart tegenstander
               </button>
-              {events.filter(e=>e.type==="YELLOW"||e.type==="RED").length===0 ? <Empty icon="🟨" label="Geen kaarten" /> : events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
+              {events.filter(e=>e.type==="YELLOW"||e.type==="RED").length===0 ? <Empty icon="🟨" label="Geen kaarten" /> : events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />)}
             </>)}
 
             {/* WISSELS */}
@@ -2056,7 +2077,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
               <button onClick={()=>setModal("SUB")} style={{width:"100%",padding:20,background:hex(U,0.07),border:`1px solid ${hex(U,0.2)}`,borderRadius:22,fontFamily:"'Barlow Condensed',sans-serif",fontSize:17,fontWeight:800,color:U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1,marginBottom:28,display:"flex",alignItems:"center",justifyContent:"center",gap:12,boxShadow:`inset 0 1px 0 ${hex(U,0.15)}`}}>
                 <span style={{fontSize:26}}>🔄</span> Wissel registreren
               </button>
-              {events.filter(e=>e.type==="SUB").length===0 ? <Empty icon="🔄" label="Geen wissels" /> : events.filter(e=>e.type==="SUB").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
+              {events.filter(e=>e.type==="SUB").length===0 ? <Empty icon="🔄" label="Geen wissels" /> : events.filter(e=>e.type==="SUB").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />)}
             </>)}
 
             {/* SPELBEELD */}
@@ -2250,7 +2271,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     : (<>
                         {allItems.map(item=>{
                           if (item.kind==="event") {
-                            return <TimelineRow key={item.id} e={item.data} onDelete={delEv} live={status==="LIVE"} C={C} />;
+                            return <TimelineRow key={item.id} e={item.data} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />;
                           }
                           // keyMoment row
                           const m = item.data;
@@ -4079,12 +4100,12 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
         </div>
       )}
 
-      {modal==="GOAL"   && <GoalSheet type="GOAL"   onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} />}
-      {modal==="OWN"    && <GoalSheet type="OWN"    onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} />}
-      {modal==="YELLOW" && <CardSheet type="YELLOW" onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} />}
-      {modal==="RED"    && <CardSheet type="RED"    onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} />}
-      {modal==="RED_OPP" && <CardSheet type="RED"   onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} defaultOpponent />}
-      {modal==="SUB"    && <SubSheet               onAdd={addEv} onClose={()=>setModal(null)} activeSquad={activeSquad} benchSquad={benchSquad} C={U} liveMinute={elapsed} paused={paused} />}
+      {modal==="GOAL"   && <GoalSheet type="GOAL"   onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} edit={editingEvent?.type==="GOAL"?editingEvent:null} />}
+      {modal==="OWN"    && <GoalSheet type="OWN"    onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} edit={editingEvent?.type==="OWN"?editingEvent:null} />}
+      {modal==="YELLOW" && <CardSheet type="YELLOW" onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} edit={editingEvent?.type==="YELLOW"?editingEvent:null} />}
+      {modal==="RED"    && <CardSheet type="RED"    onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} edit={editingEvent?.type==="RED"?editingEvent:null} />}
+      {modal==="RED_OPP" && <CardSheet type="RED"   onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} defaultOpponent />}
+      {modal==="SUB"    && <SubSheet               onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} activeSquad={activeSquad} benchSquad={benchSquad} C={U} liveMinute={elapsed} paused={paused} edit={editingEvent?.type==="SUB"?editingEvent:null} />}
       {confirm && <ConfirmSheet message="Wedstrijd beëindigen en content genereren?" onConfirm={endMatch} onCancel={()=>setConfirm(false)} />}
 
       {/* DEMO PREVIEW MODAL */}
