@@ -310,6 +310,8 @@ export default function App({ boot }) {
   const [locked,setLocked]   = usePersistedState("locked", false); // punt: na genereren staan wedstrijdgegevens op slot
   const [loading,setLoading] = useState(false);
   const [aiErr,setAiErr]     = useState(null);
+  const [geenToegang,setGeenToegang] = useState(false);
+  const [pasLoading,setPasLoading]   = useState(false);
   const [archive,setArchive] = usePersistedState("archive", []);
   const [expandedArchive,setExpandedArchive] = useState(null);
 
@@ -724,14 +726,12 @@ export default function App({ boot }) {
     setEvents(prev=>{
       const bestaand = prev.find(e=>e.id===ev.id);
       if(bestaand){
-        // Bewerken: score bijwerken als goal-type veranderde
         if(bestaand.type==="GOAL" && ev.type!=="GOAL") setHome(s=>Math.max(0,s-1));
         if(bestaand.type!=="GOAL" && ev.type==="GOAL") setHome(s=>s+1);
         if(bestaand.type==="OWN" && ev.type!=="OWN") setAway(s=>Math.max(0,s-1));
         if(bestaand.type!=="OWN" && ev.type==="OWN") setAway(s=>s+1);
         return prev.map(e=>e.id===ev.id?ev:e).sort((a,b)=>(+a.minute||0)-(+b.minute||0));
       }
-      // Nieuw event
       if(ev.type==="GOAL") setHome(s=>s+1);
       if(ev.type==="OWN")  setAway(s=>s+1);
       return [...prev,ev].sort((a,b)=>(+a.minute||0)-(+b.minute||0));
@@ -744,7 +744,6 @@ export default function App({ boot }) {
     if(ev?.type==="OWN")  setAway(s=>Math.max(0,s-1));
     setEvents(p=>p.filter(e=>e.id!==id));
   };
-  // Een bestaand event bewerken: open de juiste sheet met het event vooringevuld
   const editEv = ev => {
     if(locked) return;
     setEditingEvent(ev);
@@ -902,6 +901,20 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     return () => clearTimeout(t);
   }, []);
 
+  const koopWedstrijdpas = async () => {
+    const clubId = boot?.profile?.club_id;
+    const teamId = boot?.profile?.team_id;
+    if (!clubId) return;
+    setPasLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('mollie-wedstrijdpas-payment', {
+        body: { club_id: clubId, team_id: teamId },
+      });
+      if (data?.checkoutUrl) window.location.href = data.checkoutUrl;
+      else { setPasLoading(false); alert(data?.error || error?.message || "Er ging iets mis. Probeer het opnieuw."); }
+    } catch (e) { setPasLoading(false); alert("Geen verbinding. Probeer het opnieuw."); }
+  };
+
   const endMatch = async () => {
     if (!isOnline) {
       // Sla wedstrijd lokaal op, sla AI-generatie over tot weer online
@@ -913,6 +926,23 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     }
     setConfirm(false); setStatus("FINISHED"); setScreen("output");
     setLoading(true); setAiErr(null); setAiOut(null);
+
+    // ── Wedstrijdpas-check: mag deze club content maken? ──
+    // (Abonnement/trial actief OF betaalde wedstrijdpas. In de testfase
+    //  geeft dit altijd TRUE via de trial, dus de knop blijft onzichtbaar.
+    //  Bij een fout/geen verbinding gaan we gewoon door — nooit onterecht blokkeren.)
+    const _clubId = boot?.profile?.club_id;
+    if (_clubId) {
+      try {
+        const { data: magMaken } = await supabase.rpc('mag_content_maken', { p_club_id: _clubId });
+        if (magMaken === false) {
+          setLoading(false); setAiOut(null); setGeenToegang(true);
+          return;
+        }
+      } catch (e) { /* bij twijfel doorgaan */ }
+    }
+    setGeenToegang(false);
+
     // Bij eerste wedstrijd: pak een willekeurig thema. Daarna onthouden voor gebruiksgemak.
     if (!chosenTheme) {
       const picked = THEMES[Math.floor(Math.random() * THEMES.length)];
@@ -2336,7 +2366,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   <button onClick={endMatch} style={{padding:"11px 22px",background:T.red,border:"none",borderRadius:12,color:"#fff",fontWeight:800,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,letterSpacing:0.5,boxShadow:`0 6px 20px ${hex(T.red,0.35)}`}}>🔄 Opnieuw proberen</button>
                 </div>
               )}
-              {!loading&&!aiOut&&!aiErr && (
+              {geenToegang && (
+                <div style={{textAlign:"center",padding:"60px 20px"}}>
+                  <div style={{fontSize:48,marginBottom:16}}>🎟️</div>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:800,color:T.text,marginBottom:8}}>Geen actief abonnement</div>
+                  <div style={{fontSize:13,color:T.text3,marginBottom:24,lineHeight:1.6,fontFamily:"Barlow,sans-serif",maxWidth:300,marginLeft:"auto",marginRight:"auto"}}>
+                    Koop een Wedstrijdpas om voor deze wedstrijd het complete contentpakket te maken.
+                  </div>
+                  <button onClick={koopWedstrijdpas} disabled={pasLoading} style={{padding:"15px 30px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,letterSpacing:1,cursor:pasLoading?"wait":"pointer",textTransform:"uppercase",boxShadow:`0 8px 24px ${hex(M.purple,0.4)}`}}>
+                    {pasLoading ? "Bezig..." : "🎟️ Wedstrijdpas halen — €5"}
+                  </button>
+                </div>
+              )}
+              {!loading&&!aiOut&&!aiErr&&!geenToegang && (
                 <div style={{textAlign:"center",padding:"80px 0"}}>
                   <div style={{fontSize:52,marginBottom:14,opacity:0.12}}>📸</div>
                   <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,letterSpacing:2.5,textTransform:"uppercase",color:T.text4,marginBottom:28,lineHeight:1.6}}>Beëindig de wedstrijd<br/>om content te genereren</div>
