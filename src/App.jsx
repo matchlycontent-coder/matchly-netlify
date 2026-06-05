@@ -1804,9 +1804,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
     setHdMsgs(next);
     setHdLoading(true);
     try {
-      const res = await fetch("https://api.anthropic.com/v1/messages", {
+      const res = await fetch("/.netlify/functions/anthropic", {
         method:"POST",
-        headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01"},
+        headers:{"Content-Type":"application/json"},
         body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:512,
           system:HD_PROMPT_M, messages:next.map(m=>({role:m.role,content:m.content})) }),
       });
