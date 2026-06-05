@@ -23,6 +23,23 @@ const loadH2C = () => new Promise(res => {
   document.head.appendChild(s);
 });
 
+// Verdeel de speeltijd in gelijke spelbeeld-blokken.
+// helften: aantal helften (null/0 → 1 doorlopende periode, bv. O7)
+// halfDuur: minuten per helft  ·  blokken: aantal fases per helft
+function buildMatchBlocks(helften, halfDuur, blokken){
+  const res = [];
+  const h = (helften && helften > 0) ? helften : 1;
+  const b = (blokken && blokken > 0) ? blokken : 3;
+  const seg = halfDuur / b;
+  for (let i = 0; i < h; i++){
+    const base = i * halfDuur;
+    for (let k = 0; k < b; k++){
+      res.push([Math.round(base + k*seg), Math.round(base + (k+1)*seg)]);
+    }
+  }
+  return res;
+}
+
 export default function App({ boot }) {
 
   // ── Club settings (PERSISTED) ──
@@ -209,6 +226,70 @@ export default function App({ boot }) {
   const [h2f1,setH2f1]     = usePersistedState("h2f1", "");
   const [h2f2,setH2f2]     = usePersistedState("h2f2", "");
   const [h2f3,setH2f3]     = usePersistedState("h2f3", "");
+
+  // ── Wedstrijdformat (leeftijdscategorie) — uit Supabase ──
+  // teams.leeftijdscategorie → referentietabel leeftijdscategorieen
+  const [matchFormat,setMatchFormat] = useState(null);
+  useEffect(()=>{
+    const teams = boot?.teams || [];
+    const teamRow = teams.find(t=>t.id===boot?.profile?.team_id) || teams[0];
+    const code = teamRow?.leeftijdscategorie;
+    if(!code){ setMatchFormat(null); return; }
+    let cancelled = false;
+    (async()=>{
+      try{
+        const { data } = await supabase.from('leeftijdscategorieen').select('*').eq('code', code).maybeSingle();
+        if(!cancelled && data) setMatchFormat({
+          code:data.code, label:data.label,
+          helften:data.aantal_helften, minutenPerHelft:data.minuten_per_helft,
+          timeoutMin:data.timeout_minuten, aantalSpelers:data.aantal_spelers,
+          blokken:data.spelbeeld_blokken, heeftKeeper:data.heeft_keeper,
+        });
+      }catch{}
+    })();
+    return ()=>{ cancelled = true; };
+  },[boot]);
+
+  // Afgeleide waarden met veilige fallback (default = Senioren: 11v11, 2×45, 3 blokken)
+  const fmtHelften = matchFormat ? (matchFormat.helften || 1) : 2;   // null (bv. O7) → 1 doorlopende periode
+  const fmtMin     = matchFormat?.minutenPerHelft ?? 45;
+  const fmtSpelers = matchFormat?.aantalSpelers ?? 11;
+  const fmtBlokken = matchFormat?.blokken ?? 3;
+  const fmtKeeper  = matchFormat?.heeftKeeper ?? true;
+  const fmtTimeout = matchFormat?.timeoutMin ? parseFloat(String(matchFormat.timeoutMin).replace(',','.')) : null;
+  const halfDuur   = fmtMin;
+  const totaalDuur = fmtHelften * fmtMin;
+  const matchBlocks = buildMatchBlocks(fmtHelften, halfDuur, fmtBlokken);
+
+  // Korte omschrijving voor de speeltijd-melding op het dashboard
+  const fmtLabel = matchFormat ? (()=>{
+    const parts = [matchFormat.label];
+    parts.push(fmtHelften>=2 ? `${fmtHelften}×${fmtMin} min` : `${fmtMin} min`);
+    parts.push(`${fmtSpelers} tegen ${fmtSpelers}`);
+    if(fmtTimeout) parts.push(`time-out na ${String(fmtTimeout).replace('.',',')} min`);
+    return parts.join(' · ');
+  })() : null;
+
+  // Spelbeeld-fases afgeleid uit het format: openingsfase + (middenfase bij 3 blokken) + slotfase,
+  // per helft. Bij 1 helft (O7) één doorlopende periode, geen tweede helft.
+  const spelbeeldFases = (()=>{
+    const fases = [];
+    const halfLabel = (i)=> fmtHelften>=2 ? (i===0?'1e Helft':'2e Helft') : 'Wedstrijd';
+    const segFor = (i)=> matchBlocks.slice(i*fmtBlokken, (i+1)*fmtBlokken);
+    const push = (key,val,setter,opts,fase,seg)=> fases.push({ key, val, setter, opts,
+      label:`${halfLabel(fase)} — ${seg.naam} (${seg.a}–${seg.b} min)` });
+    const seg0 = segFor(0);
+    push('h1f1', h1f1, setH1f1, H1_F1, 0, { naam:'Openingsfase', a:seg0[0][0], b:seg0[0][1] });
+    if(fmtBlokken>=3) push('h1f2', h1f2, setH1f2, H1_F2, 0, { naam:'Middenfase', a:seg0[1][0], b:seg0[1][1] });
+    push('h1f3', h1f3, setH1f3, H1_F3, 0, { naam:'Slotfase', a:seg0[seg0.length-1][0], b:seg0[seg0.length-1][1] });
+    if(fmtHelften>=2){
+      const seg1 = segFor(1);
+      push('h2f1', h2f1, setH2f1, H2_F1, 1, { naam:'Openingsfase', a:seg1[0][0], b:seg1[0][1] });
+      if(fmtBlokken>=3) push('h2f2', h2f2, setH2f2, H2_F2, 1, { naam:'Middenfase', a:seg1[1][0], b:seg1[1][1] });
+      push('h2f3', h2f3, setH2f3, H2_F3, 1, { naam:'Slotfase', a:seg1[seg1.length-1][0], b:seg1[seg1.length-1][1] });
+    }
+    return fases;
+  })();
   const [motm,setMotm]       = usePersistedState("motm", "");
   const [motmRedenen,setMotmRedenen] = usePersistedState("motmRedenen", []);
   const toggleMotmReden = (key) => setMotmRedenen(prev => prev.includes(key) ? prev.filter(k=>k!==key) : [...prev,key]);
@@ -510,7 +591,7 @@ export default function App({ boot }) {
   // Spelbeeld blok-grenzen → reminder
   useEffect(()=>{
     if (status !== "LIVE") return;
-    const blocks = [[0,20],[21,35],[36,45],[45,65],[66,80],[81,90]];
+    const blocks = matchBlocks;
     for (const [start,end] of blocks) {
       if (elapsed === end+1 && !reminderShown[end]) {
         setBlockReminder({ start, end, label: `${start}–${end}` });
@@ -520,10 +601,11 @@ export default function App({ boot }) {
     }
   },[elapsed,status]);
 
-  // Push: rust-herinnering op minuut 45 (eenmalig)
+  // Push: rust-herinnering aan het einde van de 1e helft (eenmalig, alleen bij 2 helften)
   useEffect(()=>{
     if (status !== "LIVE") return;
-    if (elapsed !== 45) return;
+    if (fmtHelften < 2) return;
+    if (elapsed !== halfDuur) return;
     if (reminderShown.rust45) return;
     setReminderShown(p => ({...p, rust45: true}));
     pushNotify("⏸️ Tijd voor de rust", "Druk op de knop 'Wedstrijdtijd pauzeren' om de rust in te luiden.");
@@ -952,7 +1034,7 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
       setChosenTheme(picked.id);
     }
     const TYPE_NL = { GOAL:"doelpunt eigen ploeg", OWN:"tegendoelpunt (tegenstander scoorde)", YELLOW:"gele kaart", RED:"rode kaart", SUB:"wissel" };
-    const evData = events.map(e=>({type:TYPE_NL[e.type]||e.type,team:e.type==="GOAL"?"eigen ploeg":e.type==="OWN"?"tegenstander":(e.isOpponent?"tegenstander":"eigen ploeg"),half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?90:45}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
+    const evData = events.map(e=>({type:TYPE_NL[e.type]||e.type,team:e.type==="GOAL"?"eigen ploeg":e.type==="OWN"?"tegenstander":(e.isOpponent?"tegenstander":"eigen ploeg"),half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?totaalDuur:halfDuur}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
     const wedstrijdMomenten = keyMoments.map(m=>{const tm=m.team==="tegenstander"?"tegenstander":(clubName||"eigen ploeg");return `${m.minute}' ${m.type.label} — ${tm}${m.player?` (${m.player}${m.player2?` ⇄ ${m.player2}`:""})`:""}`;}).join(", ")||null;
     const bijzondereInfo = specialInfo.map(s=>`${s.type.label}${s.player?` (${s.player})`:""}`).join(", ")||null;
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
@@ -1014,7 +1096,7 @@ REGELS:
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
-- Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
+- Bepaal de helft op basis van de minuut: minuut 1 t/m ${halfDuur} = eerste helft, minuut ${halfDuur+1} en later = tweede helft (deze wedstrijd: ${fmtHelften>=2?`${fmtHelften} helften van ${halfDuur} minuten`:`${halfDuur} minuten`}). Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
 - Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Varieer bij het beschrijven van een "Counter" met natuurlijke synoniemen voor meer dynamiek: "counter", "omschakelmoment", "snelle uitval", "snelle omschakeling", "tegenaanval" of "uitbraak". Gebruik niet steeds hetzelfde woord; kies wat in de zin het beste past.
@@ -1064,7 +1146,7 @@ REGELS:
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
 - Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
-- Bepaal de helft op basis van de minuut: minuut 1 t/m 45 = eerste helft, minuut 46 en later = tweede helft. Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
+- Bepaal de helft op basis van de minuut: minuut 1 t/m ${halfDuur} = eerste helft, minuut ${halfDuur+1} en later = tweede helft (deze wedstrijd: ${fmtHelften>=2?`${fmtHelften} helften van ${halfDuur} minuten`:`${halfDuur} minuten`}). Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
 - Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
 - Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling/uitbraak, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
 - Varieer bij een "Counter" met eenvoudige synoniemen: "snelle uitval", "omschakeling" of "tegenaanval". Gebruik niet steeds hetzelfde woord.
@@ -1757,6 +1839,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 DASHBOARD
             ══════════════════════════ */}
             {screen==="dashboard" && (<>
+              {fmtLabel && (
+                <div style={{display:"flex",alignItems:"center",gap:8,background:hex(U,0.07),border:`1px solid ${hex(U,0.18)}`,borderRadius:12,padding:"8px 12px",marginBottom:14}}>
+                  <span style={{fontSize:15,lineHeight:1}}>⏱️</span>
+                  <span style={{fontSize:12,fontWeight:800,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.4}}>{fmtLabel}</span>
+                </div>
+              )}
               {status==="PRE" && (
                 <div style={{animation:"slideUp 0.3s ease"}}>
                   {hasStarted && (
@@ -1934,7 +2022,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   <button onClick={()=>setShowBasis(s=>!s)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${hex(U,0.1)},${hex(U,0.03)})`,border:`1px solid ${hex(U,0.22)}`,borderRadius:18,padding:"14px 16px",marginBottom:showBasis?0:18,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif"}}>
                     <span style={{fontSize:13,fontWeight:900,letterSpacing:1.5,color:U,textTransform:"uppercase"}}>⭐ Basisopstelling instellen</span>
                     <span style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{fontSize:15,fontWeight:900,color:baseSquad.length===11?U:T.text2}}>{baseSquad.length}<span style={{fontSize:11,color:T.text4}}>/11</span></span>
+                      <span style={{fontSize:15,fontWeight:900,color:baseSquad.length===fmtSpelers?U:T.text2}}>{baseSquad.length}<span style={{fontSize:11,color:T.text4}}>/{fmtSpelers}</span></span>
                       <span style={{fontSize:12,color:U}}>{showBasis?"▲":"▼"}</span>
                     </span>
                   </button>
@@ -1956,7 +2044,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                         {squad.map(p=>{
                           const isBase = baseSquad.includes(p);
-                          const isFull = baseSquad.length>=11;
+                          const isFull = baseSquad.length>=fmtSpelers;
                           const disabled = !isBase && isFull;
                           return (
                             <button
@@ -2122,18 +2210,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {/* SPELBEELD */}
             {screen==="spelbeeld" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
-              <SHead label="1e Helft — Openingsfase (0–20 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>{if(locked)return;setH1f1(h1f1===f?"":f);}} color={U} gradient />)}</div>
-              <SHead label="1e Helft — Middenfase (20–35 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>{if(locked)return;setH1f2(h1f2===f?"":f);}} color={U} gradient />)}</div>
-              <SHead label="1e Helft — Slotfase (35–45 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>{if(locked)return;setH1f3(h1f3===f?"":f);}} color={U} gradient />)}</div>
-              <SHead label="2e Helft — Openingsfase (45–65 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>{if(locked)return;setH2f1(h2f1===f?"":f);}} color={U} gradient />)}</div>
-              <SHead label="2e Helft — Middenfase (65–80 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>{if(locked)return;setH2f2(h2f2===f?"":f);}} color={U} gradient />)}</div>
-              <SHead label="2e Helft — Slotfase (80–90 min)" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>{if(locked)return;setH2f3(h2f3===f?"":f);}} color={U} gradient />)}</div>
+              {spelbeeldFases.map(fase=>(
+                <React.Fragment key={fase.key}>
+                  <SHead label={fase.label} C={C} />
+                  <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{fase.opts.map(f=><Chip key={f} label={f} active={fase.val===f} onClick={()=>{if(locked)return;fase.setter(fase.val===f?"":f);}} color={U} gradient />)}</div>
+                </React.Fragment>
+              ))}
               <SHead label="Eindbeeld van de wedstrijd" C={C} />
               <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>{if(locked)return;setAlgBeld(algBeld===w?"":w);}} color={U} gradient />)}</div>
               <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${T.border}`}}>
