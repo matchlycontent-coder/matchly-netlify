@@ -1795,6 +1795,28 @@ HEADLINE: 1 zin. Positief en simpel.`;
     </div>
   );
 
+
+  async function hdSend(text) {
+    const m2 = (text || hdInput).trim();
+    if (!m2 || hdLoading) return;
+    setHdInput('');
+    const next = [...hdMsgs, { role:"user", content:m2 }];
+    setHdMsgs(next);
+    setHdLoading(true);
+    try {
+      const res = await fetch("https://api.anthropic.com/v1/messages", {
+        method:"POST",
+        headers:{"Content-Type":"application/json","anthropic-version":"2023-06-01"},
+        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:512,
+          system:HD_PROMPT_M, messages:next.map(m=>({role:m.role,content:m.content})) }),
+      });
+      const data = await res.json();
+      const reply = data.content?.find(b=>b.type==="text")?.text || "Probeer het opnieuw of mail info@matchlyapp.nl.";
+      setHdMsgs(prev=>[...prev,{role:"assistant",content:reply}]);
+    } catch { setHdMsgs(prev=>[...prev,{role:"assistant",content:"Verbindingsfout — probeer opnieuw."}]); }
+    finally { setHdLoading(false); }
+  }
+
   return (
     <>
       <style>{`
@@ -4382,6 +4404,36 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
           </div>
         </div>
       )}
+
+      {/* ── HELPDESK OVERLAY ── */}
+      {hdOpen && (
+        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:9999,display:"flex",flexDirection:"column",justifyContent:"flex-end"}} onClick={e=>{if(e.target===e.currentTarget){setHdOpen(false);setHdMsgs([HD_INIT_M]);setHdInput('');}}}>
+          <div style={{background:"#111115",borderRadius:"20px 20px 0 0",height:"75vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
+            <div style={{background:"linear-gradient(135deg,#4f46e5,#a855f7,#ec4899)",padding:"14px 16px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
+              <img src={HD_LOGO_M} style={{width:34,height:34,borderRadius:10,objectFit:"cover"}} alt="" />
+              <div style={{flex:1}}>
+                <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>Matchly Helpdesk</div>
+                <div style={{fontSize:11,color:"rgba(255,255,255,0.8)"}}>Stel je vraag — ik antwoord direct</div>
+              </div>
+              <button onClick={()=>{setHdOpen(false);setHdMsgs([HD_INIT_M]);setHdInput('');}} style={{background:"rgba(0,0,0,0.2)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:8,color:"#fff",fontSize:18,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
+            </div>
+            <div style={{flex:1,overflowY:"auto",padding:"12px 14px 6px"}}>
+              {hdMsgs.map((m,i)=>(
+                <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",marginBottom:8}}>
+                  {m.role==="assistant"&&<img src={HD_LOGO_M} style={{width:24,height:24,borderRadius:7,objectFit:"cover",marginRight:7,marginTop:2,flexShrink:0}} alt="" />}
+                  <div style={{maxWidth:"80%",padding:"9px 12px",borderRadius:m.role==="user"?"14px 14px 3px 14px":"14px 14px 14px 3px",background:m.role==="user"?"linear-gradient(135deg,#4f46e5,#a855f7)":"rgba(255,255,255,0.07)",border:m.role==="user"?"none":"1px solid rgba(255,255,255,0.09)",fontSize:13,lineHeight:1.5,color:m.role==="user"?"#fff":"rgba(255,255,255,0.88)",whiteSpace:"pre-wrap"}}>{m.content}</div>
+                </div>
+              ))}
+              {hdLoading&&<div style={{display:"flex",marginBottom:8}}><img src={HD_LOGO_M} style={{width:24,height:24,borderRadius:7,objectFit:"cover",marginRight:7,flexShrink:0}} alt="" /><div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:"14px 14px 14px 3px",padding:"10px 14px",display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:7,height:7,borderRadius:"50%",background:"rgba(255,255,255,0.4)",animation:"hdBounce 1.2s infinite",animationDelay:`${i*0.2}s`}}/>)}</div></div>}
+            </div>
+            <div style={{padding:"10px 14px 16px",borderTop:"1px solid rgba(255,255,255,0.07)",display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+              <input value={hdInput} onChange={e=>setHdInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")hdSend();}} placeholder="Stel je vraag..." disabled={hdLoading} style={{flex:1,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,color:"#fff",fontSize:13,padding:"10px 12px",fontFamily:"inherit",outline:"none"}} />
+              <button onClick={()=>hdSend()} disabled={!hdInput.trim()||hdLoading} style={{width:40,height:40,borderRadius:10,border:"none",background:hdInput.trim()&&!hdLoading?"linear-gradient(135deg,#4f46e5,#a855f7)":"rgba(255,255,255,0.07)",cursor:hdInput.trim()&&!hdLoading?"pointer":"default",color:"#fff",fontSize:16,flexShrink:0}}>↑</button>
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`@keyframes hdBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}`}</style>
     </>
   );
 }
