@@ -2619,6 +2619,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       {/* Achtergrond patroon — uit thema */}
                       {renderPattern(1)}
 
+                      {/* Absolute logo-overlays op neon-ringposities (alleen bij photo-thema) */}
+                      {theme.pattern==="photo"&&(<>
+                        <div style={{position:"absolute",top:"27.3%",left:"23.7%",transform:"translate(-50%,-50%)",width:"18%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
+                          {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{width:"100%",height:"100%",borderRadius:"50%",background:thex(TAC,0.25),display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                        </div>
+                        <div style={{position:"absolute",top:"27.3%",left:"76.3%",transform:"translate(-50%,-50%)",width:"18%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
+                          {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(255,255,255,0.07)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                        </div>
+                      </>)}
+
                       {/* Flex column wrapper — alles past binnen het vierkant */}
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
 
@@ -2633,12 +2643,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* THUIS — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                            {theme.pattern!=="photo"&&<div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
-                            </div>
+                            </div>}
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{clubName}</span>
                           </div>
 
@@ -2651,12 +2661,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* UIT — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                            {theme.pattern!=="photo"&&<div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
-                            </div>
+                            </div>}
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1}}>{opponent||"Tegenstander"}</span>
                           </div>
                         </div>
