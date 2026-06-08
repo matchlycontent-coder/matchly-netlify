@@ -2669,8 +2669,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </div>
                         </div>
 
-                        {/* HEADLINE — vrij op de foto, 15% omhoog */}
-                        <div style={{flexShrink:0,padding:"2% 5%",marginTop:"-4%"}}>
+                        {/* VELDRUIMTE — quote+blokjes net onder de fotolijn */}
+                        <div style={{height:"5%",flexShrink:0}}/>
+
+                        {/* HEADLINE — vrij op de foto */}
+                        <div style={{flexShrink:0,padding:"2% 5%"}}>
                           {(()=>{
                             const len=aiOut.headline.length;
                             const fs=len>60?"2.8cqw":len>45?"3.3cqw":"3.8cqw";
