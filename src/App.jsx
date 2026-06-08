@@ -2652,11 +2652,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* CIJFERS — PNG cijfers met glow */}
                           <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"2.5%"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
+                            <div style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"2%"}}>
                               {String(home).split("").map((d,i)=><img key={"h"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
                             </div>
-                            <img src="/images/cijfers/streepje.png" style={{height:"2.5cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
-                            <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
+                            <img src="/images/cijfers/streepje.png" style={{height:"2.5cqw",objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>
+                            <div style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",justifyContent:"flex-start",gap:"2%"}}>
                               {String(away).split("").map((d,i)=><img key={"a"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
                             </div>
                           </div>
@@ -2771,7 +2771,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                               </div>
                               <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%",overflow:"hidden",minHeight:0}}>
-                                <img src="/images/cups/cup-goud.png" style={{width:"100%",maxWidth:"14cqw",maxHeight:"14cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                                <img src="/images/cups/cup-goud.png" style={{width:"100%",maxWidth:"16cqw",maxHeight:"16cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                                 <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
