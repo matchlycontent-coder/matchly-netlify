@@ -2647,7 +2647,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
                             </div>
-                            <span style={{fontSize:(clubName.length>16?"1.9cqw":clubName.length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{clubName}</span>
+                            <div style={{height:"3.5cqw",display:"flex",alignItems:"center",justifyContent:"center",width:"100%"}}><span style={{fontSize:(clubName.length>16?"1.9cqw":clubName.length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{clubName}</span></div>
                           </div>
 
                           {/* CIJFERS — PNG cijfers met glow */}
@@ -2669,7 +2669,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
                             </div>
-                            <span style={{fontSize:((opponent||"Tegenstander").length>16?"1.9cqw":(opponent||"Tegenstander").length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{opponent||"Tegenstander"}</span>
+                            <div style={{height:"3.5cqw",display:"flex",alignItems:"center",justifyContent:"center",width:"100%"}}><span style={{fontSize:((opponent||"Tegenstander").length>16?"1.9cqw":(opponent||"Tegenstander").length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{opponent||"Tegenstander"}</span></div>
                           </div>
                         </div>
 
