@@ -7,14 +7,6 @@ import { WEATHER, M, U, T, hex } from './constants/colors';
 import { usePersistedState, clearAllMatchlyStorage } from './hooks/usePersistedState';
 import { safeGet } from './utils/storage';
 import { PlayerSelect, Chip, AutoMinRow, MinRow, Sheet, ConfirmSheet, GoalSheet, CardSheet, SubSheet, MomentSheet, MatchHeader, formatMinuut, TimelineRow, GCard, SHead, INP, Empty, PBtn, BackBtn, ClubCard } from './components';
-import { getLogoFromSupabase, saveLogoToSupabase } from './supabaseLogos';
-import { supabase } from './supabaseClient.js';
-import { CUPS, getCup } from './constants/cups';
-import { awardMotm, getMotmDisplay } from './constants/gamification';
-import { getLock, randomLockId } from './constants/locks';
-
-// Matchly-logo (base64)
-const MATCHLY_LOGO = "data:image/png;base64,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";
 
 // html2canvas shim — keep original loadH2C() calls working
 
@@ -26,57 +18,11 @@ const loadH2C = () => new Promise(res => {
   document.head.appendChild(s);
 });
 
-
-// ── Helpdesk widget ──────────────────────────────────────────────
-const HD_LOGO_M = "data:image/png;base64,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";
-const HD_PROMPT_M = `Je bent de helpdesk-assistent van Matchly voor TEAMMANAGERS.
-
-WAT IS MATCHLY: PWA-app ("Van wedstrijd. Naar content.") voor amateurvoetbal. Legt doelpunten, kaarten, wissels bij en genereert daarna automatisch: wedstrijdverslag, Instagram Stories/Post, wedstrijdkaart, Man of the Match, WhatsApp-deeltekst en e-mail naar social media beheerder.
-
-SCHERMEN: Wedstrijdinfo → Basisopstelling → Dashboard/Timer → Doelpunten → Kaarten → Wissels → Spelbeeld → Uitblinkers (MOTM) → Bijzonderheden → Output
-
-CONTENT VERSTUREN: Stap 1: e-mail naar social media beheerder (instellen via Club ⚙️). Stap 2: WhatsApp-bericht delen. Afbeeldingen ook los te downloaden.
-
-VOETBAL.NL: Team-ID staat in de URL (/team/.../[ID]/show/). App haalt automatisch de volgende wedstrijd op.
-
-PUSHBERICHTEN: Toestaan via browserinstellingen. Ping 5 minuten voor de wedstrijd.
-
-PRIJZEN: Wedstrijdpas €5 (in de app: 🎟️ Wedstrijdpas halen). Abonnementen via club-beheerder: Single €15/maand · Basic €49/maand · Pro €79/maand · Ultra €119/maand.
-
-OFFLINE: Content wordt bewaard. Hergenereer zodra je weer online bent.
-
-IN-APP HANDLEIDING: Er is een visuele uitleg in de app via het 📖-icoon rechtsboven ("Hoe werkt Matchly?"). Verwijs daarnaar als iemand een algemene rondleiding/uitleg over de werking wil.
-
-APP-URL: https://matchly-app.netlify.app
-
-CONTACT: info@matchlyapp.nl — stuur users hiernaartoe bij storingen of accountproblemen.
-
-REGELS: Antwoord ALTIJD in het Nederlands. Max 3-4 zinnen. Verwijs bij twijfel naar info@matchlyapp.nl.`;
-const HD_INIT_M = { role:"assistant", content:"Hey! 👋 Ik ben de Matchly-assistent. Waarmee kan ik je helpen?" };
-// ────────────────────────────────────────────────────────────────
-// Verdeel de speeltijd in gelijke spelbeeld-blokken.
-// helften: aantal helften (null/0 → 1 doorlopende periode, bv. O7)
-// halfDuur: minuten per helft  ·  blokken: aantal fases per helft
-function buildMatchBlocks(helften, halfDuur, blokken){
-  const res = [];
-  const h = (helften && helften > 0) ? helften : 1;
-  const b = (blokken && blokken > 0) ? blokken : 3;
-  const seg = halfDuur / b;
-  for (let i = 0; i < h; i++){
-    const base = i * halfDuur;
-    for (let k = 0; k < b; k++){
-      res.push([Math.round(base + k*seg), Math.round(base + (k+1)*seg)]);
-    }
-  }
-  return res;
-}
-
-export default function App({ boot }) {
+export default function App() {
 
   // ── Club settings (PERSISTED) ──
   const [clubName,setClubName]   = usePersistedState("clubName", "VV Ons Dorp");
   const [team,setTeam]           = usePersistedState("team", "Heren 1");
-  const [teamLocked,setTeamLocked] = useState(false);
   const [comp,setComp]           = usePersistedState("comp", "3e Klasse KNVB");
   const [stijlByTeam,setStijlByTeam] = usePersistedState("stijlByTeam", {});
   const stijl    = stijlByTeam[team] || safeGet("stijl","") || "Zakelijk & Nuchter"; // per team; valt terug op oude globale waarde voor backward-compat
@@ -98,7 +44,6 @@ export default function App({ boot }) {
     return [];
   })());
   const [motmSponsor,setMotmSponsor] = usePersistedState("motmSponsor", { name:"", url:null });
-  const [silverSponsors,setSilverSponsors] = usePersistedState("silverSponsors", []); // zilver-laag (max 4, op beide stories)
   const [squad,setSquad]         = usePersistedState("squad", []);
   const [baseSquad,setBaseSquad] = usePersistedState("baseSquad", []);
   const toggleBase = (name) => setBaseSquad(prev => prev.includes(name) ? prev.filter(n=>n!==name) : [...prev,name]);
@@ -132,8 +77,6 @@ export default function App({ boot }) {
   const [someName,setSomeName]       = usePersistedState("someName", "");
   const [someNumber,setSomeNumber]   = usePersistedState("someNumber", "");      // E.164 zonder + (bv. 31612345678)
   const [someCountry,setSomeCountry] = usePersistedState("someCountry", "31");   // landcode default NL
-  const [someEmail,setSomeEmail]     = usePersistedState("someEmail", "");       // e-mail beheerder (Resend-verzending)
-  const [mailStatus,setMailStatus]   = useState(null);                           // null | "sending" | "ok" | "error:<msg>"
   // Clubwebsite (voor verslag-export en deelteksten)
   const [clubWebsite,setClubWebsite] = usePersistedState("clubWebsite", "");
   // Meta-koppeling voorbereiding (placeholders — nog niet actief)
@@ -148,13 +91,11 @@ export default function App({ boot }) {
   const [newP,setNewP]           = useState("");
   // Refs
   const csvRef     = useRef(null);
-  const viaPasRef  = useRef(false);
   const logoRef    = useRef(null);
   const sponsorRef = useRef(null);
   const sponsorScanRef = useRef(null);
   const motmSponsorRef = useRef(null);
   const teamSponsorRef = useRef(null);
-  const silverSponsorRef = useRef(null);
   const playerScanRef = useRef(null);
   const nextMatchRef = useRef(null);
 
@@ -166,34 +107,6 @@ export default function App({ boot }) {
   const [opponent,setOpp]    = usePersistedState("opponent", "");
   const [oppDraft,setOppDraft] = useState(opponent);
   useEffect(() => { setOppDraft(opponent); }, [opponent]); // sync extern (bv. AI-fetch)
-
-  // ── Koppeling met Supabase (admin): laad club, team en sponsoren van het ingelogde account ──
-  useEffect(() => {
-    if (!boot) return;
-    const c = boot.club, sp = boot.sponsors || [], tms = boot.teams || [];
-    if (c) {
-      if (c.name) setClubName(c.name);
-      if (c.logo_url) setHvLogoUrl('https://images.weserv.nl/?url=' + encodeURIComponent(c.logo_url));
-      if (c.ig_handle != null) setIgHandle(c.ig_handle);
-      if (c.fb_handle != null) setFbHandle(c.fb_handle);
-      if (c.website != null) setClubWebsite(c.website);
-      if (c.club_code != null) setClubCode(c.club_code);
-    }
-    let activeTeam = null;
-    if (boot.profile && boot.profile.team_id) activeTeam = tms.find(t => t.id === boot.profile.team_id);
-    if (!activeTeam) activeTeam = tms.find(t => (t.name || "").toLowerCase() === (team || "").toLowerCase());
-    if (!activeTeam && tms.length) activeTeam = tms[0];
-    if (activeTeam && activeTeam.name) setTeam(activeTeam.name);
-    setTeamLocked(!!(boot.profile && boot.profile.team_id));
-    const tId = activeTeam ? activeTeam.id : null;
-    const toSp = (r) => ({ name: r.name || "", url: r.logo_url || null });
-    setSponsors(sp.filter(r => r.tier === "goud").map(toSp));
-    setSilverSponsors(sp.filter(r => r.tier === "zilver").map(toSp));
-    setTeamSponsors(sp.filter(r => r.tier === "brons" && r.team_id === tId).map(toSp));
-    const motm = sp.find(r => r.tier === "motm" && r.team_id === tId);
-    setMotmSponsor(motm ? toSp(motm) : { name: "", url: null });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [boot]);
 
   // ── ONLINE/OFFLINE detectie ──
   const [isOnline,setIsOnline] = useState(typeof navigator !== "undefined" ? navigator.onLine : true);
@@ -216,12 +129,8 @@ export default function App({ boot }) {
   const [loc,setLoc]         = usePersistedState("loc", "thuis");
   const [kick,setKick]       = usePersistedState("kick", "");
   const [weather,setWeather] = usePersistedState("weather", "");
-  const [elapsed,setElapsed] = usePersistedState("elapsed", 0);
-  const [paused,setPaused] = usePersistedState("paused", false);
-  // Wall-clock ankers — tijd op basis van echte klok zodat hij niet achterloopt bij app-switch
-  const [startTs,setStartTs]         = usePersistedState("startTs", 0);       // ms-tijdstip van minuut 1
-  const [pausedMs,setPausedMs]       = usePersistedState("pausedMs", 0);      // opgebouwde rust in ms
-  const [pauseStartTs,setPauseStartTs] = usePersistedState("pauseStartTs", 0); // start van huidige rust (0 = niet in rust)
+  const [elapsed,setElapsed] = useState(0);
+  const [paused,setPaused] = useState(false);
   const [sponsorOffset,setSponsorOffset] = useState(0);
   const [showDemo,setShowDemo] = useState(false);
   const [blockReminder,setBlockReminder] = useState(null); // {label, end}
@@ -241,14 +150,6 @@ export default function App({ boot }) {
     }
   }, [isOnline]); // eslint-disable-line
 
-  // Zoek het tegenstander-logo zodra de tegenstander bekend is — ook bij het
-  // opstarten uit opgeslagen staat (los van internet-status wijzigingen).
-  useEffect(() => {
-    if (opponent && opponent.trim().length >= 3 && !oppLogoUrl && !oppLogoLoading) {
-      triggerOppLogoSearch();
-    }
-  }, [opponent]); // eslint-disable-line
-
   // ── Match analysis (PERSISTED) ──
   const [algBeld,setAlgBeld] = usePersistedState("algBeld", "");
   const [h1f1,setH1f1]     = usePersistedState("h1f1", "");
@@ -257,80 +158,7 @@ export default function App({ boot }) {
   const [h2f1,setH2f1]     = usePersistedState("h2f1", "");
   const [h2f2,setH2f2]     = usePersistedState("h2f2", "");
   const [h2f3,setH2f3]     = usePersistedState("h2f3", "");
-
-  // ── Wedstrijdformat (leeftijdscategorie) — uit Supabase ──
-  // teams.leeftijdscategorie → referentietabel leeftijdscategorieen
-  const [matchFormat,setMatchFormat] = useState(null);
-  useEffect(()=>{
-    const teams = boot?.teams || [];
-    const teamRow = teams.find(t=>t.id===boot?.profile?.team_id) || teams[0];
-    const code = teamRow?.leeftijdscategorie;
-    if(!code){ setMatchFormat(null); return; }
-    let cancelled = false;
-    (async()=>{
-      try{
-        const { data } = await supabase.from('leeftijdscategorieen').select('*').eq('code', code).maybeSingle();
-        if(!cancelled && data) setMatchFormat({
-          code:data.code, label:data.label,
-          helften:data.aantal_helften, minutenPerHelft:data.minuten_per_helft,
-          timeoutMin:data.timeout_minuten, aantalSpelers:data.aantal_spelers,
-          blokken:data.spelbeeld_blokken, heeftKeeper:data.heeft_keeper,
-        });
-      }catch{}
-    })();
-    return ()=>{ cancelled = true; };
-  },[boot]);
-
-  // Helpdesk state
-  const [hdOpen, setHdOpen] = useState(false);
-  const [hdMsgs, setHdMsgs] = useState([HD_INIT_M]);
-  const [hdInput, setHdInput] = useState('');
-  const [hdLoading, setHdLoading] = useState(false);
-
-  // Afgeleide waarden met veilige fallback (default = Senioren: 11v11, 2×45, 3 blokken)
-  const fmtHelften = matchFormat ? (matchFormat.helften || 1) : 2;   // null (bv. O7) → 1 doorlopende periode
-  const fmtMin     = matchFormat?.minutenPerHelft ?? 45;
-  const fmtSpelers = matchFormat?.aantalSpelers ?? 11;
-  const fmtBlokken = matchFormat?.blokken ?? 3;
-  const fmtKeeper  = matchFormat?.heeftKeeper ?? true;
-  const fmtTimeout = matchFormat?.timeoutMin ? parseFloat(String(matchFormat.timeoutMin).replace(',','.')) : null;
-  const halfDuur   = fmtMin;
-  const totaalDuur = fmtHelften * fmtMin;
-  const matchBlocks = buildMatchBlocks(fmtHelften, halfDuur, fmtBlokken);
-
-  // Korte omschrijving voor de speeltijd-melding op het dashboard
-  const fmtLabel = matchFormat ? (()=>{
-    const parts = [matchFormat.label];
-    parts.push(fmtHelften>=2 ? `${fmtHelften}×${fmtMin} min` : `${fmtMin} min`);
-    parts.push(`${fmtSpelers} tegen ${fmtSpelers}`);
-    if(fmtTimeout) parts.push(`time-out na ${String(fmtTimeout).replace('.',',')} min`);
-    return parts.join(' · ');
-  })() : null;
-
-  // Spelbeeld-fases afgeleid uit het format: openingsfase + (middenfase bij 3 blokken) + slotfase,
-  // per helft. Bij 1 helft (O7) één doorlopende periode, geen tweede helft.
-  const spelbeeldFases = (()=>{
-    const fases = [];
-    const halfLabel = (i)=> fmtHelften>=2 ? (i===0?'1e Helft':'2e Helft') : 'Wedstrijd';
-    const segFor = (i)=> matchBlocks.slice(i*fmtBlokken, (i+1)*fmtBlokken);
-    const push = (key,val,setter,opts,fase,seg)=> fases.push({ key, val, setter, opts,
-      label:`${halfLabel(fase)} — ${seg.naam} (${seg.a}–${seg.b} min)` });
-    const seg0 = segFor(0);
-    push('h1f1', h1f1, setH1f1, H1_F1, 0, { naam:'Openingsfase', a:seg0[0][0], b:seg0[0][1] });
-    if(fmtBlokken>=3) push('h1f2', h1f2, setH1f2, H1_F2, 0, { naam:'Middenfase', a:seg0[1][0], b:seg0[1][1] });
-    push('h1f3', h1f3, setH1f3, H1_F3, 0, { naam:'Slotfase', a:seg0[seg0.length-1][0], b:seg0[seg0.length-1][1] });
-    if(fmtHelften>=2){
-      const seg1 = segFor(1);
-      push('h2f1', h2f1, setH2f1, H2_F1, 1, { naam:'Openingsfase', a:seg1[0][0], b:seg1[0][1] });
-      if(fmtBlokken>=3) push('h2f2', h2f2, setH2f2, H2_F2, 1, { naam:'Middenfase', a:seg1[1][0], b:seg1[1][1] });
-      push('h2f3', h2f3, setH2f3, H2_F3, 1, { naam:'Slotfase', a:seg1[seg1.length-1][0], b:seg1[seg1.length-1][1] });
-    }
-    return fases;
-  })();
   const [motm,setMotm]       = usePersistedState("motm", "");
-  const [motmHistory,setMotmHistory] = usePersistedState("motmHistory", {}); // { spelernaam: [cupId,...] } — cup-spaarsysteem
-  const [motmCup,setMotmCup] = usePersistedState("motmCup", null);           // cup toegekend voor de huidige wedstrijd (lock + weergave)
-  const [matchLock,setMatchLock] = usePersistedState("matchLock", null);     // clean-sheet slot voor de huidige wedstrijd
   const [motmRedenen,setMotmRedenen] = usePersistedState("motmRedenen", []);
   const toggleMotmReden = (key) => setMotmRedenen(prev => prev.includes(key) ? prev.filter(k=>k!==key) : [...prev,key]);
   // MOTM slogan generator — pakkende kreet op basis van geselecteerde redenen
@@ -340,11 +168,11 @@ export default function App({ boot }) {
     // Combinaties (worden eerst gecheckt)
     if (has("hattrick") && has("leader"))  return "MATCHWINNER";
     if (has("hattrick") && has("goal"))    return "GENADELOOS";
-    if (has("saves") && has("penstop"))    return "ONOVERWINNELIJK";
+    if (has("saves") && has("penstop"))    return "ONKLOPBAAR";
     if (has("defender") && has("leader"))  return "ROTSVAST";
     if (has("goal") && has("assist"))      return "ALLESBEPALEND";
     if (has("saves") && has("leader"))     return "STEUNPILAAR";
-    if (has("workrate") && has("leader"))  return "DE HARDE WERKER";
+    if (has("workrate") && has("leader"))  return "DE BEZIELER";
     if (has("playmaker") && has("assist")) return "DE REGISSEUR";
     // Enkele redenen
     if (has("hattrick"))  return "DE KILLER";
@@ -352,9 +180,9 @@ export default function App({ boot }) {
     if (has("saves"))     return "DE REDDER IN NOOD";
     if (has("goal"))      return "BESLISSEND";
     if (has("assist"))    return "DE AANGEVER";
-    if (has("playmaker")) return "DE MOTOR VAN DE PLOEG";
-    if (has("defender"))  return "HET SLOT";
-    if (has("leader"))    return "DE CAPTAIN";
+    if (has("playmaker")) return "SPELVERDELER";
+    if (has("defender"))  return "DE MUUR";
+    if (has("leader"))    return "DE KAPITEIN";
     if (has("workrate"))  return "ONVERZETTELIJK";
     return "UITBLINKER";
   };
@@ -366,28 +194,28 @@ export default function App({ boot }) {
     const n = nameParts.length > 0 && !TUSSENV.has(nameParts[0].toLowerCase())
       ? nameParts[0]
       : (nameParts.length > 1 ? nameParts[nameParts.length-1] : (nameParts[0] || "Hij"));
-    if (!redenen || redenen.length === 0) return `${n} stak er bovenuit en bekroonde z'n optreden als Man of the Match.`;
+    if (!redenen || redenen.length === 0) return `${n} stak er bovenuit en bekroonde z'n optreden met de spotlight.`;
     const has = (k) => redenen.includes(k);
     // Combinaties krijgen voorrang
     if (has("saves") && has("penstop"))   return `Een muur tussen de palen. ${n} hield z'n team in de wedstrijd — inclusief een gestopte strafschop.`;
-    if (has("hattrick") && has("leader")) return `Drie keer raak én bovenliggend in elk duel: ${n} ging vandaag voorop in de strijd.`;
+    if (has("hattrick") && has("leader")) return `Drie keer raak én leidinggevend in elk duel: ${n} ging vandaag voorop.`;
     if (has("hattrick") && has("goal"))   return `Genadeloos voor de goal. ${n} besliste het duel met een hattrick.`;
-    if (has("defender") && has("leader")) return `Foutloos in de defensie, de baas in elke duel — ${n} leidde de ploeg.`;
+    if (has("defender") && has("leader")) return `Onverstoorbaar in de defensie, kapitein in elke duel — ${n} ging vandaag voorop.`;
     if (has("goal") && has("assist"))     return `Allesbepalend in de eindfase: ${n} bezorgde z'n ploeg het beslissende moment.`;
-    if (has("saves") && has("leader"))    return `Steunpilaar op de belangrijkste momenten. ${n} hield het team overeind.`;
-    if (has("workrate") && has("leader")) return `Met onverzettelijkheid en kracht leidde ${n} z'n ploeg naar de overwinning.`;
-    if (has("playmaker") && has("assist"))return `De speler die elke aanval startte. ${n} regisseerde de wedstrijd van A tot Z.`;
+    if (has("saves") && has("leader"))    return `Steunpilaar op het belangrijkste moment. ${n} hield het team rechtop.`;
+    if (has("workrate") && has("leader")) return `Met onverzettelijkheid en gezag joeg ${n} z'n ploeg naar de overwinning.`;
+    if (has("playmaker") && has("assist"))return `De spelverdeler die elke aanval startte. ${n} regisseerde van A tot Z.`;
     // Enkele redenen
     if (has("hattrick"))  return `Drie keer raak: ${n} besliste de wedstrijd in z'n eentje.`;
-    if (has("penstop"))   return `De held van de middag: ${n} stopte een cruciale strafschop.`;
+    if (has("penstop"))   return `De held van de middag: ${n} stopte een levensgrote strafschop.`;
     if (has("saves"))     return `Een keeper kan een wedstrijd winnen — vandaag bewees ${n} dat opnieuw.`;
     if (has("goal"))      return `Het beslissende moment kwam van ${n} — koelbloedig op het juiste moment.`;
     if (has("assist"))    return `Onmisbaar in de aanval: ${n} stond aan de basis van iedere goal.`;
     if (has("playmaker")) return `De man die alles dirigeerde vanaf het middenveld: ${n} liet z'n elftal lopen.`;
-    if (has("defender"))  return `Geen speler kwam hem voorbij. ${n} was vandaag de baas in de defensie.`;
-    if (has("leader"))    return `Met overtuiging en klasse hielp ${n} z'n ploeg aan de overwinning.`;
+    if (has("defender"))  return `Geen bal voorbij gelaten. ${n} was vandaag een muur in de defensie.`;
+    if (has("leader"))    return `Met gezag en geloof joeg ${n} z'n ploeg naar de overwinning.`;
     if (has("workrate"))  return `Onvermoeibaar, onverzettelijk, onmisbaar — ${n} liet zien wat karakter is.`;
-    return `${n} stak er bovenuit en bekroonde z'n optreden als Man of the Match.`;
+    return `${n} stak er bovenuit en bekroonde z'n optreden met de spotlight.`;
   };
   const [stars,setStars]     = usePersistedState("stars", []);
   const [newStar,setNewStar] = useState("");
@@ -397,43 +225,17 @@ export default function App({ boot }) {
   const [specialInfo,setSpecialInfo] = usePersistedState("specialInfo", []); // [{type, player?}]
 
   // ── Navigation ──
-  // Punt 8: onthoud het laatst gebruikte scherm bij wisselen van apps (sessionStorage
-  // blijft bij app-wissel, maar wordt gewist bij volledig afsluiten → dan weer dashboard).
-  const [screen,setScreen]         = useState(()=>{
-    try { return sessionStorage.getItem("matchly_screen") || "dashboard"; } catch { return "dashboard"; }
-  });
-  useEffect(()=>{
-    try { sessionStorage.setItem("matchly_screen", screen); } catch {}
-  },[screen]);
-  // Punt 6: onthoud welke schermen je bezocht hebt, zodat "Terug" één stap teruggaat.
-  const screenHistory = useRef(["dashboard"]);
-  useEffect(()=>{
-    const h = screenHistory.current;
-    if (h[h.length-1] !== screen) h.push(screen);
-    if (h.length > 12) h.shift();
-  },[screen]);
-  const goBack = () => {
-    const h = screenHistory.current;
-    h.pop();                       // huidige scherm eraf
-    const target = h[h.length-1] || "dashboard";
-    setScreen(target);
-  };
+  const [screen,setScreen]         = useState("dashboard");
   const [clubSection,setClubSection] = useState("main"); // "main" | "spelerslijst" | "sponsoren" | "distributie"
-  const [showGuide,setShowGuide] = useState(false); // handleiding-overlay
   const [settingsTab,setSettingsTab] = useState("club"); // "club" | "team"
   const [hasStarted,setHasStarted] = useState(false);
-  const [showBasis,setShowBasis] = useState(false); // punt 11: basisopstelling-chips tonen/verbergen
   const [modal,setModal]           = useState(null);
-  const [editingEvent,setEditingEvent] = useState(null);
   const [confirm,setConfirm]       = useState(false);
 
   // ── AI output (PERSISTED — bespaart API calls bij refresh) ──
   const [aiOut,setAiOut]     = usePersistedState("aiOut", null);
-  const [locked,setLocked]   = usePersistedState("locked", false); // punt: na genereren staan wedstrijdgegevens op slot
   const [loading,setLoading] = useState(false);
   const [aiErr,setAiErr]     = useState(null);
-  const [geenToegang,setGeenToegang] = useState(false);
-  const [pasLoading,setPasLoading]   = useState(false);
   const [archive,setArchive] = usePersistedState("archive", []);
   const [expandedArchive,setExpandedArchive] = useState(null);
 
@@ -445,7 +247,7 @@ export default function App({ boot }) {
       club: clubName, team, opponent: opponent || "Onbekend",
       home, away, mKind, loc,
       events: events.map(e=>({type:e.type,half:e.half||null,minute:e.minute||null,extra:!!e.extra,player:e.player||null,assist:e.assist||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null,note:e.note||null})),
-      keyMoments: keyMoments.map(k=>({type:k.type.label,team:k.team==="tegenstander"?"tegenstander":(clubName||"eigen ploeg"),minute:k.minute,player:k.player||null,player2:k.player2||null})),
+      keyMoments: keyMoments.map(k=>({type:k.type.label,minute:k.minute,player:k.player||null,player2:k.player2||null})),
       specialInfo: specialInfo.map(s=>({type:s.type.label,player:s.player||null})),
       motm: motm || null,
       motmRedenen: [...motmRedenen],
@@ -466,36 +268,6 @@ export default function App({ boot }) {
       }
       return [snap, ...prev].slice(0, 100);
     });
-
-    // ── Stille opslag naar Supabase (fundering voor latere analyse-add-on) ──
-    // Schrijft de volledige wedstrijddata weg. Onzichtbaar voor de gebruiker;
-    // mag de verslag-flow nooit blokkeren, dus volledig in try/catch.
-    (async () => {
-      try {
-        const dbTeamId = boot?.profile?.team_id || null;
-        const dbClubId = boot?.profile?.club_id || null;
-        if (!supabase || !dbTeamId) return; // geen koppeling → niets opslaan
-        await supabase.from('wedstrijden').insert({
-          team_id: dbTeamId,
-          club_id: dbClubId,
-          datum: snap.date,
-          tegenstander: snap.opponent,
-          thuis: snap.loc !== 'uit',
-          doelpunten_voor: Number(snap.home) || 0,
-          doelpunten_tegen: Number(snap.away) || 0,
-          match_kind: snap.mKind || null,
-          motm: snap.motm || null,
-          events: snap.events || [],
-          opstelling: baseSquad || [],
-          headline: aiContent?.headline || null,
-          verslag: aiContent?.verslag || null,
-          samenvatting: aiContent?.samenvatting || null,
-          instagram: aiContent?.instagram || null,
-        });
-      } catch (e) {
-        // stil falen — lokale opslag en content blijven gewoon werken
-      }
-    })();
   };
   const [copied,setCopied]   = useState(null);
   const [dl,setDl]           = useState(false);
@@ -587,12 +359,8 @@ export default function App({ boot }) {
     : "";
 
   // ── Computed ──
-  // Herken het eerste elftal soepel (Heren 1, heren 1, 1e, eerste, 1) → dan gewoon de clubnaam
-  const isHeren1 = (()=>{
-    const t = (team||"").trim().toLowerCase();
-    return t === "heren 1" || t === "heren1" || t === "1e" || t === "eerste" || t === "1" || t === "het eerste";
-  })();
-  // Bij het eerste gewoon de clubnaam, anders clubnaam + teamnaam
+  const isHeren1 = team === "Heren 1";
+  // Bij Heren 1 gewoon de clubnaam, anders clubnaam + teamnaam
   const teamLabel = isHeren1 ? "" : team;
   const fullTeamName = teamLabel ? `${clubName} ${teamLabel}` : clubName;
 
@@ -605,33 +373,17 @@ export default function App({ boot }) {
     if(scrollRef.current) scrollRef.current.scrollTo({top:0,behavior:"instant"});
   },[screen, status]);
 
-  // Live timer — gebaseerd op de echte klok (loopt niet achter bij app-switch)
+  // Live timer
   useEffect(()=>{
-    if(status!=="LIVE") return;
-    const syncElapsed = () => {
-      if(!startTs) return;
-      const now = Date.now();
-      const curPause = (paused && pauseStartTs) ? (now - pauseStartTs) : 0;
-      const min = Math.max(1, Math.floor((now - startTs - pausedMs - curPause)/60000) + 1);
-      setElapsed(min);
-    };
-    syncElapsed();                                   // direct bijwerken
-    let id = null;
-    if(!paused) id = setInterval(syncElapsed, 15000); // elke 15s herberekenen
-    const onVis = () => { if(document.visibilityState==="visible") syncElapsed(); };
-    document.addEventListener("visibilitychange", onVis);
-    window.addEventListener("focus", syncElapsed);
-    return ()=>{
-      if(id) clearInterval(id);
-      document.removeEventListener("visibilitychange", onVis);
-      window.removeEventListener("focus", syncElapsed);
-    };
-  },[status,paused,startTs,pausedMs,pauseStartTs]);
+    if(status==="LIVE" && !paused) timer.current=setInterval(()=>setElapsed(t=>t+1),60000);
+    else clearInterval(timer.current);
+    return ()=>clearInterval(timer.current);
+  },[status,paused]);
 
   // Spelbeeld blok-grenzen → reminder
   useEffect(()=>{
     if (status !== "LIVE") return;
-    const blocks = matchBlocks;
+    const blocks = [[0,20],[21,35],[36,45],[45,65],[66,80],[81,90]];
     for (const [start,end] of blocks) {
       if (elapsed === end+1 && !reminderShown[end]) {
         setBlockReminder({ start, end, label: `${start}–${end}` });
@@ -641,14 +393,13 @@ export default function App({ boot }) {
     }
   },[elapsed,status]);
 
-  // Push: rust-herinnering aan het einde van de 1e helft (eenmalig, alleen bij 2 helften)
+  // Push: rust-herinnering op minuut 45 (eenmalig)
   useEffect(()=>{
     if (status !== "LIVE") return;
-    if (fmtHelften < 2) return;
-    if (elapsed !== halfDuur) return;
+    if (elapsed !== 45) return;
     if (reminderShown.rust45) return;
     setReminderShown(p => ({...p, rust45: true}));
-    pushNotify("⏸️ Tijd voor de rust", "Druk op de knop 'Wedstrijdtijd pauzeren' om de rust in te luiden.");
+    pushNotify("⏸️ Tijd voor de rust", "Druk zo op 'Wedstrijdtijd pauzeren' om de rust in te luiden.");
   },[elapsed,status]);
 
   // Push: 12 minuten na pauze → klaar voor 2e helft
@@ -697,64 +448,67 @@ export default function App({ boot }) {
     return [...clubSlice, { ...currentTeam, _isTeam:true }];
   })();
 
-  // Sponsor-niveaus met randkleur (goud/zilver/brons)
-  const TIER_GOLD = "#d4af37", TIER_SILVER = "#c4c4cc", TIER_BRONZE = "#cd7f32";
-  const goldSp   = sponsors.slice(0, 5).map(s=>({...s, _tier:"goud"}));
-  const silverSp = silverSponsors.slice(0, 4).map(s=>({...s, _tier:"zilver"}));
-  const bronzeSp = teamSponsors.slice(0, 1).map(s=>({...s, _tier:"brons"}));
-  // Match post: alleen 5 goud (hoofdsponsoren)
-  const postSponsors = goldSp;
-  // Story + MOTM-story: 5 goud + 4 zilver + 1 brons (zelfde sponsors op beide)
-  const storySponsors = [...goldSp, ...silverSp, ...bronzeSp];
-  const tierColor = (s) => s._tier==="goud"?TIER_GOLD : s._tier==="zilver"?TIER_SILVER : s._tier==="brons"?TIER_BRONZE : null;
-  // Gradient per niveau (render-veilig voor html2canvas: gradient als achtergrond van een wrapper)
-  const tierGradient = (s) => s._tier==="goud"   ? "linear-gradient(135deg,#fcefb4 0%,#e6c14e 35%,#b8860b 70%,#f5d97a 100%)"
-                            : s._tier==="zilver" ? "linear-gradient(135deg,#f4f5fa 0%,#cdced6 35%,#8e8e99 70%,#e3e4ea 100%)"
-                            : s._tier==="brons"  ? "linear-gradient(135deg,#eab97e 0%,#cd7f32 35%,#8f5420 70%,#dca066 100%)"
-                            : "#cccccc";
-
-  // ── Logo Search: eerst Supabase cache, dan find-logo als fallback ──
+  // ── HV Logo Search (shared for own + opponent) ──
   const searchHvLogo = async (naam, setUrl, setLoading_, setMsg) => {
-    if (!naam.trim()) return;
+    if(!naam.trim()) return;
     setLoading_(true);
     setMsg("");
-
-    // STAP 1: probeer eerst de Supabase-cache
     try {
-      const cachedUrl = await getLogoFromSupabase(naam);
-      if (cachedUrl) {
-        setUrl(cachedUrl);
-        setMsg("✓ Logo gevonden (cache)");
-        setLoading_(false);
-        return;
-      }
-    } catch (cacheErr) {
-      console.log("Supabase cache lookup faalde:", cacheErr);
-    }
+      const vraag = `Zoek op hollandsevelden.nl het clublogo voor de Nederlandse amateurvoetbalclub "${naam}".
+Geef ALLEEN de directe URL van de logo-afbeelding terug (eindigt op .png, .jpg, .jpeg, .svg, .webp of bevat /logo).
+Typische URL structuur: https://www.hollandsevelden.nl/... of https://cms.hollandsevelden.nl/...
+Geef UITSLUITEND de URL terug, geen extra tekst, geen uitleg.`;
 
-    // STAP 2: niet in cache → zoek via find-logo
-    try {
-      const res = await fetch("/.netlify/functions/find-logo", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ clubName: naam.trim() })
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+          model:"claude-sonnet-4-20250514",
+          max_tokens:300,
+          tools:[{"type":"web_search_20250305","name":"web_search"}],
+          messages:[{role:"user",content:vraag}]
+        })
       });
-
-      if (!res.ok) throw new Error(`API ${res.status}`);
       const data = await res.json();
+      const blocks = data.content || [];
+      const toolBlocks = blocks.filter(b=>b.type==="tool_use");
 
-      if (data.logoUrl) {
-        setUrl(data.logoUrl);
-        setMsg("✓ Logo gevonden");
-        // STAP 3: bewaar in Supabase voor volgende keer
-        saveLogoToSupabase(naam, data.displayName || naam, data.logoUrl).catch(saveErr => {
-          console.log("Supabase opslaan faalde:", saveErr);
+      let txt = "";
+      if(toolBlocks.length > 0) {
+        const res2 = await fetch("https://api.anthropic.com/v1/messages",{
+          method:"POST",
+          headers:{"Content-Type":"application/json"},
+          body:JSON.stringify({
+            model:"claude-sonnet-4-20250514",
+            max_tokens:300,
+            tools:[{"type":"web_search_20250305","name":"web_search"}],
+            messages:[
+              {role:"user",content:vraag},
+              {role:"assistant",content:blocks},
+              {role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Geef ALLEEN de directe logo afbeeldingsURL terug van hollandsevelden.nl. Geen andere tekst."}))}
+            ]
+          })
         });
+        const d2 = await res2.json();
+        txt = (d2.content||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
       } else {
-        setMsg(data.reason || "Niet gevonden — upload handmatig");
+        txt = (blocks||[]).map(b=>b.type==="text"?b.text:"").join("").trim();
       }
-    } catch (e) {
-      setMsg("Zoeken mislukt — " + (e.message || "onbekende fout"));
+
+      // Extract URL from response
+      const urlMatch = txt.match(/https?:\/\/[^\s"'<>\n,]+(?:\.png|\.jpg|\.jpeg|\.svg|\.webp)/i)
+                    || txt.match(/https?:\/\/[^\s"'<>\n,]+\/(?:logo|clublogo|emblem)[^\s"'<>\n,]*/i)
+                    || txt.match(/https?:\/\/[^\s"'<>\n,]+hollandsevelden[^\s"'<>\n,]+/i);
+
+      if(urlMatch && urlMatch[0]) {
+        const cleanUrl = urlMatch[0].replace(/[.,;!?)]+$/, "");
+        setUrl(cleanUrl);
+        setMsg("✓ Logo gevonden");
+      } else {
+        setMsg("Niet gevonden — upload handmatig");
+      }
+    } catch(e) {
+      setMsg("Zoeken mislukt");
     }
     setLoading_(false);
   };
@@ -784,7 +538,7 @@ export default function App({ boot }) {
     setTeamIdLoading(true); setTeamIdMsg("");
     try {
       const vraag = `Zoek het KNVB team-ID voor "${clubName} ${team}" op voetbal.nl. Het team-ID staat in de URL: voetbal.nl/teams/nederland/team/[ID]/show/. Geef ALLEEN het numerieke ID terug, niets anders.`;
-      const res = await fetch("/.netlify/functions/anthropic",{
+      const res = await fetch("https://api.anthropic.com/v1/messages",{
         method:"POST",
         headers:{"Content-Type":"application/json"},
         body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag}]})
@@ -794,7 +548,7 @@ export default function App({ boot }) {
       const toolBlocks = blocks.filter(b=>b.type==="tool_use");
       let finalData = data;
       if(toolBlocks.length > 0) {
-        const res2 = await fetch("/.netlify/functions/anthropic",{
+        const res2 = await fetch("https://api.anthropic.com/v1/messages",{
           method:"POST",
           headers:{"Content-Type":"application/json"},
           body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:200,tools:[{"type":"web_search_20250305","name":"web_search"}],messages:[{role:"user",content:vraag},{role:"assistant",content:blocks},{role:"user",content:toolBlocks.map(tb=>({type:"tool_result",tool_use_id:tb.id,content:"Verwerk de resultaten."}))}]})
@@ -845,64 +599,29 @@ export default function App({ boot }) {
 
   // ── Match actions ──
   const addEv = ev => {
-    if(locked) return;
-    setEvents(prev=>{
-      const bestaand = prev.find(e=>e.id===ev.id);
-      if(bestaand){
-        if(bestaand.type==="GOAL" && ev.type!=="GOAL") setHome(s=>Math.max(0,s-1));
-        if(bestaand.type!=="GOAL" && ev.type==="GOAL") setHome(s=>s+1);
-        if(bestaand.type==="OWN" && ev.type!=="OWN") setAway(s=>Math.max(0,s-1));
-        if(bestaand.type!=="OWN" && ev.type==="OWN") setAway(s=>s+1);
-        return prev.map(e=>e.id===ev.id?ev:e).sort((a,b)=>(+a.minute||0)-(+b.minute||0));
-      }
-      if(ev.type==="GOAL") setHome(s=>s+1);
-      if(ev.type==="OWN")  setAway(s=>s+1);
-      return [...prev,ev].sort((a,b)=>(+a.minute||0)-(+b.minute||0));
-    });
+    setEvents(p=>[...p,ev].sort((a,b)=>(+a.minute||0)-(+b.minute||0)));
+    if(ev.type==="GOAL") setHome(s=>s+1);
+    if(ev.type==="OWN")  setAway(s=>s+1);
   };
   const delEv = id => {
-    if(locked) return;
     const ev=events.find(e=>e.id===id);
     if(ev?.type==="GOAL") setHome(s=>Math.max(0,s-1));
     if(ev?.type==="OWN")  setAway(s=>Math.max(0,s-1));
     setEvents(p=>p.filter(e=>e.id!==id));
   };
-  const editEv = ev => {
-    if(locked) return;
-    setEditingEvent(ev);
-    if(ev.type==="GOAL"||ev.type==="OWN") setModal(ev.type==="OWN"?"OWN":"GOAL");
-    else if(ev.type==="YELLOW"||ev.type==="RED") setModal(ev.type);
-    else if(ev.type==="SUB") setModal("SUB");
-  };
   const cp = (txt,k) => { navigator.clipboard.writeText(txt); setCopied(k); setTimeout(()=>setCopied(null),2500); };
-  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setStartTs(Date.now()); setPausedMs(0); setPauseStartTs(0); setElapsed(1); setScreen("dashboard"); };
-  // Rust starten/hervatten — telt de rusttijd correct mee in de klok
-  const togglePause = () => {
-    const now = Date.now();
-    if(!paused){
-      setPauseStartTs(now);            // rust begint
-    } else {
-      if(pauseStartTs) setPausedMs(m => m + (now - pauseStartTs));  // rust optellen
-      setPauseStartTs(0);
-    }
-    setPaused(p => !p);
-  };
-  // Handmatige tijdcorrectie — verschuift het starttijdstip zodat de klok-sync dit respecteert
-  const adjustTime = (deltaMin) => {
-    setStartTs(ts => ts ? ts - deltaMin*60000 : ts);
-    setElapsed(e => Math.max(1, e + deltaMin));
-  };
+  const startMatch = () => { setHasStarted(true); setStatus("LIVE"); setScreen("dashboard"); };
 
   const resetMatch = () => {
     setHasStarted(false); setStatus("PRE"); setHome(0); setAway(0); setEvents([]);
     setOpp(""); setMKind(""); setLoc("thuis"); setKick(""); setMatchDate(""); setWeather(""); setElapsed(0);
-    setReminderShown({}); setBlockReminder(null); setPaused(false); setStartTs(0); setPausedMs(0); setPauseStartTs(0);
+    setReminderShown({}); setBlockReminder(null); setPaused(false);
     setAlgBeld(""); setH1f1(""); setH1f2(""); setH1f3("");
     setH2f1(""); setH2f2(""); setH2f3("");
-    setMotm(""); setStars([]); setBijzT([]); setBijzN(""); setMotmRedenen([]); setMotmCup(null); setMatchLock(null);
+    setMotm(""); setStars([]); setBijzT([]); setBijzN(""); setMotmRedenen([]);
     setKeyMoments([]); setSpecialInfo([]);                  // wedstrijdmomenten + bijzonderheden leegmaken
     setOppLogoUrl(""); setOppLogoMsg("");
-    setAiOut(null); setLocked(false); setAiErr(null); setScreen("dashboard");
+    setAiOut(null); setAiErr(null); setScreen("dashboard");
     // chosenTheme NIET resetten — laatst gekozen design-keuze blijft voor de volgende wedstrijd (gebruiksgemak)
     setChecklist({afb:false,wa:false,mail:false,social:false});
     // autoFetchedRef NIET resetten — na 1e auto-fetch geen automatische ophaal meer (alleen via ↻ knop)
@@ -927,10 +646,10 @@ export default function App({ boot }) {
     setNextMatchMsg("");
     try {
       const today = new Date().toLocaleDateString("nl-NL",{day:"numeric",month:"long",year:"numeric"});
-      const fullTeam = isHeren1 ? clubName : `${clubName} ${team}`.trim();
+      const fullTeam = `${clubName} ${isHeren1?team:team}`.trim();
       const compInfo = hvCompUrl
         ? `De competitie staat op deze HollandsVelden URL: ${hvCompUrl}`
-        : `Zoek op voetbal.nl of de KNVB competitiepagina voor ${isHeren1?clubName:`${clubName} ${team}`}.`;
+        : `Zoek op voetbal.nl of de KNVB competitiepagina voor ${clubName} ${team}.`;
 
       const vraag = `Zoek de eerstvolgende geplande wedstrijd voor "${fullTeam}" — inclusief vandaag (${today}) of later.
 
@@ -989,7 +708,7 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
       const dateStr = result.datum ? new Date(result.datum).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"}) : "";
       setNextMatchMsg(`✓ ${result.tegenstander}${dateStr?` · ${dateStr}`:""}${conf==="laag"?" (controleer)":""}`);
     } catch(e) {
-      setNextMatchMsg("⚠ Ophalen mislukt — "+(e.message||"onbekende fout"));
+      setNextMatchMsg("⚠ Ophalen mislukt: "+(e.message||"onbekende fout"));
     } finally {
       setNextMatchLoading(false);
     }
@@ -1024,119 +743,51 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     return () => clearTimeout(t);
   }, []);
 
-  const koopWedstrijdpas = async () => {
-    const clubId = boot?.profile?.club_id;
-    const teamId = boot?.profile?.team_id;
-    if (!clubId) return;
-    setPasLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('mollie-wedstrijdpas-payment', {
-        body: { club_id: clubId, team_id: teamId },
-      });
-      if (data?.checkoutUrl) window.location.href = data.checkoutUrl;
-      else { setPasLoading(false); alert(data?.error || error?.message || "Er ging iets mis. Probeer het opnieuw."); }
-    } catch (e) { setPasLoading(false); alert("Geen verbinding. Probeer het opnieuw."); }
-  };
-
   const endMatch = async () => {
-    // ── Cup toekennen aan de Man of the Match (één keer per wedstrijd, alleen bij winst/gelijk) ──
-    if (motm && home >= away && !motmCup) {
-      const hist = motmHistory[motm] || [];
-      const newHist = awardMotm(hist);
-      setMotmHistory({ ...motmHistory, [motm]: newHist });
-      setMotmCup(newHist[newHist.length - 1]);
-    }
-    // ── Clean sheet → willekeurig slot voor deze wedstrijd (mag variëren) ──
-    if (away === 0 && !matchLock) setMatchLock(randomLockId());
     if (!isOnline) {
       // Sla wedstrijd lokaal op, sla AI-generatie over tot weer online
       setStatus("FINISHED");
       setScreen("output");
-      setAiErr("📵 Geen internet — De content kon niet gemaakt worden. Wedstrijd is opgeslagen. Probeer opnieuw via 'Hergenereer' zodra je online bent.");
+      setAiErr("📵 Geen internet — content kon niet gegenereerd worden. Match staat opgeslagen. Probeer opnieuw via 'Hergenereer' zodra je online bent.");
       archiveMatch(null);
       return;
     }
     setConfirm(false); setStatus("FINISHED"); setScreen("output");
     setLoading(true); setAiErr(null); setAiOut(null);
-
-    // ── Wedstrijdpas-check: mag deze club content maken? ──
-    // mag_content_maken geeft 'abonnement', 'pas' of 'geen' terug.
-    // (In de testfase geeft dit 'abonnement' via de trial, dus de knop blijft onzichtbaar.
-    //  Bij een fout/geen verbinding gaan we gewoon door — nooit onterecht blokkeren.)
-    const _clubId = boot?.profile?.club_id;
-    viaPasRef.current = false;
-    if (_clubId) {
-      try {
-        const { data: reden } = await supabase.rpc('mag_content_maken', { p_club_id: _clubId });
-        if (reden === 'geen') {
-          setLoading(false); setAiOut(null); setGeenToegang(true);
-          return;
-        }
-        if (reden === 'pas') viaPasRef.current = true;  // pas verbruiken na geslaagde generatie
-      } catch (e) { /* bij twijfel doorgaan */ }
-    }
-    setGeenToegang(false);
-
     // Bij eerste wedstrijd: pak een willekeurig thema. Daarna onthouden voor gebruiksgemak.
     if (!chosenTheme) {
       const picked = THEMES[Math.floor(Math.random() * THEMES.length)];
       setChosenTheme(picked.id);
     }
-    const TYPE_NL = { GOAL:"doelpunt eigen ploeg", OWN:"tegendoelpunt (tegenstander scoorde)", YELLOW:"gele kaart", RED:"rode kaart", SUB:"wissel" };
-    const evData = events.map(e=>({type:TYPE_NL[e.type]||e.type,team:e.type==="GOAL"?"eigen ploeg":e.type==="OWN"?"tegenstander":(e.isOpponent?"tegenstander":"eigen ploeg"),half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?totaalDuur:halfDuur}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
-    const wedstrijdMomenten = keyMoments.map(m=>{const tm=m.team==="tegenstander"?"tegenstander":(clubName||"eigen ploeg");return `${m.minute}' ${m.type.label} — ${tm}${m.player?` (${m.player}${m.player2?` ⇄ ${m.player2}`:""})`:""}`;}).join(", ")||null;
+    const evData = events.map(e=>({type:e.type,half:e.half||null,minute:e.minute?(e.extra?`${e.half==="2"?90:45}+${e.minute}`:String(e.minute)):null,player:e.player||null,assist:e.assist||null,goalType:e.goalType||null,reason:e.reason||null,playerOut:e.playerOut||null,playerIn:e.playerIn||null}));
+    const wedstrijdMomenten = keyMoments.map(m=>`${m.minute}' ${m.type.label}${m.player?` (${m.player}${m.player2?` ⇄ ${m.player2}`:""})`:""}`).join(", ")||null;
     const bijzondereInfo = specialInfo.map(s=>`${s.type.label}${s.player?` (${s.player})`:""}`).join(", ")||null;
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
     const samenvattingSpec = goalCount<=2
-      ? "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Een complete, lopende samenvatting van de wedstrijd — geen losse flard of afgeknipte zin. Hou het bondig want er gebeurde weinig."
+      ? "1 zin, 15-25 woorden. Hou het kort want er gebeurde weinig."
       : goalCount>=5
-        ? "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Vat het verloop en de beslissende fase samen in een complete, lopende tekst — nooit langer dan 150 tekens, dus kies de kern."
-        : "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin.";
+        ? "2-3 zinnen, 40-60 woorden. Beschrijf het verloop en de beslissende fase."
+        : "Maximaal 2 zinnen, 25-35 woorden.";
 
     const sysAdult=`Je schrijft wedstrijdverslagen voor Matchly, een app voor amateurvoetbalclubs.
 SCHRIJFSTIJL: ${stijl}.
 Qua vorm en toon sluit je aan bij hoe Voetbalzone.nl, AD Sport en Telesport wedstrijden beschrijven: feitelijk, vloeiend en leesbaar. Geen droge opsomming, maar een lopend verhaal. Zinslengte varieert bewust — kort en lang door elkaar — voor ritme. Geen omhaal van woorden. Schrijf alsof je het aan een voetballiefhebber vertelt die de wedstrijd niet zag maar wel snapt hoe het spel werkt. Varieer openingszin en structuur per verslag.
 
-VOORBEELDEN VAN GOEDE OPENINGEN (qua toon en variatie voor elke uitslag — gebruik de echte clubnamen, niet verzinnen):
+VOORBEELDEN VAN GOEDE OPENINGEN (qua toon, niet verzinnen):
 - "VV GroenWit pakte op karakter de drie punten tegen SV Blauw-Wit."
 - "Een vroege voorsprong gaf VV GroenWit vertrouwen tegen SV Blauw-Wit."
-- "Na een rustig begin voerde VV GroenWit het tempo op en versloeg SV Blauw-Wit met 3-2."
-- "SV Blauw-Wit was te sterk voor VV GroenWit en pakte terecht de drie punten."
-- "VV GroenWit kon het verschil niet maken en ging onderuit tegen SV Blauw-Wit."
-- "Een vroege tegentreffer zette de toon — VV GroenWit kwam er niet meer aan te pas."
-- "VV GroenWit en SV Blauw-Wit hielden elkaar in evenwicht en deelden de punten."
-- "Een punt was het maximale voor VV GroenWit na een gelijkopgaande wedstrijd."
-- "VV GroenWit greep net naast de winst en moest genoegen nemen met een gelijkspel."
-- "VV GroenWit was oppermachtig en gunde SV Blauw-Wit geen moment om op adem te komen."
-- "Een dik verdiende overwinning voor VV GroenWit, dat SV Blauw-Wit volledig overklaste."
-- "Van meet af aan de baas — VV GroenWit liet SV Blauw-Wit kansloos."
+- "Na een rustig begin schakelde VV GroenWit door en versloeg SV Blauw-Wit met 3-2."
 
-VOORBEELDEN VAN GOEDE HEADLINES (variatie voor elke uitslag):
+VOORBEELDEN VAN GOEDE HEADLINES:
 - "Tom van der Meer kopt VV GroenWit in slotfase langs SV Blauw-Wit"
-- "Karakter levert VV GroenWit de drie punten op tegen SV Blauw-Wit"
-- "VV GroenWit houdt stand ondanks twee tegentreffers"
-- "VV GroenWit bezwijkt onder druk van SV Blauw-Wit"
-- "Vroege achterstand fataal voor VV GroenWit"
-- "SV Blauw-Wit te sterk voor vechtend VV GroenWit"
-- "VV GroenWit en SV Blauw-Wit komen niet tot een winnaar"
-- "Gelijkspel voor VV GroenWit na sterke tweede helft"
-- "VV GroenWit pakt een punt maar had meer verdiend"
-- "VV GroenWit walst over SV Blauw-Wit heen"
-- "Ruime zege voor dominant VV GroenWit"
-- "VV GroenWit sloopt SV Blauw-Wit met doelpuntenfestijn"
+- "Karakter brengt VV GroenWit drie punten tegen SV Blauw-Wit"
+- "VV GroenWit houdt stand na twee tegentreffers"
 
 TAAL: Schrijf in helder Nederlands op B1-niveau. Gebruik gewone, herkenbare woorden. Zeg altijd "coach", nooit "trainer".
 
-VOORBEELDVERSLAG (let op de toon, opbouw, zinsritme en het natuurlijke voetbaltaalgebruik — neem deze tekst NOOIT letterlijk over, schrijf altijd op basis van de echte data en clubnamen):
-"VV GroenWit heeft de uitwedstrijd bij SV Blauw-Wit met 2-3 gewonnen. Het werd een wedstrijd met twee gezichten, waarin de bezoekers in de slotfase het verschil maakten.
-De thuisploeg begon het scherpst en kwam al vroeg op voorsprong. Een snelle aanval over rechts werd binnengetikt door de spits van Blauw-Wit: 1-0. GroenWit had even tijd nodig om in de wedstrijd te komen, maar trok het initiatief halverwege de eerste helft naar zich toe. Die druk leverde vlak voor rust de gelijkmaker op, toen Tom van der Meer een vrije trap hard in de kruising schoot: 1-1.
-Na de onderbreking golfde het spel op en neer. Over en weer vielen er kansen, maar het was Blauw-Wit dat opnieuw toesloeg uit een counter: 2-1. GroenWit gaf zich niet gewonnen en bleef aandringen. Die volharding werd beloond met een rake kopbal uit een hoekschop, weer met Van der Meer als doelpuntenmaker: 2-2.
-In een spannende slotfase raakte de thuisploeg nog het aluminium, maar een minuut na die kans besliste GroenWit de wedstrijd. Een rush over links werd hard binnengeschoten: 2-3. Daar bleef het bij. Een verdiende overwinning voor GroenWit, dat na rust het meeste geloof toonde."
-
 REGELS:
-- Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd — geen verzonnen kansen, blessures, weersomstandigheden of sfeerbeelden tenzij die letterlijk zijn aangeleverd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
-- Noem de eigen ploeg precies zoals aangeleverd in het "club"-veld. Voeg er NOOIT zelf een teamaanduiding zoals "Heren 1", "het eerste" of een elftalnummer aan toe als dat niet in de aangeleverde naam staat. Staat er "Kethel Spaland", schrijf dan "Kethel Spaland", niet "Kethel Spaland Heren 1".
+- Gebruik ALLEEN de aangeleverde data. Verzin NOOIT spelersnamen, gebeurtenissen of details.
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
 - Verwerk het spelbeeld chronologisch per fase in het verslag.
 - Vermijd clichés als "spannend duel", "de jongens", "goed gestreden", "beide ploegen", "belangrijke punten", "onder toeziend oog van", "knappe prestatie", "uitstekend werk".
@@ -1144,19 +795,6 @@ REGELS:
 - Wissel zinslengte af: combineer korte, krachtige zinnen (5–8 woorden) met langere, beschrijvende zinnen (15–20 woorden). Vermijd drie of meer zinnen van vergelijkbare lengte achter elkaar.
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
 - Gebruik concrete, specifieke bewoordingen. Geen vage omschrijvingen.
-- Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
-- Bepaal de helft op basis van de minuut: minuut 1 t/m ${halfDuur} = eerste helft, minuut ${halfDuur+1} en later = tweede helft (deze wedstrijd: ${fmtHelften>=2?`${fmtHelften} helften van ${halfDuur} minuten`:`${halfDuur} minuten`}). Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
-- Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
-- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
-- Varieer bij het beschrijven van een "Counter" met natuurlijke synoniemen voor meer dynamiek: "counter", "omschakelmoment", "snelle uitval", "snelle omschakeling", "tegenaanval" of "uitbraak". Gebruik niet steeds hetzelfde woord; kies wat in de zin het beste past.
-- Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk". Verwijs er later ook NOOIT naar terug als "die paal" of "de lat"; een bal op het aluminium is een gemiste kans, dus refereer er aan als "die kans" of "die mogelijkheid" (bijv. "een minuut na die kans viel de 3-1").
-- Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
-- Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
-- Schrijf nooit "een raket" voor een hard schot of doelpunt — dat is geen natuurlijk Nederlands. Gebruik in plaats daarvan "een knal", "een pegel", "een rotschot", "een schitterend doelpunt" of "van afstand raak". Varieer met deze termen.
-- Gebruik nooit gekunstelde duidingen als "een lichte verstoring", "een kleine domper" of vergelijkbaar bij een kaart of moment. Blijf feitelijk: meld gewoon dat de speler geel/rood pakte, zonder geforceerde interpretatie.
-- Let op thuis of uit (zie het "locatie"-veld). Bij een THUISwedstrijd hou je "de punten thuis" of "houdt de ploeg de drie punten in eigen huis" — schrijf dan NOOIT dat de ploeg "de zege naar huis brengt" of "de punten meeneemt". Bij een UITwedstrijd "neemt de ploeg de punten mee" of "neemt de drie punten mee naar huis". Kies de juiste uitdrukking op basis van thuis/uit.
-- Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
-- Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
 
 VERSLAG: 150–250 woorden. Chronologisch per fase. Sluit af met eindstand.
@@ -1184,8 +822,7 @@ VOORBEELDEN VAN GOEDE HEADLINES:
 TAAL: heel eenvoudige, toegankelijke woorden. Korte zinnen. Geen moeilijke termen. Zeg "coach", niet "trainer". Gebruik natuurlijke jeugdvoetbalwoorden: spelertjes, team, jongens en meiden, het elftal, wedstrijd, inzet, plezier.
 
 REGELS:
-- Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
-- Noem de eigen ploeg precies zoals aangeleverd in het "club"-veld. Voeg er NOOIT zelf een teamaanduiding zoals "Heren 1", "het eerste" of een elftalnummer aan toe als dat niet in de aangeleverde naam staat.
+- Gebruik ALLEEN de aangeleverde data. Verzin NOOIT spelersnamen, gebeurtenissen of details.
 - Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
 - Schrijf korte zinnen (gemiddeld 6–12 woorden). Een enkele langere zin mag, maar wees zuinig.
 - Beschrijf wat er gebeurde in begrijpelijke taal. Geen tactiek, geen analyse, geen technische bespiegelingen.
@@ -1194,19 +831,6 @@ REGELS:
 - Gebruik geen emoji's in de tekstoutput.
 - Vermijd zakelijke of volwassen woorden ("tactisch", "balbezit", "compact spel", "uitstekend gepresteerd", "knappe prestatie", "beslissende fase").
 - Geen kritiek of negatieve opmerkingen over spelertjes, coach of tegenstander.
-- Gebruik nooit het woord "scoreloos" — schrijf altijd "doelpuntloos".
-- Bepaal de helft op basis van de minuut: minuut 1 t/m ${halfDuur} = eerste helft, minuut ${halfDuur+1} en later = tweede helft (deze wedstrijd: ${fmtHelften>=2?`${fmtHelften} helften van ${halfDuur} minuten`:`${halfDuur} minuten`}). Beschrijf een helft NOOIT als "doelpuntloos", "rustig" of "stil" als er volgens de minuten in die helft is gescoord. Tel de doelpunten per helft correct.
-- Bij elk wedstrijdmoment staat achter het type wie het betreft (de eigen ploeg of de tegenstander). Beschrijf het vanuit het juiste team — bijvoorbeeld "een grote kans voor de thuisploeg" of "een grote kans van de tegenstander". Verwar de twee nooit.
-- Een "tegendoelpunt" betekent dat de TEGENSTANDER scoorde — noem dit NOOIT een "eigen goal". Het veld goalType beschrijft hoe er gescoord werd (bv. "Corner" = uit een hoekschop, "Strafschop"/"Penalty" = strafschop, "Counter" = uit een snelle omschakeling/uitbraak, "Open spel" = uit open spel). Alleen wanneer goalType letterlijk "Eigen goal" is, gaat het om een doelpunt in eigen doel.
-- Varieer bij een "Counter" met eenvoudige synoniemen: "snelle uitval", "omschakeling" of "tegenaanval". Gebruik niet steeds hetzelfde woord.
-- Schrijf nooit "paal" of "lat" — gebruik "het aluminium" of "het houtwerk". Verwijs er later ook NOOIT naar terug als "die paal" of "de lat"; een bal op het aluminium is een gemiste kans, dus refereer er aan als "die kans" of "die mogelijkheid" (bijv. "een minuut na die kans viel de 3-1").
-- Schrijf nooit "middenfase" — gebruik "halverwege de wedstrijd".
-- Schrijf nooit "het slot op de wedstrijd gooien" — de correcte uitdrukking is "de wedstrijd in het slot gooien".
-- Schrijf nooit "een raket" voor een hard schot of doelpunt — dat is geen natuurlijk Nederlands. Gebruik in plaats daarvan "een knal", "een pegel", "een rotschot", "een schitterend doelpunt" of "van afstand raak". Varieer met deze termen.
-- Gebruik nooit gekunstelde duidingen als "een lichte verstoring", "een kleine domper" of vergelijkbaar bij een kaart of moment. Blijf feitelijk: meld gewoon dat de speler geel/rood pakte, zonder geforceerde interpretatie.
-- Let op thuis of uit (zie het "locatie"-veld). Bij een THUISwedstrijd hou je "de punten thuis" of "houdt de ploeg de drie punten in eigen huis" — schrijf dan NOOIT dat de ploeg "de zege naar huis brengt" of "de punten meeneemt". Bij een UITwedstrijd "neemt de ploeg de punten mee" of "neemt de drie punten mee naar huis". Kies de juiste uitdrukking op basis van thuis/uit.
-- Vermijd AI-achtige woorden en zinsopbouw — schrijf zoals een mens het zou zeggen, met natuurlijk gebruik van lidwoorden.
-- Controleer je tekst tot slot als een Nederlandse redacteur en herschrijf alle onnatuurlijke of houterige zinnen.
 - Benoem doelpuntenmakers, wissels en bijzondere momenten. Voeg waar passend kleine, positieve observaties toe over inzet, plezier of sfeer.
 - Schrijf actieve zinnen. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 
@@ -1222,15 +846,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
       setAiOut(parsed);
-      setLocked(true);
       archiveMatch(parsed);
-      // Kwam de toegang van een wedstrijdpas? Stempel die nu af (eenmalig gebruik).
-      if (viaPasRef.current) {
-        const _cid = boot?.profile?.club_id;
-        if (_cid) { try { await supabase.rpc('verbruik_wedstrijdpas', { p_club_id: _cid, p_wedstrijd_id: null }); } catch (e) {} }
-        viaPasRef.current = false;
-      }
-    } catch { setAiErr("Mislukt. Controleer de data en probeer opnieuw."); }
+    } catch { setAiErr("Generatie mislukt. Controleer de data en probeer opnieuw."); }
     setLoading(false);
   };
 
@@ -1238,8 +855,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
     if(!instaRef.current) return; setDl(true);
     try {
       const h2c=await loadH2C();
-      const dpr=Math.max(window.devicePixelRatio||1,2);
-      const cv=await h2c(instaRef.current,{backgroundColor:T.bg0,scale:dpr*2,useCORS:true,logging:false});
+      const cv=await h2c(instaRef.current,{backgroundColor:T.bg0,scale:3,useCORS:true,logging:false});
       const w=window.open();
       w.document.write(`<html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;"><p style="color:#555;font-family:sans-serif;font-size:13px;">📱 Houd de afbeelding ingedrukt om op te slaan</p><img src="${cv.toDataURL("image/png")}" style="max-width:92vw;max-height:92vh;border-radius:16px;" /></body></html>`);
     } catch { alert("Mislukt."); }
@@ -1293,14 +909,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
     // Voegt nieuwe teamsponsor toe met de bestandsnaam als startwaarde voor de naam
     const cleanName = f.name.replace(/\.[^/.]+$/, ""); // strip extensie
     setTeamSponsors(prev => [...prev, { name: cleanName, url }]);
-    e.target.value = "";
-  };
-  const handleSilverSponsorLogo = async e => {
-    const f = e.target.files[0];
-    if (!f) return;
-    const url = await compressImage(f);
-    const cleanName = f.name.replace(/\.[^/.]+$/, "");
-    setSilverSponsors(prev => prev.length>=4 ? prev : [...prev, { name: cleanName, url }]);
     e.target.value = "";
   };
 
@@ -1372,7 +980,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
     for (const d of delays) {
       if (d > 0) await sleep(d);
       try {
-        const res = await fetch("/.netlify/functions/anthropic", {
+        const res = await fetch("https://api.anthropic.com/v1/messages", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(payload)
@@ -1812,28 +1420,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
     </div>
   );
 
-
-  async function hdSend(text) {
-    const m2 = (text || hdInput).trim();
-    if (!m2 || hdLoading) return;
-    setHdInput('');
-    const next = [...hdMsgs, { role:"user", content:m2 }];
-    setHdMsgs(next);
-    setHdLoading(true);
-    try {
-      const res = await fetch("/.netlify/functions/anthropic", {
-        method:"POST",
-        headers:{"Content-Type":"application/json"},
-        body:JSON.stringify({ model:"claude-sonnet-4-20250514", max_tokens:512,
-          system:HD_PROMPT_M, messages:next.map(m=>({role:m.role,content:m.content})) }),
-      });
-      const data = await res.json();
-      const reply = data.content?.find(b=>b.type==="text")?.text || "Probeer het opnieuw of mail info@matchlyapp.nl.";
-      setHdMsgs(prev=>[...prev,{role:"assistant",content:reply}]);
-    } catch { setHdMsgs(prev=>[...prev,{role:"assistant",content:"Verbindingsfout — probeer opnieuw."}]); }
-    finally { setHdLoading(false); }
-  }
-
   return (
     <>
       <style>{`
@@ -1859,7 +1445,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
         <div style={{width:"100%",maxWidth:430,background:T.bg1,height:"100dvh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
 
           {/* HEADER */}
-          <MatchHeader clubName={clubName} opponent={opponent} homeScore={home} awayScore={away} status={status} elapsed={elapsed} paused={paused} clubLogo={logo} hvLogoUrl={hvLogoUrl} oppLogoUrl={oppLogoUrl} C={C} sec={sec} setElapsed={setElapsed} adjustTime={adjustTime} />
+          <MatchHeader clubName={clubName} opponent={opponent} homeScore={home} awayScore={away} status={status} elapsed={elapsed} paused={paused} clubLogo={logo} hvLogoUrl={hvLogoUrl} oppLogoUrl={oppLogoUrl} C={C} sec={sec} setElapsed={setElapsed} />
 
           {/* Offline banner - global */}
           {!isOnline && (
@@ -1883,25 +1469,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
           {/* NAV */}
           <div style={{background:T.bg0,borderBottom:`1px solid ${T.border}`,padding:"10px 20px",display:"flex",alignItems:"center",justifyContent:"space-between"}}>
             {screen!=="dashboard"
-              ? <div style={{display:"flex",alignItems:"center",gap:16}}>
-                  <button onClick={()=>setScreen("dashboard")} style={{background:"none",border:"none",color:T.text3,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,letterSpacing:0.5,display:"flex",alignItems:"center",gap:6,padding:0}}>
-                    <span style={{fontSize:20,lineHeight:1,fontWeight:300}}>‹</span> Dashboard
-                  </button>
-                  {(screen==="overzicht" || (screen==="club" && clubSection!=="main")) && (
-                    <button onClick={()=> (screen==="club" ? setClubSection("main") : goBack())} style={{background:"rgba(255,255,255,0.05)",border:`1px solid ${T.border2}`,color:T.text3,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,letterSpacing:0.5,display:"flex",alignItems:"center",gap:5,padding:"5px 12px",borderRadius:100}}>
-                      <span style={{fontSize:15,lineHeight:1}}>↩</span> Terug
-                    </button>
-                  )}
-                </div>
+              ? <button onClick={()=>setScreen("dashboard")} style={{background:"none",border:"none",color:T.text3,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:700,letterSpacing:0.5,display:"flex",alignItems:"center",gap:6,padding:0}}>
+                  <span style={{fontSize:20,lineHeight:1,fontWeight:300}}>‹</span> Dashboard
+                </button>
               : <div style={{display:"flex",alignItems:"center",gap:8}}>
                   <img src={MATCHLY_LOGO} alt="Matchly" style={{height:32,width:"auto",display:"block",objectFit:"contain"}}/>
                 </div>
             }
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <button onClick={()=>setHdOpen(true)} title="Matchly Helpdesk" style={{width:38,height:38,background:"rgba(255,255,255,0.05)",border:`1px solid ${T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",padding:0,overflow:"hidden"}}><img src={HD_LOGO_M} style={{width:24,height:24,borderRadius:"50%",objectFit:"cover"}} alt="Help"/></button>
-              <button onClick={()=>setShowGuide(true)} title="Hoe werkt het?" style={{width:38,height:38,background:"rgba(255,255,255,0.05)",border:`1px solid ${T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:16}}>📖</button>
-              <button onClick={()=>{setScreen(screen==="club"?"dashboard":"club");}} style={{width:38,height:38,background:screen==="club"?hex(U,0.15):"rgba(255,255,255,0.05)",border:`1px solid ${screen==="club"?hex(U,0.4):T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:17,transition:"all 0.18s",boxShadow:screen==="club"?`0 0 12px ${hex(U,0.25)}`:"none"}}>⚙️</button>
-            </div>
+            <button onClick={()=>{setScreen(screen==="club"?"dashboard":"club");}} style={{width:38,height:38,background:screen==="club"?hex(U,0.15):"rgba(255,255,255,0.05)",border:`1px solid ${screen==="club"?hex(U,0.4):T.border2}`,borderRadius:"50%",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontSize:17,transition:"all 0.18s",boxShadow:screen==="club"?`0 0 12px ${hex(U,0.25)}`:"none"}}>⚙️</button>
           </div>
 
           {/* CONTENT */}
@@ -1911,12 +1486,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 DASHBOARD
             ══════════════════════════ */}
             {screen==="dashboard" && (<>
-              {fmtLabel && (
-                <div style={{display:"flex",alignItems:"center",gap:8,background:hex(U,0.07),border:`1px solid ${hex(U,0.18)}`,borderRadius:12,padding:"8px 12px",marginBottom:14}}>
-                  <span style={{fontSize:15,lineHeight:1}}>⏱️</span>
-                  <span style={{fontSize:12,fontWeight:800,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.4}}>{fmtLabel}</span>
-                </div>
-              )}
               {status==="PRE" && (
                 <div style={{animation:"slideUp 0.3s ease"}}>
                   {hasStarted && (
@@ -1932,9 +1501,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,maxWidth:280,margin:"0 auto 14px"}}>
                         {teamId ? "Wedstrijd staat klaar — voer de tegenstander in en start." : <>Begin met instellen via <span style={{color:U,fontWeight:700}}>⚙️ Club-instellingen</span> rechtsboven.</>}
                       </div>
-                      <button onClick={()=>setShowGuide(true)} style={{display:"inline-flex",alignItems:"center",gap:7,padding:"9px 16px",background:hex(U,0.12),border:`1px solid ${hex(U,0.3)}`,borderRadius:100,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,letterSpacing:0.5,cursor:"pointer",textTransform:"uppercase"}}>
-                        <span style={{fontSize:15}}>📖</span> Hoe werkt het?
-                      </button>
                     </div>
                   )}
 
@@ -1951,10 +1517,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {kick && <span style={{color:U}}>{kick}</span>}
                           </div>
                         ) : (
-                          <div style={{fontSize:18,fontWeight:900,color:T.text,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1,textTransform:"uppercase",lineHeight:1.1,marginBottom:6}}>
-                            {new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long"})}
-                            <span style={{color:U,margin:"0 8px"}}>·</span>
-                            <span style={{color:U}}>{new Date().toLocaleTimeString("nl-NL",{hour:"2-digit",minute:"2-digit"})}</span>
+                          <div style={{fontSize:14,fontWeight:800,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:1,textTransform:"uppercase",marginBottom:6,fontStyle:"italic"}}>
+                            Nog geen datum gepland
                           </div>
                         )}
                         <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:10}}>
@@ -1968,7 +1532,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <button onClick={fetchNextMatch} disabled={nextMatchLoading} style={{width:"100%",marginBottom:nextMatchMsg?6:14,padding:"12px",background:nextMatchLoading?"rgba(255,255,255,0.04)":M.gradD,border:"none",borderRadius:100,color:nextMatchLoading?T.text4:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,letterSpacing:0.5,cursor:nextMatchLoading?"wait":"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,boxShadow:nextMatchLoading?"none":`0 4px 16px ${hex(M.purple,0.35)}`}}>
                         {nextMatchLoading
                           ? <><span style={{animation:"spin 1s linear infinite",display:"inline-block"}}>⟳</span> Opzoeken…</>
-                          : <>🔄 Laad komende wedstrijd</>
+                          : <>🔄 Laadt komende wedstrijd</>
                         }
                       </button>
                       {nextMatchMsg && (
@@ -2090,17 +1654,20 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     );
                   })()}
 
-                  {/* ── BASISOPSTELLING — knop die de chips toont (punt 11) ── */}
-                  <button onClick={()=>setShowBasis(s=>!s)} style={{width:"100%",display:"flex",alignItems:"center",justifyContent:"space-between",background:`linear-gradient(135deg,${hex(U,0.1)},${hex(U,0.03)})`,border:`1px solid ${hex(U,0.22)}`,borderRadius:18,padding:"14px 16px",marginBottom:showBasis?0:18,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif"}}>
-                    <span style={{fontSize:13,fontWeight:900,letterSpacing:1.5,color:U,textTransform:"uppercase"}}>⭐ Basisopstelling instellen</span>
-                    <span style={{display:"flex",alignItems:"center",gap:8}}>
-                      <span style={{fontSize:15,fontWeight:900,color:baseSquad.length===fmtSpelers?U:T.text2}}>{baseSquad.length}<span style={{fontSize:11,color:T.text4}}>/{fmtSpelers}</span></span>
-                      <span style={{fontSize:12,color:U}}>{showBasis?"▲":"▼"}</span>
-                    </span>
-                  </button>
-                  {showBasis && (
-                    <div style={{background:`linear-gradient(135deg,${hex(U,0.06)},${hex(U,0.02)})`,border:`1px solid ${hex(U,0.18)}`,borderTop:"none",borderRadius:"0 0 18px 18px",padding:16,marginBottom:18}}>
-                      <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:12}}>Tik op spelers om de basis te kiezen · rest is wissel · ook te beheren via spelersbeheer</div>
+                  {/* ── DIT IS JE BASIS — altijd zichtbaar, toont empty state als geen squad ── */}
+                  {true && (
+                    <div style={{background:`linear-gradient(135deg,${hex(U,0.06)},${hex(U,0.02)})`,border:`1px solid ${hex(U,0.18)}`,borderRadius:18,padding:16,marginBottom:18}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:12}}>
+                        <div>
+                          <div style={{fontSize:11,fontWeight:900,letterSpacing:2,color:U,textTransform:"uppercase",fontFamily:"'Barlow Condensed',sans-serif"}}>⭐ Dit is je basis</div>
+                          <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:2}}>Tik op spelers om de basis te kiezen · rest is wissel</div>
+                        </div>
+                        <div style={{display:"flex",alignItems:"center",gap:4}}>
+                          <span style={{fontSize:18,fontWeight:900,color:baseSquad.length===11?U:T.text2,fontFamily:"'Barlow Condensed',sans-serif"}}>{baseSquad.length}</span>
+                          <span style={{fontSize:11,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800}}>/ 11</span>
+                        </div>
+                      </div>
+
                       {/* Spelers grid — tap to toggle, of empty state als geen squad */}
                       {squad.length===0 ? (
                         <div style={{padding:"20px 12px",textAlign:"center",background:"rgba(255,255,255,0.03)",borderRadius:12,border:`1px dashed ${T.border3}`}}>
@@ -2116,7 +1683,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
                         {squad.map(p=>{
                           const isBase = baseSquad.includes(p);
-                          const isFull = baseSquad.length>=fmtSpelers;
+                          const isFull = baseSquad.length>=11;
                           const disabled = !isBase && isFull;
                           return (
                             <button
@@ -2197,16 +1764,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 </button>
 
                 <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:16}}>
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#00e676,#00b248)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(0,230,118,0.4)"}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="#000"/></svg></div>} label="Goals" sub={`${gCount} eigen · ${oCount} tegen`} count={gCount+oCount} onClick={()=>setScreen("goals")} accent={C} disabled={locked} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff6f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)",position:"relative"}}><div style={{position:"absolute",width:18,height:24,background:"#ffd600",borderRadius:3,top:4,left:6,border:"1.5px solid rgba(0,0,0,0.2)"}}/><div style={{position:"absolute",width:18,height:24,background:"#ff1744",borderRadius:3,top:7,left:12,border:"1.5px solid rgba(0,0,0,0.2)"}}/></div>} label="Kaarten" sub={`${yCount} geel · ${rCount} rood`} count={yCount+rCount} onClick={()=>setScreen("kaarten")} accent={U} disabled={locked} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#448aff,#1565c0)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(68,138,255,0.35)"}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h13M13 4l3 3-3 3M21 17H8M11 14l-3 3 3 3"/></svg></div>} label="Wissels" sub={`${sCount} doorgevoerd`} count={sCount} onClick={()=>setScreen("wissels")} accent={C} disabled={locked} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:`linear-gradient(135deg,${U},${hex(U,0.6)})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 14px ${hex(U,0.4)}`}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>} label="Spelbeeld" sub="Wedstrijdanalyse" onClick={()=>setScreen("spelbeeld")} accent={U} disabled={locked} progress={[h1f1,h1f2,h1f3,h2f1,h2f2,h2f3,algBeld].filter(Boolean).length} progressMax={7} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff8f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)"}}>🏆</div>} label="Man of the Match" sub={home<away?"Niet bij verlies":(motm?motm:"Kies speler")} onClick={()=>setScreen("uitblinkers")} accent={U} disabled={locked} />
-                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(124,58,237,0.45)",fontSize:20}}>⚡</div>} label="Wedstrijdmomenten" labelSize={14} sub={keyMoments.length+specialInfo.length>0?`${keyMoments.length+specialInfo.length} momenten`:"Kansen, blessures & meer"} count={keyMoments.length+specialInfo.length} onClick={()=>setScreen("wedstrijdinfo")} accent={"#7c3aed"} disabled={locked} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#00e676,#00b248)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(0,230,118,0.4)"}}><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="#000"/></svg></div>} label="Goals" sub={`${gCount} eigen · ${oCount} tegen`} count={gCount+oCount} onClick={()=>setScreen("goals")} accent={C} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff6f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)",position:"relative"}}><div style={{position:"absolute",width:18,height:24,background:"#ffd600",borderRadius:3,top:4,left:6,border:"1.5px solid rgba(0,0,0,0.2)"}}/><div style={{position:"absolute",width:18,height:24,background:"#ff1744",borderRadius:3,top:7,left:12,border:"1.5px solid rgba(0,0,0,0.2)"}}/></div>} label="Kaarten" sub={`${yCount} geel · ${rCount} rood`} count={yCount+rCount} onClick={()=>setScreen("kaarten")} accent={T.yellow} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#448aff,#1565c0)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(68,138,255,0.35)"}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round"><path d="M3 7h13M13 4l3 3-3 3M21 17H8M11 14l-3 3 3 3"/></svg></div>} label="Wissels" sub={`${sCount} doorgevoerd`} count={sCount} onClick={()=>setScreen("wissels")} accent={C} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:`linear-gradient(135deg,${U},${hex(U,0.6)})`,display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 4px 14px ${hex(U,0.4)}`}}><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#000" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>} label="Spelbeeld" sub="Wedstrijdanalyse" onClick={()=>setScreen("spelbeeld")} accent={U} progress={[h1f1,h1f2,h1f3,h2f1,h2f2,h2f3,algBeld].filter(Boolean).length} progressMax={7} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#ffd600,#ff8f00)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(255,214,0,0.35)"}}>🏆</div>} label="Man of the Match" sub={home<away?"Niet bij verlies":(motm?motm:"Kies speler")} onClick={()=>setScreen("uitblinkers")} accent={T.yellow} />
+                  <GCard icon={<div style={{width:36,height:36,borderRadius:11,background:"linear-gradient(135deg,#7c3aed,#4f46e5)",display:"flex",alignItems:"center",justifyContent:"center",boxShadow:"0 4px 14px rgba(124,58,237,0.45)",fontSize:20}}>⚡</div>} label="Wedstrijdmomenten" labelSize={14} sub={keyMoments.length+specialInfo.length>0?`${keyMoments.length+specialInfo.length} momenten`:"Kansen, blessures & meer"} count={keyMoments.length+specialInfo.length} onClick={()=>setScreen("wedstrijdinfo")} accent={"#7c3aed"} />
                 </div>
 
                 {status==="LIVE" && (
-                  <button onClick={togglePause} style={{width:"100%",padding:14,background:paused?M.gradD:"transparent",border:paused?"none":`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:paused?"#fff":U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginBottom:10,boxShadow:paused?`0 8px 28px ${hex(M.purple,0.4)}`:"none",animation:paused?"pulsePause 1.6s ease-in-out infinite":"none"}}>
+                  <button onClick={()=>setPaused(p=>!p)} style={{width:"100%",padding:14,background:paused?M.gradD:"transparent",border:paused?"none":`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:paused?"#fff":U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,marginBottom:10,boxShadow:paused?`0 8px 28px ${hex(M.purple,0.4)}`:"none",animation:paused?"pulsePause 1.6s ease-in-out infinite":"none"}}>
                     {paused?"▶️ Wedstrijdtijd hervatten":"⏸️ Wedstrijdtijd pauzeren (rust)"}
                   </button>
                 )}
@@ -2217,17 +1784,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </button>
                 )}
 
-                {status==="FINISHED" && locked && (
-                  <div style={{background:`linear-gradient(135deg,${hex(U,0.1)},${hex(U,0.03)})`,border:`1px solid ${hex(U,0.3)}`,borderRadius:18,padding:"14px 16px",marginBottom:12,display:"flex",alignItems:"center",justifyContent:"space-between",gap:12}}>
-                    <div style={{fontSize:12,color:T.text2,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>🔒 Wedstrijdgegevens staan op slot. Druk op Wijzigen om aan te passen.</div>
-                    <button onClick={()=>setLocked(false)} style={{flexShrink:0,padding:"9px 16px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,letterSpacing:0.5,cursor:"pointer"}}>✏️ Wijzigen</button>
-                  </div>
-                )}
-                {status==="FINISHED" && !locked && aiOut && (
-                  <button onClick={endMatch} disabled={loading} style={{width:"100%",padding:15,background:"transparent",border:`1px solid ${hex(U,0.4)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:800,color:U,cursor:loading?"wait":"pointer",textTransform:"uppercase",letterSpacing:1,marginBottom:12}}>
-                    🔄 Content opnieuw genereren
-                  </button>
-                )}
                 {status==="FINISHED" && aiOut && (
                   <button onClick={()=>setScreen("output")} style={{width:"100%",padding:17,background:M.gradD,border:"none",borderRadius:100,fontFamily:"'Barlow Condensed',sans-serif",fontSize:17,fontWeight:800,color:"#fff",cursor:"pointer",textTransform:"uppercase",letterSpacing:1.2,boxShadow:`0 8px 28px ${hex(M.purple,0.4)}`,marginBottom:12}}>
                     📸 Bekijk content
@@ -2245,13 +1801,13 @@ HEADLINE: 1 zin. Positief en simpel.`;
             {screen==="goals" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
               <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:12,marginBottom:28}}>
-                {[{t:"GOAL",icon:"⚽",label:"Doelpunt",c:C},{t:"OWN",icon:"⚽",label:"Tegendoelpunt",c:T.red}].map(({t,icon,label,c})=>(
+                {[{t:"GOAL",icon:"⚽",label:"Doelpunt",c:C},{t:"OWN",icon:"🔴",label:"Tegendoelpunt",c:T.red}].map(({t,icon,label,c})=>(
                   <button key={t} onClick={()=>setModal(t)} style={{padding:"24px 16px",background:hex(c,0.07),border:`1px solid ${hex(c,0.2)}`,borderRadius:22,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:c,cursor:"pointer",textTransform:"uppercase",display:"flex",flexDirection:"column",alignItems:"center",gap:12,transition:"all 0.18s",boxShadow:`inset 0 1px 0 ${hex(c,0.15)}`}}>
                     <span style={{fontSize:36,filter:`drop-shadow(0 4px 8px ${hex(c,0.4)})`}}>{icon}</span>{label}
                   </button>
                 ))}
               </div>
-              {events.filter(e=>e.type==="GOAL"||e.type==="OWN").length===0 ? <Empty icon="⚽" label="Nog geen doelpunten" /> : events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />)}
+              {events.filter(e=>e.type==="GOAL"||e.type==="OWN").length===0 ? <Empty icon="⚽" label="Nog geen doelpunten" /> : events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
             </>)}
 
             {/* KAARTEN */}
@@ -2264,10 +1820,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </button>
                 ))}
               </div>
-              <button onClick={()=>setModal("RED_OPP")} style={{width:"100%",padding:"16px",marginBottom:28,background:hex(T.red,0.07),border:`1px solid ${hex(T.red,0.2)}`,borderRadius:18,fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:800,color:T.red,cursor:"pointer",textTransform:"uppercase",letterSpacing:0.8,display:"flex",alignItems:"center",justifyContent:"center",gap:10,boxShadow:`inset 0 1px 0 ${hex(T.red,0.15)}`}}>
-                <span style={{fontSize:26}}>🟥</span> Rode kaart tegenstander
-              </button>
-              {events.filter(e=>e.type==="YELLOW"||e.type==="RED").length===0 ? <Empty icon="🟨" label="Geen kaarten" /> : events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />)}
+              {events.filter(e=>e.type==="YELLOW"||e.type==="RED").length===0 ? <Empty icon="🟨" label="Geen kaarten" /> : events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
             </>)}
 
             {/* WISSELS */}
@@ -2276,20 +1829,26 @@ HEADLINE: 1 zin. Positief en simpel.`;
               <button onClick={()=>setModal("SUB")} style={{width:"100%",padding:20,background:hex(U,0.07),border:`1px solid ${hex(U,0.2)}`,borderRadius:22,fontFamily:"'Barlow Condensed',sans-serif",fontSize:17,fontWeight:800,color:U,cursor:"pointer",textTransform:"uppercase",letterSpacing:1,marginBottom:28,display:"flex",alignItems:"center",justifyContent:"center",gap:12,boxShadow:`inset 0 1px 0 ${hex(U,0.15)}`}}>
                 <span style={{fontSize:26}}>🔄</span> Wissel registreren
               </button>
-              {events.filter(e=>e.type==="SUB").length===0 ? <Empty icon="🔄" label="Geen wissels" /> : events.filter(e=>e.type==="SUB").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />)}
+              {events.filter(e=>e.type==="SUB").length===0 ? <Empty icon="🔄" label="Geen wissels" /> : events.filter(e=>e.type==="SUB").map(e=><TimelineRow key={e.id} e={e} onDelete={delEv} live={status==="LIVE"} C={C} />)}
             </>)}
 
             {/* SPELBEELD */}
             {screen==="spelbeeld" && (<>
               <BackBtn onClick={()=>setScreen("dashboard")} />
-              {spelbeeldFases.map(fase=>(
-                <React.Fragment key={fase.key}>
-                  <SHead label={fase.label} C={C} />
-                  <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{fase.opts.map(f=><Chip key={f} label={f} active={fase.val===f} onClick={()=>{if(locked)return;fase.setter(fase.val===f?"":f);}} color={U} gradient />)}</div>
-                </React.Fragment>
-              ))}
+              <SHead label="1e Helft — Openingsfase (0–20 min)" C={C} />
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F1.map(f=><Chip key={f} label={f} active={h1f1===f} onClick={()=>setH1f1(h1f1===f?"":f)} color={U} />)}</div>
+              <SHead label="1e Helft — Middenfase (20–35 min)" C={C} />
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F2.map(f=><Chip key={f} label={f} active={h1f2===f} onClick={()=>setH1f2(h1f2===f?"":f)} color={U} />)}</div>
+              <SHead label="1e Helft — Slotfase (35–45 min)" C={C} />
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H1_F3.map(f=><Chip key={f} label={f} active={h1f3===f} onClick={()=>setH1f3(h1f3===f?"":f)} color={U} />)}</div>
+              <SHead label="2e Helft — Openingsfase (45–65 min)" C={C} />
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F1.map(f=><Chip key={f} label={f} active={h2f1===f} onClick={()=>setH2f1(h2f1===f?"":f)} color={U} />)}</div>
+              <SHead label="2e Helft — Middenfase (65–80 min)" C={C} />
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F2.map(f=><Chip key={f} label={f} active={h2f2===f} onClick={()=>setH2f2(h2f2===f?"":f)} color={U} />)}</div>
+              <SHead label="2e Helft — Slotfase (80–90 min)" C={C} />
+              <div style={{display:"flex",flexWrap:"wrap",gap:8}}>{H2_F3.map(f=><Chip key={f} label={f} active={h2f3===f} onClick={()=>setH2f3(h2f3===f?"":f)} color={U} />)}</div>
               <SHead label="Eindbeeld van de wedstrijd" C={C} />
-              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>{if(locked)return;setAlgBeld(algBeld===w?"":w);}} color={U} gradient />)}</div>
+              <div style={{display:"flex",flexWrap:"wrap",gap:8,marginBottom:4}}>{ALG_BEELD.map(w=><Chip key={w} label={w} active={algBeld===w} onClick={()=>setAlgBeld(algBeld===w?"":w)} color={U} />)}</div>
               <div style={{marginTop:28,paddingTop:20,borderTop:`1px solid ${T.border}`}}>
                 <BackBtn onClick={()=>setScreen("dashboard")} label="Terug naar dashboard" />
               </div>
@@ -2307,7 +1866,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
               ) : (
                 <>
                   <SHead label="Man of the Match" C={C} />
-                  <div style={{marginBottom:8}}><PlayerSelect value={motm} onChange={v=>{if(!locked)setMotm(v);}} squad={squad} placeholder="Kies of typ speler..." /></div>
+                  <div style={{marginBottom:8}}><PlayerSelect value={motm} onChange={setMotm} squad={squad} placeholder="Kies of typ speler..." /></div>
                   <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5,padding:"4px 4px",marginBottom:16}}>De Man of the Match krijgt een aparte spotlight-post na de wedstrijd.</div>
 
                   {/* MOTM redenen — aantik max 9 opties */}
@@ -2318,7 +1877,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         {MOTM_REDENEN.map(r=>{
                           const active = motmRedenen.includes(r.key);
                           return (
-                            <button key={r.key} onClick={()=>{if(locked)return;toggleMotmReden(r.key);}} style={{padding:"10px 13px",background:active?hex(U,0.18):hex(U,0.05),border:`1px solid ${active?U:hex(U,0.2)}`,borderRadius:12,color:active?T.text:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:active?900:700,letterSpacing:0.5,cursor:"pointer",display:"flex",alignItems:"center",gap:6,transition:"all 0.15s"}}>
+                            <button key={r.key} onClick={()=>toggleMotmReden(r.key)} style={{padding:"10px 13px",background:active?hex(U,0.18):hex(U,0.05),border:`1px solid ${active?U:hex(U,0.2)}`,borderRadius:12,color:active?T.text:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:active?900:700,letterSpacing:0.5,cursor:"pointer",display:"flex",alignItems:"center",gap:6,transition:"all 0.15s"}}>
                               <span style={{fontSize:14}}>{r.icon}</span>
                               <span>{r.label}</span>
                             </button>
@@ -2342,19 +1901,22 @@ HEADLINE: 1 zin. Positief en simpel.`;
                 <div key={i} style={{display:"flex",alignItems:"center",gap:10,background:`${hex(U,0.06)}`,border:`1px solid ${hex(U,0.18)}`,borderRadius:12,padding:"10px 14px",marginBottom:8}}>
                   <span style={{fontSize:14}}>{m.type.icon}</span>
                   <span style={{fontSize:12,fontWeight:800,color:U,fontFamily:"'Barlow Condensed',sans-serif",minWidth:30}}>{m.minute}'</span>
-                  <span style={{flex:1,fontSize:13,color:T.text2,fontFamily:"Barlow,sans-serif"}}>{m.type.label}{m.team?` · ${m.team==="tegenstander"?"tegenstander":(clubName||"wij")}`:""}{m.player?` — ${m.player}`:""}{m.player2?` ⇄ ${m.player2}`:""}</span>
+                  <span style={{flex:1,fontSize:13,color:T.text2,fontFamily:"Barlow,sans-serif"}}>{m.type.label}{m.player?` — ${m.player}`:""}{m.player2?` ⇄ ${m.player2}`:""}</span>
                   <button onClick={()=>setKeyMoments(p=>p.filter((_,j)=>j!==i))} style={{background:"none",border:"none",color:T.text4,cursor:"pointer",fontSize:18}}>×</button>
                 </div>
               ))}
               <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:24,marginTop:keyMoments.length?6:0}}>
                 {[
-                  {key:"chance",      icon:"⚡", label:"Grote kans",             teamChoice:true},
-                  {key:"penalty_miss",icon:"🥅", label:"Penalty gemist",          teamChoice:true},
-                  {key:"penalty",     icon:"⚖️", label:"Niet gegeven penalty",    teamChoice:true},
-                  {key:"disallowed",  icon:"❌", label:"Afgekeurde goal",         teamChoice:true},
-                  {key:"bar",         icon:"🏃", label:"Paal/lat",               teamChoice:true},
-                  {key:"big_save",    icon:"🧤", label:"Belangrijke redding",     teamChoice:true},
-                  {key:"injury",      icon:"🩹", label:"Blessure + wissel",       ownOnly:true, needsPlayer:true, needsPlayer2:true},
+                  {key:"chance",      icon:"⚡", label:"Grote kans",               needsPlayer:true},
+                  {key:"penalty_miss",icon:"🥅", label:"Penalty gemist",            needsPlayer:true},
+                  {key:"penalty_miss_opp",icon:"😮",label:"Penalty gemist teg.",   needsPlayer:false},
+                  {key:"penalty",     icon:"⚖️", label:"Niet gegeven penalty",     needsPlayer:true},
+                  {key:"penalty_opp", icon:"⚖️", label:"Niet gegeven teg. penalty",needsPlayer:false},
+                  {key:"disallowed",  icon:"❌", label:"Afgekeurde goal",           needsPlayer:true},
+                  {key:"disallowed_opp",icon:"🚩",label:"Afgekeurde goal teg.",    needsPlayer:false},
+                  {key:"bar",         icon:"🏃", label:"Paal/lat",                 needsPlayer:true},
+                  {key:"big_save",    icon:"🧤", label:"Belangrijke redding",      needsPlayer:true},
+                  {key:"injury",      icon:"🩹", label:"Blessure + wissel",        needsPlayer:true, needsPlayer2:true},
                 ].map(t=>(
                   <button key={t.key} onClick={()=>setAddMoment(t)} style={{padding:"10px 14px",background:hex(U,0.08),border:`1px solid ${hex(U,0.22)}`,borderRadius:11,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:800,cursor:"pointer",letterSpacing:0.5,boxShadow:`0 0 8px ${hex(U,0.1)}`}}>+ {t.icon} {t.label}</button>
                 ))}
@@ -2464,7 +2026,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     : (<>
                         {allItems.map(item=>{
                           if (item.kind==="event") {
-                            return <TimelineRow key={item.id} e={item.data} onDelete={delEv} onEdit={editEv} canEdit={!locked} C={C} />;
+                            return <TimelineRow key={item.id} e={item.data} onDelete={delEv} live={status==="LIVE"} C={C} />;
                           }
                           // keyMoment row
                           const m = item.data;
@@ -2529,19 +2091,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   <button onClick={endMatch} style={{padding:"11px 22px",background:T.red,border:"none",borderRadius:12,color:"#fff",fontWeight:800,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,letterSpacing:0.5,boxShadow:`0 6px 20px ${hex(T.red,0.35)}`}}>🔄 Opnieuw proberen</button>
                 </div>
               )}
-              {geenToegang && (
-                <div style={{textAlign:"center",padding:"60px 20px"}}>
-                  <div style={{fontSize:48,marginBottom:16}}>🎟️</div>
-                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:800,color:T.text,marginBottom:8}}>Geen actief abonnement</div>
-                  <div style={{fontSize:13,color:T.text3,marginBottom:24,lineHeight:1.6,fontFamily:"Barlow,sans-serif",maxWidth:300,marginLeft:"auto",marginRight:"auto"}}>
-                    Koop een Wedstrijdpas om voor deze wedstrijd het complete contentpakket te maken.
-                  </div>
-                  <button onClick={koopWedstrijdpas} disabled={pasLoading} style={{padding:"15px 30px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,letterSpacing:1,cursor:pasLoading?"wait":"pointer",textTransform:"uppercase",boxShadow:`0 8px 24px ${hex(M.purple,0.4)}`}}>
-                    {pasLoading ? "Bezig..." : "🎟️ Wedstrijdpas halen — €5"}
-                  </button>
-                </div>
-              )}
-              {!loading&&!aiOut&&!aiErr&&!geenToegang && (
+              {!loading&&!aiOut&&!aiErr && (
                 <div style={{textAlign:"center",padding:"80px 0"}}>
                   <div style={{fontSize:52,marginBottom:14,opacity:0.12}}>📸</div>
                   <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,letterSpacing:2.5,textTransform:"uppercase",color:T.text4,marginBottom:28,lineHeight:1.6}}>Beëindig de wedstrijd<br/>om content te genereren</div>
@@ -2631,204 +2181,178 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         {l.id==="classic" && (
 <div style={{width:"100%",aspectRatio:"1/1",containerType:"inline-size",position:"relative",background:TBG,fontFamily:"'Barlow Condensed',sans-serif",overflow:"hidden"}}>
 
-                      {/* Achtergrond patroon — uit thema */}
-                      {renderPattern(1)}
+  {renderPattern(1)}
 
-                      {/* Flex column wrapper — alles past binnen het vierkant */}
-                      <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
+  {/* ── FLEX COLUMN: topbar + spacer + content ── */}
+  <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
 
-                        {/* TOP BAR */}
-                        <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3% 4% 0",flexShrink:0}}>
-                          <span style={{fontSize:((teamLabel||clubName).length>22?"2.2cqw":(teamLabel||clubName).length>16?"2.5cqw":"2.8cqw"),fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase"}}>{teamLabel||clubName}</span>
-                          <span style={{fontSize:"2.2cqw",color:"rgba(255,255,255,0.2)"}}>powered by Matchly</span>
-                        </div>
+    {/* TOP BAR */}
+    <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3% 4% 0",flexShrink:0}}>
+      <span style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}99`,textTransform:"uppercase"}}>{teamLabel||clubName}</span>
+      <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
+        <div style={{height:"0.2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
+        <span style={{fontSize:"2.6cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
+        <div style={{height:"0.2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
+      </div>
+      <span style={{fontSize:"1.9cqw",color:"rgba(255,255,255,0.2)"}}>powered by Matchly</span>
+    </div>
 
-                        {/* SCORE — groot en dominant, zoals screenshot */}
-                        <div style={{display:"flex",alignItems:"center",padding:"1% 3% 0",flexShrink:0,gap:"1%"}}>
+    {/* SPACER: houdt ruimte vrij voor de ringen-zone */}
+    <div style={{flexShrink:0,height:"35cqw"}}/>
 
-                          {/* THUIS — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
-                              {(hvLogoUrl||logo)
-                                ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
-                                :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                              }
-                            </div>
-                            <span style={{fontSize:"2.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{clubName}</span>
-                          </div>
+    {/* HEADLINE BALK */}
+    <div style={{flexShrink:0,background:"rgba(0,0,0,0.85)",borderTop:`1.5px solid ${thex(TAC,0.55)}`,padding:"2% 5%"}}>
+      {(()=>{const len=aiOut.headline.length;const fs=len>60?"2.8cqw":len>45?"3.3cqw":"3.8cqw";return(
+        <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center"}}>"{aiOut.headline}"</div>
+      );})()}
+    </div>
 
-                          {/* CIJFERS — dominant maar in verhouding */}
-                          <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:"1%"}}>
-                            <span style={{fontSize:"34cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
-                            <span style={{fontSize:"10cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-4%"}}>-</span>
-                            <span style={{fontSize:"34cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
-                          </div>
+    {/* BODY: 3 kolommen */}
+    {(()=>{
+      const cGoals=events.filter(e=>e.type==="GOAL"||e.type==="OWN");
+      const cCards=events.filter(e=>e.type==="YELLOW"||e.type==="RED");
+      const cSubs=events.filter(e=>e.type==="SUB");
+      const cIsClean=away===0&&cGoals.length===0;
+      const cFewGoals=cGoals.length<=1;
+      const cOther=[
+        ...cCards.map(c=>({minute:parseInt(c.minute)||0,icon:c.type==="YELLOW"?"🟨":"🟥",label:c.player||"—",isOpp:false})),
+        ...cSubs.map(s=>({minute:parseInt(s.minute)||0,icon:"🔄",label:s.playerIn||"—",isOpp:false})),
+      ].sort((a,b)=>a.minute-b.minute);
+      let cHs=0,cAs=0;
+      const cGoalItems=cGoals.map(g=>{
+        if(g.type==="OWN")cAs++;else cHs++;
+        return {minute:parseInt(g.minute)||0,icon:"⚽",isOpp:g.type==="OWN",label:g.type==="OWN"?(opponent||"Teg."):(g.player||"—")};
+      });
+      const cAll=[...cGoalItems,...cOther].sort((a,b)=>a.minute-b.minute);
+      const cFases=[{l:"1e helft",v:h1f1},{l:"2e helft",v:h2f3}].filter(f=>f.v);
+      const cTotal=cAll.length+cFases.length+(cIsClean?1:0);
+      const sc=Math.max(0.7,Math.min(1.1,4/Math.max(cTotal,1)));
+      const fs=v=>(parseFloat(v)*sc)+"cqw";
+      const mkHd=(label)=>(
+        <div style={{marginBottom:fs(1.8)}}>
+          <div style={{fontSize:fs(2),fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:fs(0.6)}}>{label}</div>
+          <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
+        </div>
+      );
+      const renderLeft=()=>{
+        if(!cFewGoals){
+          const gsc=Math.max(0.75,Math.min(1,5/Math.max(cGoals.length,1)));
+          const gfs=v=>(parseFloat(v)*gsc)+"cqw";
+          return(<>
+            {mkHd("Doelpunten")}
+            {cGoals.slice(0,8).map((e,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",marginBottom:gfs(1.5),gap:"3%"}}>
+                <span style={{fontSize:gfs(2.5),fontWeight:900,color:e.isOpp?(TAC2||"#e53935"):TAC,flexShrink:0,minWidth:"12%"}}>{formatMinuut(e.minute,e.extra,e.half)}'</span>
+                <span style={{fontSize:gfs(2.4),color:e.isOpp?"rgba(255,255,255,0.55)":"rgba(255,255,255,0.88)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600}}>{e.isOpp?(opponent||"Tegenstander"):(e.player||"—")}</span>
+              </div>
+            ))}
+          </>);
+        }
+        return(<>
+          {cIsClean&&(<>
+            {mkHd("Clean Sheet")}
+            <div style={{display:"flex",alignItems:"center",gap:"3%",background:thex(TAC,0.07),borderRadius:"4%",padding:fs(1.2)+" 3%",marginBottom:fs(2)}}>
+              <span style={{fontSize:fs(3.2)}}>🔒</span>
+              <span style={{fontSize:fs(2.4),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</span>
+            </div>
+          </>)}
+          {cAll.length>0&&(<>
+            {!cIsClean&&mkHd(cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn")}
+            {cAll.map((e,i)=>(
+              <div key={i} style={{display:"flex",alignItems:"center",gap:"2%",marginBottom:fs(1.3)}}>
+                <span style={{fontSize:fs(2.3),fontWeight:900,color:e.isOpp?(TAC2||"#e53935"):TAC,minWidth:"11%",flexShrink:0}}>{e.minute}'</span>
+                <span style={{fontSize:fs(2.3),flexShrink:0}}>{e.icon}</span>
+                <span style={{fontSize:fs(2.3),color:"rgba(255,255,255,0.85)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.label}</span>
+              </div>
+            ))}
+          </>)}
+          {cFases.length>0&&(<>
+            {mkHd("Spelbeeld")}
+            {cFases.map((f,i)=>(<div key={i} style={{display:"flex",gap:"2%",marginBottom:fs(1)}}>
+              <span style={{fontSize:fs(2),color:`${TAC}88`,fontWeight:900,flexShrink:0,width:"18%"}}>{f.l}</span>
+              <span style={{fontSize:fs(2.1),color:"rgba(255,255,255,0.7)"}}>{f.v}</span>
+            </div>))}
+          </>)}
+        </>);
+      };
+      return(
+        <div style={{display:"flex",padding:"2% 4% 1%",gap:"3%",flex:1,minHeight:0,overflow:"hidden"}}>
+          <div style={{flex:1,overflow:"hidden"}}>{renderLeft()}</div>
+          {motm&&home>=away&&(
+            <div style={{width:"23%",display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0,overflow:"hidden"}}>
+              {mkHd("Man of the Match")}
+              <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"5%"}}>
+                <span style={{fontSize:"10cqw",lineHeight:1}}>🏆</span>
+                <span style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</span>
+              </div>
+            </div>
+          )}
+          <div style={{flex:1,display:"flex",flexDirection:"column",overflow:"hidden"}}>
+            {mkHd("In het kort")}
+            {(()=>{const txt=aiOut.samenvatting||aiOut.verslag||"";const tfs=txt.length>250?"2cqw":txt.length>200?"2.2cqw":txt.length>150?"2.5cqw":"2.8cqw";return(
+              <p style={{fontSize:tfs,color:"rgba(255,255,255,0.82)",lineHeight:1.55,margin:0,overflow:"hidden"}}>{txt}</p>
+            );})()}
+          </div>
+        </div>
+      );
+    })()}
 
-                          {/* UIT — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                              {oppLogoUrl
-                                ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
-                                :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                              }
-                            </div>
-                            <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1}}>{opponent||"Tegenstander"}</span>
-                          </div>
-                        </div>
+    {/* SOCIAL PILL */}
+    {(igHandle||fbHandle)&&(
+      <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4% 1%",gap:"2%",flexShrink:0}}>
+        <div style={{display:"inline-flex",alignItems:"center",border:`1px solid ${thex(TAC,0.35)}`,borderRadius:"40px",overflow:"hidden",background:"rgba(0,0,0,0.45)"}}>
+          {igHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"1.2% 3.5%"}}>
+            <img src={IG_ICON} alt="ig" style={{width:13,height:13,flexShrink:0,borderRadius:3}}/>
+            <span style={{fontSize:"2.1cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{igHandle}</span>
+          </div>)}
+          {igHandle&&fbHandle&&<div style={{width:"1px",alignSelf:"stretch",background:thex(TAC,0.3)}}/>}
+          {fbHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"1.2% 3.5%"}}>
+            <img src={FB_ICON} alt="fb" style={{width:13,height:13,flexShrink:0,borderRadius:3}}/>
+            <span style={{fontSize:"2.1cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{fbHandle}</span>
+          </div>)}
+        </div>
+        {nextGame&&<span style={{fontSize:"1.8cqw",color:"rgba(255,255,255,0.32)"}}>📅 {nextGame}</span>}
+      </div>
+    )}
 
-                        {/* HEADLINE — themabalk met gradient, quote in donkere tekst */}
-                        <div style={{flexShrink:0,background:themeBarGradient,padding:"2.5% 5%",margin:"2% 0 0 0",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.2)"}}>
-                          {(()=>{
-                            const len=aiOut.headline.length;
-                            const fs=len>60?"3cqw":len>45?"3.6cqw":"4.2cqw";
-                            return (
-                              <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.2,color:"rgba(0,0,0,0.9)",textAlign:"center",textShadow:"0 1px 2px rgba(255,255,255,0.15)"}}>"{aiOut.headline}"</div>
-                            );
-                          })()}
-                        </div>
+    {/* SPONSOR BALK */}
+    <div style={{flexShrink:0,marginTop:"auto"}}>
+      {visSponsors.length>0&&(
+        <div style={{background:"rgba(0,0,0,0.75)",borderTop:`1px solid ${thex(TAC,0.2)}`,padding:"1.5% 3%"}}>
+          <div style={{fontSize:"1.7cqw",fontWeight:900,letterSpacing:2.5,color:"rgba(255,255,255,0.18)",textTransform:"uppercase",textAlign:"center",marginBottom:"1.2%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
+          <div style={{display:"flex",gap:"2%",justifyContent:"center"}}>
+            {visSponsors.map((s,i)=>(
+              <div key={i} style={{flex:1,background:"rgba(12,12,12,0.9)",border:`1px solid ${s._isTeam?TAC:thex(TAC,0.28)}`,borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%"}}>
+                {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:16,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.85)"}}>{s.name}</span>}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
 
-                        {/* BODY — 3 kolommen, linker dynamisch */}
-                        {(()=>{
-                          const cGoals=events.filter(e=>e.type==="GOAL"||e.type==="OWN");
-                          const cCards=events.filter(e=>e.type==="YELLOW"||e.type==="RED");
-                          const cSubs=events.filter(e=>e.type==="SUB");
-                          const cIsClean=away===0&&cGoals.length===0;
-                          const cFewGoals=cGoals.length<=1;
-                          const cOther=[
-                            ...cCards.map(c=>({minute:parseInt(c.minute)||0,icon:c.type==="YELLOW"?"🟨":"🟥",label:c.player||"—",sub:c.type==="YELLOW"?"Gele kaart":"Rode kaart",isGoal:false})),
-                            ...cSubs.map(s=>({minute:parseInt(s.minute)||0,icon:"🔄",label:s.playerIn||"—",sub:"↑ · "+(s.playerOut||"—")+" eraf",isGoal:false})),
-                          ].sort((a,b)=>a.minute-b.minute);
-                          let cHs=0,cAs=0;
-                          const cGoalItems=cGoals.map(g=>{
-                            if(g.type==="OWN")cAs++;else cHs++;
-                            return {minute:parseInt(g.minute)||0,icon:"⚽",label:g.type==="OWN"?(opponent||"Teg."):(g.player||"—"),badge:cHs+"-"+cAs,isGoal:true};
-                          });
-                          const cAll=[...cGoalItems,...cOther].sort((a,b)=>a.minute-b.minute);
-                          const cFases=[{l:"1e helft",v:h1f1},{l:"2e helft",v:h2f3}].filter(f=>f.v);
-                          const cTotal=cAll.length+cFases.length+(cIsClean?1:0);
-                          const cSc=Math.max(0.7,Math.min(1.1,4/Math.max(cTotal,1)));
-                          const cFs=v=>(parseFloat(v)*cSc)+"cqw";
-                          const renderLeftCol=()=>{
-                            if(!cFewGoals){
-                              let h2=0,a2=0;
-                              // Dynamische schaal: meer goals = kleiner lettertype
-                              const gSc=Math.max(0.75,Math.min(1,5/Math.max(cGoals.length,1)));
-                              const gFs=v=>(parseFloat(v)*gSc)+"cqw";
-                              return (<>
-                                <div style={{fontSize:gFs(2.5),fontWeight:900,letterSpacing:2,color:TAC+"cc",textTransform:"uppercase",marginBottom:gFs(1.2)}}>Doelpunten</div>
-                                {cGoals.slice(0,8).map((e,i)=>{
-                                  if(e.type==="OWN")a2++;else h2++;
-                                  const sc2=h2+"-"+a2;
-                                  return (<div key={i} style={{display:"flex",alignItems:"center",marginBottom:gFs(1.2),gap:"2%"}}>
-                                    <span style={{fontSize:gFs(2.6),color:i<4?TAC+"cc":TAC2+"cc",fontWeight:900,flexShrink:0,width:"9%",textAlign:"right"}}>{formatMinuut(e.minute,e.extra,e.half)}</span>
-                                    <span style={{fontSize:gFs(2.6),color:"rgba(255,255,255,0.82)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600}}>{e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}</span>
-                                    <span style={{fontSize:gFs(1.9),color:thex(i<4?TAC:TAC2,0.85),fontWeight:800,flexShrink:0,background:thex(i<4?TAC:TAC2,0.12),padding:"0.4% 1.2%",borderRadius:"3px"}}>{sc2}</span>
-                                  </div>);
-                                })}
-                              </>);
-                            }
-                            return (<>
-                              {cIsClean&&(<div style={{display:"flex",alignItems:"center",gap:"3%",marginBottom:cFs(2),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,padding:cFs(1)+" 3%",borderRadius:"0 2% 2% 0"}}>
-                                <img src={getLock(matchLock).bestand} style={{height:cFs(5.5),objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.5))"}}/>
-                                <div><div style={{fontSize:cFs(2),fontWeight:900,color:TAC+"cc",textTransform:"uppercase",letterSpacing:1}}>Clean sheet</div><div style={{fontSize:cFs(2.5),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</div></div>
-                              </div>)}
-                              {cAll.length>0&&(<>
-                                <div style={{fontSize:cFs(2.2),fontWeight:900,letterSpacing:2,color:TAC+"88",textTransform:"uppercase",marginBottom:cFs(1)}}>{cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
-                                {cAll.map((e,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:"2%",marginBottom:cFs(1.2),background:"rgba(255,255,255,0.04)",borderRadius:"2%",padding:cFs(0.7)+" 2%"}}>
-                                  <span style={{fontSize:cFs(2.4),fontWeight:900,color:TAC,width:"8%",textAlign:"right",flexShrink:0}}>{e.minute}'</span>
-                                  <span style={{fontSize:cFs(2.7),flexShrink:0}}>{e.icon}</span>
-                                  <div style={{flex:1,minWidth:0}}>
-                                    <div style={{fontSize:cFs(2.3),fontWeight:700,color:"rgba(255,255,255,0.85)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:1}}>{e.isGoal&&<span style={{color:"rgba(255,255,255,0.3)",marginRight:"2%",fontSize:cFs(2)}}>{e.badge} </span>}{e.label}</div>
-                                    {!e.isGoal&&<div style={{fontSize:cFs(1.9),color:"rgba(255,255,255,0.35)",lineHeight:1.2}}>{e.sub}</div>}
-                                  </div>
-                                </div>))}
-                              </>)}
-                              {cFases.length>0&&(<>
-                                <div style={{fontSize:cFs(2.2),fontWeight:900,letterSpacing:2,color:TAC+"88",textTransform:"uppercase",marginBottom:cFs(1),marginTop:cAll.length>0?cFs(1.5):"0"}}>Spelbeeld</div>
-                                {cFases.map((f,i)=>(<div key={i} style={{display:"flex",alignItems:"center",gap:"2%",marginBottom:cFs(1),background:"rgba(255,255,255,0.04)",borderRadius:"2%",padding:cFs(0.7)+" 2%"}}>
-                                  <span style={{fontSize:cFs(2),fontWeight:900,color:TAC+"88",width:"20%",flexShrink:0}}>{f.l}</span>
-                                  <span style={{fontSize:cFs(2.2),fontWeight:700,color:"rgba(255,255,255,0.75)",flex:1}}>{f.v}</span>
-                                </div>))}
-                              </>)}
-                            </>);
-                          };
-                          return (
-                        <div style={{display:"flex",padding:"2% 4% 0",gap:"3%",flex:1,minHeight:0}}>
-                          <div style={{flex:1,overflow:"hidden"}}>{renderLeftCol()}</div>
+  </div>{/* einde flex column */}
 
-                          {/* MOTM midden — niet bij verlies */}
-                          {motm&&home>=away&&(
-                            <div style={{width:"22%",display:"flex",flexDirection:"column",alignItems:"center",gap:"3%",flexShrink:0}}>
-                              <div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2}bb`,textTransform:"uppercase",textAlign:"center"}}>MOTM</div>
-                              <div style={{background:thex(TAC,0.1),border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"10%",padding:"4% 3%",textAlign:"center",width:"100%",position:"relative",overflow:"hidden"}}>
-                                <div style={{position:"absolute",top:0,right:0,bottom:0,width:"3%",background:`linear-gradient(180deg,${thex(TAC2,0.6)},transparent)`}}/>
-                                {(()=>{const bigId=(getMotmDisplay(motmHistory[motm]||[]).newCupId)||motmCup;const c=bigId?getCup(bigId):null;return c?<img src={c.bestand} style={{height:"12cqw",objectFit:"contain",marginBottom:"3%",filter:`drop-shadow(0 2px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 6px ${thex(TAC,0.4)})`}}/>:<div style={{fontSize:"6cqw",marginBottom:"3%"}}>🏆</div>;})()}
-                                <div style={{fontSize:(motm.length>16?"2.2cqw":motm.length>12?"2.5cqw":"2.8cqw"),fontWeight:900,color:"#fff",lineHeight:1.15}}>{motm}</div>
-                              </div>
-                            </div>
-                          )}
+  {/* ── LOGOS + SCORE absoluut op ringen (DOM-volgorde: na flex → schildert bovenop) ── */}
+  <div style={{position:"absolute",top:"27.3%",left:"23.7%",transform:"translate(-50%,-50%)",width:"19%",aspectRatio:"1/1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+    {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:"50%",background:"rgba(0,0,0,0.25)"}} crossOrigin="anonymous"/>:<div style={{width:"100%",aspectRatio:"1/1",borderRadius:"50%",background:thex(TAC,0.2),border:`2px solid ${TAC}`,display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+  </div>
+  <div style={{position:"absolute",top:"27.3%",left:"76.3%",transform:"translate(-50%,-50%)",width:"19%",aspectRatio:"1/1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+    {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",borderRadius:"50%",background:"rgba(0,0,0,0.25)"}} crossOrigin="anonymous"/>:<div style={{width:"100%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(255,255,255,0.07)",border:"1.5px solid rgba(255,255,255,0.2)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+  </div>
+  <div style={{position:"absolute",top:"27.3%",left:"50%",transform:"translate(-50%,-50%)",display:"flex",alignItems:"center",gap:"1.5%"}}>
+    <span style={{fontSize:"32cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 40px ${thex(TAC,0.85)},0 0 90px ${thex(TAC,0.35)}`}}>{home}</span>
+    <span style={{fontSize:"10cqw",color:"rgba(255,255,255,0.22)",fontWeight:300,lineHeight:1}}>-</span>
+    <span style={{fontSize:"32cqw",fontWeight:900,color:"rgba(255,255,255,0.5)",lineHeight:0.85,textShadow:`0 0 40px ${thex(TAC2||TAC,0.55)}`}}>{away}</span>
+  </div>
+  <div style={{position:"absolute",top:"40%",left:"23.7%",transform:"translateX(-50%)",textAlign:"center",width:"26%"}}>
+    <span style={{fontSize:"2.5cqw",fontWeight:900,color:"#fff",textTransform:"uppercase",letterSpacing:1}}>{clubName}</span>
+  </div>
+  <div style={{position:"absolute",top:"40%",left:"76.3%",transform:"translateX(-50%)",textAlign:"center",width:"26%"}}>
+    <span style={{fontSize:"2.5cqw",fontWeight:900,color:"rgba(255,255,255,0.45)",textTransform:"uppercase",letterSpacing:1}}>{opponent||"Tegenstander"}</span>
+  </div>
 
-                          {/* In het kort */}
-                          <div style={{flex:1,display:"flex",flexDirection:"column",gap:"2%",minHeight:0,paddingBottom:"2%"}}>
-                            <div style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC}cc`,textTransform:"uppercase",flexShrink:0}}>In het kort</div>
-                            {(()=>{
-                              const txt=aiOut.samenvatting||aiOut.verslag||"";
-                              // Sterke dynamische schaal: korte tekst groot, lange tekst krimpt fors mee zodat alles past
-                              const len=txt.length;
-                              const fsNum=Math.max(1.4,Math.min(2.9,2.9-Math.max(0,len-90)*0.0095));
-                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.4,margin:0,flex:1,overflow:"hidden"}}>{txt}</p>;
-                            })()}
-                          </div>
-                        </div>
-                          );
-                        })()}
-
-                        {/* INSTAGRAM + FACEBOOK + VOLGENDE WEDSTRIJD */}
-                        <div style={{display:"flex",gap:"2%",padding:"1% 4% 0",flexShrink:0}}>
-                          {igHandle&&(
-                            <div style={{flex:1.6,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC,0.08),border:`1px solid ${thex(TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%"}}>
-                              <img src={IG_ICON} alt="ig" style={{width:14,height:14,flexShrink:0,borderRadius:3}}/>
-                              <span style={{fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{igHandle}</span>
-                            </div>
-                          )}
-                          {fbHandle&&(
-                            <div style={{flex:1.6,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC,0.08),border:`1px solid ${thex(TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%"}}>
-                              <img src={FB_ICON} alt="fb" style={{width:14,height:14,flexShrink:0,borderRadius:3}}/>
-                              <span style={{fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{fbHandle}</span>
-                            </div>
-                          )}
-                          {nextGame&&(
-                            <div style={{flex:2,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC2||TAC,0.06),border:`1px solid ${thex(TAC2||TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%",justifyContent:"flex-end"}}>
-                              <span style={{fontSize:"2.8cqw",flexShrink:0}}>📅</span>
-                              <div style={{textAlign:"right"}}>
-                                <div style={{fontSize:(nextGame.length>50?"1.6cqw":nextGame.length>35?"1.8cqw":"2cqw"),fontWeight:900,color:"rgba(255,255,255,0.7)",lineHeight:1.2}}>{nextGame}</div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* SPONSOR BALK */}
-                        <div style={{flexShrink:0,marginTop:"1.5%"}}>
-                          <div style={{background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>
-                            {postSponsors.length>0&&(
-                              <>
-                                <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
-                                <div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>
-                                  {postSponsors.map((s,i)=>(
-                                    <div key={i} style={{flex:1,maxWidth:"18%",borderRadius:"8%",padding:"2px",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}>
-                                      <div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                                      {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:18,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </>
-                            )}
-                          </div>
-                        </div>
-
-                      </div>{/* einde flex column wrapper */}
-                    </div>
+</div>
                         )}
                         {l.id==="story" && (
                         <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Barlow Condensed',sans-serif",overflow:"hidden"}}>
@@ -2842,10 +2366,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)"}}>Matchly</span>
                             </div>
                             <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"3% 4%",flexShrink:0}}>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",width:"24%"}}>
-                                <div style={{width:"90%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
-                                  {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                                </div>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
+                                {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"16%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"1%",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}} crossOrigin="anonymous"/>:<div style={{width:"16%",aspectRatio:"1/1",background:thex(TAC,0.2),border:`1px solid ${thex(TAC,0.4)}`,borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"5cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
                                 <span style={{fontSize:(clubName.length>20?"1.9cqw":clubName.length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"#fff",textAlign:"center"}}>{clubName}</span>
                               </div>
                               <div style={{display:"flex",alignItems:"baseline",gap:"1%"}}>
@@ -2853,10 +2375,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <span style={{fontSize:"9cqw",color:"rgba(255,255,255,0.25)"}}>–</span>
                                 <span style={{fontSize:"26cqw",fontWeight:900,color:"rgba(255,255,255,0.35)",lineHeight:1}}>{away}</span>
                               </div>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",width:"24%"}}>
-                                <div style={{width:"90%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                  {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                                </div>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"1.5%"}}>
+                                {oppLogoUrl?<img src={oppLogoUrl} style={{width:"16%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"1%",boxShadow:"0 4px 12px rgba(0,0,0,0.5)"}} crossOrigin="anonymous"/>:<div style={{width:"16%",aspectRatio:"1/1",background:"rgba(255,255,255,0.07)",borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"5cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.9cqw":(opponent||"Tegenstander").length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"rgba(255,255,255,0.4)",textAlign:"center"}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
@@ -2881,7 +2401,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <div style={{flex:1,padding:"0 4%",overflow:"hidden",minHeight:0,display:"flex",flexDirection:"column",justifyContent:"center"}}>
                               {stIsClean&&storyTimeline.filter(e=>e.isGoal).length===0&&(
                                 <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:sSp(1.8),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,borderRadius:"0 2% 2% 0",padding:sSp(1.2)+" 2.5%",flexShrink:0}}>
-                                  <img src={getLock(matchLock).bestand} style={{height:sFs(5.5),objectFit:"contain",filter:"drop-shadow(0 1px 4px rgba(0,0,0,0.5))"}}/>
+                                  <span style={{fontSize:sFs(3.5)}}>🔒</span>
                                   <div><div style={{fontSize:sFs(1.9),fontWeight:900,letterSpacing:1,color:TAC+"cc",textTransform:"uppercase"}}>Clean sheet</div><div style={{fontSize:sFs(2.4),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</div></div>
                                 </div>
                               )}
@@ -2911,12 +2431,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               );
                             })()}
 
-                            {motm&&home>=away&&<div style={{flexShrink:0,margin:"2% 4%",background:`linear-gradient(135deg,${thex(TAC,0.12)},${thex(TAC2||TAC,0.08)})`,border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"3%",padding:"2.5% 3.5%",display:"flex",alignItems:"center",gap:"3%"}}>{(()=>{const bigId=(getMotmDisplay(motmHistory[motm]||[]).newCupId)||motmCup;const c=bigId?getCup(bigId):null;return c?<img src={c.bestand} style={{height:"8cqw",objectFit:"contain",filter:`drop-shadow(0 2px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 6px ${thex(TAC,0.4)})`}}/>:<span style={{fontSize:"5cqw"}}>🏆</span>;})()}<div><div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2||TAC}cc`,textTransform:"uppercase"}}>Man of the Match</div><div style={{fontSize:"3.5cqw",fontWeight:900,color:"#fff"}}>{motm}</div></div></div>}
+                            {motm&&home>=away&&<div style={{flexShrink:0,margin:"2% 4%",background:`linear-gradient(135deg,${thex(TAC,0.12)},${thex(TAC2||TAC,0.08)})`,border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"3%",padding:"2.5% 3.5%",display:"flex",alignItems:"center",gap:"3%"}}><span style={{fontSize:"5cqw"}}>🏆</span><div><div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2||TAC}cc`,textTransform:"uppercase"}}>Man of the Match</div><div style={{fontSize:"3.5cqw",fontWeight:900,color:"#fff"}}>{motm}</div></div></div>}
                             {(igHandle||fbHandle)&&<div style={{flexShrink:0,margin:"0 4% 2%",display:"flex",alignItems:"center",gap:"3%",flexWrap:"wrap"}}>
                               {igHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={IG_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{igHandle}</span></div>}
                               {fbHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={FB_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{fbHandle}</span></div>}
                             </div>}
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,borderRadius:"6%",padding:"0.7%",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}><div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"4%",padding:"2% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:15,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div></div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{visSponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>{visSponsors.map((s,i)=><div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"4%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:12,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -2954,12 +2474,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }}>
                               {/* Linker team - eigen club */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
-                                  {(hvLogoUrl||logo)
-                                    ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"12%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                  }
-                                </div>
+                                {(hvLogoUrl||logo)
+                                  ?<img src={hvLogoUrl||logo} style={{width:"60%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"6%"}} crossOrigin="anonymous"/>
+                                  :<div style={{width:"60%",aspectRatio:"1/1",background:`linear-gradient(135deg,${TAC},${thex(TAC,0.7)})`,borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"#000"}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                }
                                 <span style={{fontSize:(clubName.length>20?"1.7cqw":clubName.length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.85)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{clubName}</span>
                               </div>
 
@@ -2972,41 +2490,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                               {/* Rechter team - tegenstander */}
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                  {oppLogoUrl
-                                    ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"12%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                  }
-                                </div>
+                                {oppLogoUrl
+                                  ?<img src={oppLogoUrl} style={{width:"60%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"6%"}} crossOrigin="anonymous"/>
+                                  :<div style={{width:"60%",aspectRatio:"1/1",background:"rgba(255,255,255,0.08)",border:"1px solid rgba(255,255,255,0.15)",borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
+                                }
                                 <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.7cqw":(opponent||"Tegenstander").length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.55)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{opponent||"Tegenstander"}</span>
                               </div>
                             </div>
-                            <div style={{position:"relative",width:"100%",height:"30cqw",marginTop:"2%",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                              {(()=>{
-                                const disp = getMotmDisplay(motmHistory[motm] || []);
-                                const bigId = disp.newCupId || motmCup;
-                                const bigCup = bigId ? getCup(bigId) : null;
-                                return (<>
-                                  {/* grote nieuw gewonnen cup — strak in het midden */}
-                                  {bigCup
-                                    ? <img src={bigCup.bestand} style={{height:"100%",objectFit:"contain",filter:`drop-shadow(0 6px 18px rgba(0,0,0,0.6)) drop-shadow(0 0 14px ${thex(TAC,0.55)})`}}/>
-                                    : <div style={{width:"18%",aspectRatio:"1/1",borderRadius:"50%",background:`linear-gradient(135deg,${TAC},${TAC2||TAC})`,padding:"2%",boxShadow:`0 0 30px ${thex(TAC,0.5)}`,display:"flex",alignItems:"center",justifyContent:"center"}}><div style={{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"8cqw"}}>🏆</div></div>}
-                                  {/* eerder gewonnen cups — verticale mini-kolom, zweeft rechts, duwt het midden niet weg */}
-                                  {disp.mini && disp.mini.length>0 && (
-                                    <div style={{position:"absolute",right:"3%",top:"50%",transform:"translateY(-50%)",display:"flex",flexDirection:"column",gap:"6%",alignItems:"center"}}>
-                                      {disp.mini.map((m,i)=>{
-                                        const c = getCup(m.cupId); if(!c) return null;
-                                        return (
-                                          <div key={i} style={{position:"relative",height:"7cqw",display:"flex",alignItems:"center"}}>
-                                            <img src={c.bestand} style={{height:"100%",objectFit:"contain",opacity:0.92,filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.5))"}}/>
-                                            {m.dubbel && <img src={c.bestand} style={{height:"100%",objectFit:"contain",opacity:0.92,marginLeft:"-55%",filter:"drop-shadow(0 2px 6px rgba(0,0,0,0.5))"}}/>}
-                                          </div>
-                                        );
-                                      })}
-                                    </div>
-                                  )}
-                                </>);
-                              })()}
+                            <div style={{display:"flex",justifyContent:"center",marginTop:"2%",flexShrink:0}}>
+                              <div style={{width:"18%",aspectRatio:"1/1",borderRadius:"50%",background:`linear-gradient(135deg,${TAC},${TAC2||TAC})`,padding:"2%",boxShadow:`0 0 30px ${thex(TAC,0.5)}`,animation:"trophyGlow 2.4s ease-in-out infinite",perspective:"200px"}}>
+                                <div style={{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"8cqw",animation:"trophySpin 3.6s linear infinite",transformStyle:"preserve-3d"}}>🏆</div>
+                              </div>
                             </div>
                             {/* Pakkende quote onder beker, boven naam */}
                             <div style={{textAlign:"center",marginTop:"2.5%",padding:"0 6%",flexShrink:0}}>
@@ -3030,7 +2524,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <div style={{fontSize:(fullTeamName.length>30?"1.5cqw":fullTeamName.length>22?"1.7cqw":"2cqw"),color:`${TAC}88`,letterSpacing:1,fontWeight:700,marginTop:"1.5%",textTransform:"uppercase",textAlign:"center"}}>{fullTeamName}</div>
                               <div style={{fontSize:(((opponent||"Tegenstander").length>20)?"1.7cqw":"2cqw"),color:"rgba(255,255,255,0.3)",marginTop:"1%"}}>{home>away?"Gewonnen":home===away?"Gelijkspel":"Verloren"} · {home}-{away} vs {opponent||"Tegenstander"}</div>
                             </div>
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,borderRadius:"7%",padding:"0.7%",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}><div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"5%",padding:"2% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:20,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div></div>)}</div></>)}</div>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{visSponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>{visSponsors.map((s,i)=><div key={i} style={{flex:1,background:"#e8e8e8",borderRadius:"5%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%",border:s._isTeam?`2px solid ${TAC}`:"none"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:16,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div>)}</div></>)}</div>
                           </div>
                         </div>
                         )}
@@ -3039,8 +2533,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         const h2c=await loadH2C();
                         const el=document.getElementById(`layout-${l.id}`);
                         if(!el) return;
-                        const dpr=Math.max(window.devicePixelRatio||1,2);
-                        const canvas=await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                        const canvas=await h2c(el,{scale:2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
                         const link=document.createElement("a");
                         link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.png`;
                         link.href=canvas.toDataURL("image/png");
@@ -3062,54 +2555,45 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}`;
                   });
                   const greeting = someName ? `Hoi ${someName.split(" ")[0]}` : "Hoi";
-                  const msgText = [
+                  const msgLines = [
                     `${greeting}! 👋`,``,
-                    `De content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* staat klaar.`,``,
-                    `📧 Alles staat in je mail: het verslag, de caption${motm&&home>=away?`, de Man of the Match (*${motm}*)`:""} en de afbeeldingen als bijlage.`,``,
-                    `Laat even weten wanneer het geplaatst is. Groet! 🙌`,
-                  ].join("\n");
+                    `Content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* staat klaar om te plaatsen.`,``,
+                    `━━━━━━━━━━━━━━━━━━━`,
+                    `📸 *MATCH POST (caption)*`,
+                    `━━━━━━━━━━━━━━━━━━━`,``,
+                    aiOut.instagram,``,
+                  ];
+                  if(motm&&home>=away){
+                    msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
+                    msgLines.push(`🏆 *MAN OF THE MATCH*`);
+                    msgLines.push(`━━━━━━━━━━━━━━━━━━━`);msgLines.push(``);
+                    msgLines.push(`⭐ Man of the Match: *${motm}*`);msgLines.push(``);
+                    msgLines.push(`Story-afbeelding volgt — geen caption nodig (story).`);msgLines.push(``);
+                  }
+                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  msgLines.push(`⚽ *DOELPUNTEN*`);
+                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  goalLines.length>0 ? goalLines.forEach(g=>msgLines.push(g)) : msgLines.push(`Geen doelpunten`);
+                  msgLines.push(``);
+                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  msgLines.push(`📋 *INSTRUCTIES*`);
+                  msgLines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  msgLines.push(`• De afbeeldingen volgen direct hierna in deze chat`);
+                  if(motm&&home>=away) msgLines.push(`• Match-afbeelding, Story én MOTM-afbeelding apart sturen`);
+                  else msgLines.push(`• Match-afbeelding en Story apart sturen`);
+                  msgLines.push(`• Geplaatst? Laat het even weten 🙌`);
+                  const msgText = msgLines.join("\n");
                   const waUrl = hasSome ? `https://wa.me/${someCountry}${someNumber}?text=${encodeURIComponent(msgText)}` : null;
 
                   const downloadLayout = async (id) => {
                     const h2c = await loadH2C();
                     const el = document.getElementById(`layout-${id}`);
                     if(!el) return;
-                    const dpr = Math.max(window.devicePixelRatio||1,2);
-                    const canvas = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                    const canvas = await h2c(el,{scale:2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
                     const link = document.createElement("a");
                     link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`;
                     link.href = canvas.toDataURL("image/png");
                     link.click();
-                  };
-
-                  // E-mail het hele pakket (verslag + afbeeldingen als bijlage) via Resend
-                  const emailToBeheerder = async () => {
-                    if (!someEmail) { setScreen("club"); setClubSection("distributie"); return; }
-                    setMailStatus("sending");
-                    try {
-                      const h2c = await loadH2C();
-                      const ids = ["classic","story",...(motm&&home>=away?["motm"]:[])];
-                      const attachments = [];
-                      for (const id of ids) {
-                        const el = document.getElementById(`layout-${id}`);
-                        if (!el) continue;
-                        // Scale 4 + JPEG 0.95: hoge scherpte (logo's en randen) met een klein bestand.
-                        // JPEG op 0.95 oogt als PNG maar is veel lichter, dus ruime marge voor mobiel.
-                        const canvas = await h2c(el,{scale:4,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                        const dataUrl = canvas.toDataURL("image/jpeg", 0.95);
-                        attachments.push({ filename:`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`, content: dataUrl.split(",")[1] });
-                      }
-                      const gls = events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(e=>formatMinuut(e.minute,e.extra,e.half)+" "+(e.type==="OWN"?(opponent||"Teg."):(e.player||"—"))).join("<br>")||"Geen doelpunten";
-                      const html = `<div style="font-family:Arial,sans-serif;color:#111;line-height:1.5"><h2 style="margin:0 0 8px">${clubName} ${home}-${away} ${opponent||""}</h2><p style="font-weight:bold;font-size:16px">${aiOut.headline||""}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Verslag (voor de website)</h3><p>${(aiOut.verslag||"").replace(/\n/g,"<br>")}</p><h3 style="margin:18px 0 4px;font-size:13px;color:#666;text-transform:uppercase;letter-spacing:1px">Social media caption</h3><p style="background:#f5f5f7;padding:12px 14px;border-radius:8px;white-space:pre-wrap">${(aiOut.instagram||"").replace(/\n/g,"<br>")}</p><hr><p><strong>Doelpunten:</strong><br>${gls}</p>${motm&&home>=away?`<p><strong>Man of the Match:</strong> ${motm}</p>`:""}<p style="color:#888;font-size:12px">De afbeeldingen zitten als bijlage bij deze e-mail.<br>Verstuurd via Matchly</p></div>`;
-                      const subject = `Wedstrijdverslag: ${clubName} ${home}-${away} ${opponent||"Tegenstander"}`;
-                      const res = await fetch("/.netlify/functions/send-email",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({to:someEmail,subject,html,attachments})});
-                      const d = await res.json().catch(()=>({}));
-                      if (!res.ok) throw new Error(d.error||"Versturen mislukt");
-                      setMailStatus("ok");
-                      setTimeout(()=>setMailStatus(null),4000);
-                    } catch(e) {
-                      setMailStatus("error:"+(e.message||"onbekend"));
-                    }
                   };
 
                   return (
@@ -3121,35 +2605,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           <span style={{fontSize:20}}>📤</span>
                         </div>
                         <div>
-                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.3}}>Stuur naar social media beheerder</div>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.3}}>Stuur naar beheerder</div>
                           <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:1}}>
-                            {hasSome ? `→ ${someName||`+${someCountry}${someNumber}`}` : "In te stellen onder Teaminstellingen → Distributie & communicatie"}
+                            {hasSome ? `→ ${someName||`+${someCountry}${someNumber}`}` : "Stel beheerder in via Clubinstellingen"}
                           </div>
                         </div>
                       </div>
 
-                      {/* Stap 1: mail naar beheerder met alle content */}
-                      <div>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 1 — Stuur de mail naar de social media beheerder</div>
-                        <div style={{background:"rgba(255,255,255,0.03)",border:"1px solid rgba(255,255,255,0.08)",borderRadius:12,padding:"12px 14px",marginBottom:12}}>
-                          <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",fontWeight:700,letterSpacing:1,textTransform:"uppercase",marginBottom:8}}>In de mail zit:</div>
-                          <div style={{display:"flex",flexDirection:"column",gap:6,fontSize:13,color:T.text2,fontFamily:"Barlow,sans-serif"}}>
-                            <div style={{display:"flex",alignItems:"center",gap:8}}><span>📸</span><span>Wedstrijdkaart{motm&&home>=away?", story & Man of the Match":" & story"} (als bijlage)</span></div>
-                            <div style={{display:"flex",alignItems:"center",gap:8}}><span>📝</span><span>Caption voor social media</span></div>
-                            <div style={{display:"flex",alignItems:"center",gap:8}}><span>📰</span><span>Verslag voor de website</span></div>
-                          </div>
-                        </div>
-                        <button onClick={emailToBeheerder} disabled={mailStatus==="sending"} style={{width:"100%",background:someEmail?(mailStatus==="sending"?"rgba(255,255,255,0.06)":"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)"):"rgba(255,255,255,0.05)",borderRadius:10,padding:"13px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:mailStatus==="sending"?"wait":"pointer",border:someEmail&&mailStatus!=="sending"?"none":"1px solid rgba(255,255,255,0.1)"}}>
-                          <span style={{fontSize:16}}>📧</span>
-                          <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,color:someEmail&&mailStatus!=="sending"?"#fff":T.text3,letterSpacing:0.5}}>
-                            {mailStatus==="sending"?"Versturen…":someEmail?"Stuur mail naar social media beheerder":"E-mail instellen"}
-                          </span>
-                        </button>
-                        {mailStatus==="ok" && <div style={{marginTop:8,fontSize:11,color:"#34d399",fontFamily:"Barlow,sans-serif",fontWeight:700}}>✓ Verstuurd naar {someEmail}</div>}
-                        {typeof mailStatus==="string" && mailStatus.startsWith("error:") && <div style={{marginTop:8,fontSize:11,color:"#f87171",fontFamily:"Barlow,sans-serif"}}>✗ {mailStatus.slice(6)}</div>}
-
-                        {/* Afbeeldingen ook los te downloaden */}
-                        <div style={{marginTop:12,fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:T.text4,textTransform:"uppercase",marginBottom:8}}>Of download de afbeeldingen los</div>
+                      {/* Stap 1: afbeeldingen downloaden */}
+                      <div style={{marginBottom:14}}>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 1 — Afbeeldingen downloaden</div>
                         <div style={{display:"flex",flexDirection:"column",gap:7}}>
                           <button onClick={()=>downloadLayout("classic")} style={{width:"100%",padding:"10px 14px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer",letterSpacing:0.5,display:"flex",alignItems:"center",gap:8,textAlign:"left"}}>
                             <span>📸</span><span>Wedstrijdkaart (1:1)</span>
@@ -3165,17 +2630,22 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
                       </div>
 
-                      {/* Stap 2: WhatsApp-melding dat de mail klaarstaat */}
-                      <div style={{marginTop:16,paddingTop:16,borderTop:"1px solid rgba(255,255,255,0.08)"}}>
-                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Laat de social media beheerder weten dat de mail klaarstaat</div>
-                        <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{width:"100%",background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"12px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
-                          <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
-                          <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
-                            {hasSome?"Stuur WhatsApp-melding":"Beheerder instellen"}
-                          </span>
-                        </button>
+                      {/* Stap 2: bericht versturen */}
+                      <div>
+                        <div style={{fontSize:10,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:900,letterSpacing:2,color:"rgba(168,85,247,0.85)",textTransform:"uppercase",marginBottom:8}}>Stap 2 — Tekst versturen via WhatsApp</div>
+                        <div style={{display:"flex",gap:8}}>
+                          <button onClick={()=>{navigator.clipboard.writeText(msgText);setCopiedDistr("handover");setTimeout(()=>setCopiedDistr(null),2500);}} style={{flex:1,padding:"11px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.1)",borderRadius:10,color:T.text2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textTransform:"uppercase"}}>
+                            {copiedDistr==="handover"?"✓ Gekopieerd":"📋 Kopiëren"}
+                          </button>
+                          <button onClick={()=>{if(!hasSome){setScreen("club");setClubSection("distributie");return;}window.open(waUrl,"_blank");}} style={{flex:2,background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:10,padding:"11px 16px",display:"flex",alignItems:"center",justifyContent:"center",gap:7,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.1)"}}>
+                            <span style={{fontSize:16}}>{hasSome?"💬":"⚙️"}</span>
+                            <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:0.5}}>
+                              {hasSome?"Stuur via WhatsApp":"Beheerder instellen"}
+                            </span>
+                          </button>
+                        </div>
                         <div style={{marginTop:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
-                          💬 Een kort WhatsApp-berichtje aan de social media beheerder dat de content (verslag, caption en afbeeldingen) in de mail klaarstaat.
+                          💡 Stuur daarna de gedownloade afbeeldingen apart in dezelfde WhatsApp-chat.
                         </div>
                       </div>
                     </div>
@@ -3260,18 +2730,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       })()}
                     </div>
 
-                    {(sponsors.length>0 || silverSponsors.length>0 || teamSponsors.length>0) && <>
+                    {(sponsors.length>0 || teamSponsors.length>0) && <>
                       <div style={{borderBottom:"1px solid rgba(255,255,255,0.06)",margin:"20px 0"}}/>
                       <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.25)",textTransform:"uppercase",textAlign:"center",marginBottom:10}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                       <div style={{display:"flex",gap:8,justifyContent:"center",flexWrap:"wrap"}}>
-                        {storySponsors.map((s,i)=>(
-                          <div key={i} style={{borderRadius:9,padding:"2px",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}>
-                            <div style={{background:"#e8e8e8",borderRadius:7,padding:"6px 14px",display:"flex",alignItems:"center"}}>
+                        {[...sponsors, ...teamSponsors.map(s=>({...s,_isTeam:true}))].map((s,i)=>(
+                          <div key={i} style={{background:"#e8e8e8",borderRadius:7,padding:"6px 14px",display:"flex",alignItems:"center",border:s._isTeam?`2px solid ${TAC}`:"none"}}>
                             {s.url
                               ? <img src={s.url} style={{height:18,maxWidth:60,objectFit:"contain"}} crossOrigin="anonymous"/>
                               : <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:900,color:"#222"}}>{s.name||"—"}</span>
                             }
-                            </div>
                           </div>
                         ))}
                       </div>
@@ -3294,7 +2762,6 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   </div>
                 </div>
 
-
                 {/* ── SECTION LABEL ── */}
                 <div style={{display:"flex",alignItems:"center",gap:8,margin:"24px 0 10px"}}>
                   <div style={{height:1,flex:1,background:`linear-gradient(90deg,${thex(TAC,0.4)},transparent)`}}/>
@@ -3310,13 +2777,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     if(e.type==="OWN") as++; else hs++;
                     return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?`${opponent||"Tegenstander"}`:(e.player||"—")}`;
                   });
-                  const waDatum = matchDate
-                    ? new Date(matchDate).toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long",year:"numeric"})
-                    : new Date().toLocaleDateString("nl-NL",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
                   const waLines=[
                     `🏆 *${clubName} ${home}-${away} ${opponent||"Tegenstander"}*`,
-                    `👕 ${fullTeamName}`,
-                    `📅 ${waDatum}`,
+                    `📅 ${fullTeamName}`,
                     ``,
                     `"${aiOut.headline}"`,
                     ``,
@@ -3384,6 +2847,151 @@ HEADLINE: 1 zin. Positief en simpel.`;
                   );
                 })()}
 
+                {/* ══════════════════════════════════════════
+                    HANDOVER NAAR SOCIAL MEDIA-BEHEERDER
+                    Bundelt alle content (caption, MOTM, samenvatting)
+                    in één WhatsApp-bericht naar de SoMe-beheerder
+                ══════════════════════════════════════════ */}
+                <div style={{display:"flex",alignItems:"center",gap:8,margin:"30px 0 14px"}}>
+                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,${thex(TAC,0.4)},transparent)`}}/>
+                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:9,fontWeight:900,letterSpacing:3,color:`${TAC}99`,textTransform:"uppercase"}}>Naar Social Media-beheerder</span>
+                  <div style={{height:1,flex:1,background:`linear-gradient(90deg,transparent,${thex(TAC,0.4)})`}}/>
+                </div>
+
+                {(()=>{
+                  const hasSome = someNumber && someNumber.length >= 8;
+                  // Bouw het complete handover-bericht
+                  const goals = events.filter(e=>e.type==="GOAL"||e.type==="OWN");
+                  let hs=0,as=0;
+                  const goalLines = goals.map(e=>{
+                    if(e.type==="OWN") as++; else hs++;
+                    return `${e.minute||"?"}' (${hs}-${as}) ${e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}`;
+                  });
+                  const greeting = someName ? `Hoi ${someName.split(" ")[0]}` : "Hoi";
+                  const lines = [
+                    `${greeting}! 👋`,
+                    ``,
+                    `De content voor *${clubName} ${home}-${away} ${opponent||"Tegenstander"}* is klaar om te plaatsen.`,
+                    ``,
+                    `━━━━━━━━━━━━━━━━━━━`,
+                    `📸 *INSTAGRAM / FACEBOOK POST*`,
+                    `━━━━━━━━━━━━━━━━━━━`,
+                    ``,
+                    aiOut.instagram,
+                    ``,
+                  ];
+                  if (motm && home>=away) {
+                    lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                    lines.push(`🏆 *MAN OF THE MATCH STORY*`);
+                    lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                    lines.push(``);
+                    lines.push(`⭐ Man of the Match: *${motm}*`);
+                    lines.push(``);
+                    lines.push(`${motm} kreeg de onderscheiding na onze ${home>away?"overwinning":"gelijkspel"} tegen ${opponent||"de tegenstander"} (${home}-${away}).`);
+                    lines.push(``);
+                    lines.push(`#MOTM #${clubName.replace(/[^A-Za-z0-9]/g,"")} #${team.replace(/[^A-Za-z0-9]/g,"")}`);
+                    lines.push(``);
+                  }
+                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  lines.push(`📰 *KORTE SAMENVATTING*`);
+                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  lines.push(``);
+                  lines.push(`"${aiOut.headline}"`);
+                  lines.push(``);
+                  lines.push(aiOut.samenvatting);
+                  lines.push(``);
+                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  lines.push(`⚽ *DOELPUNTEN*`);
+                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  if (goalLines.length > 0) {
+                    goalLines.forEach(g=>lines.push(g));
+                  } else {
+                    lines.push(`Geen doelpunten`);
+                  }
+                  lines.push(``);
+                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  lines.push(`📋 *INSTRUCTIES*`);
+                  lines.push(`━━━━━━━━━━━━━━━━━━━`);
+                  lines.push(`• De match-afbeelding stuur ik direct hierna apart`);
+                  if (motm && home>=away) lines.push(`• De MOTM-afbeelding stuur ik daarna apart`);
+                  if (clubWebsite) lines.push(`• Het volledige verslag staat op ${clubWebsite}`);
+                  lines.push(`• Geplaatst? Laat het even weten 🙌`);
+                  const handoverText = lines.join("\n");
+
+                  const waUrl = hasSome
+                    ? `https://wa.me/${someCountry}${someNumber}?text=${encodeURIComponent(handoverText)}`
+                    : null;
+
+                  return (
+                    <div style={{background:"rgba(168,85,247,0.05)",border:`1px solid rgba(168,85,247,0.22)`,borderRadius:18,padding:18,marginBottom:24}}>
+                      {!hasSome && (
+                        <div style={{background:"rgba(255,214,0,0.08)",border:"1px solid rgba(255,214,0,0.25)",borderRadius:12,padding:12,marginBottom:14,display:"flex",alignItems:"flex-start",gap:10}}>
+                          <span style={{fontSize:18,lineHeight:1}}>⚠️</span>
+                          <div style={{flex:1}}>
+                            <div style={{fontSize:12,fontWeight:800,color:"#ffd600",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>Nog geen beheerder ingesteld</div>
+                            <div style={{fontSize:11.5,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.5,marginBottom:8}}>Stel het WhatsApp-nummer van je social media-beheerder in zodat je alles in één tik kunt doorsturen.</div>
+                            <button onClick={()=>{setScreen("club");setClubSection("distributie");}} style={{padding:"7px 12px",background:"rgba(255,214,0,0.15)",border:"1px solid rgba(255,214,0,0.4)",borderRadius:8,color:"#ffd600",fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:800,cursor:"pointer",letterSpacing:1,textTransform:"uppercase"}}>→ Instellen</button>
+                          </div>
+                        </div>
+                      )}
+
+                      <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:14}}>
+                        <div style={{width:38,height:38,borderRadius:"50%",background:"linear-gradient(135deg,#a855f7,#ec4899)",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,boxShadow:"0 4px 14px rgba(168,85,247,0.45)"}}>
+                          <span style={{fontSize:18}}>📤</span>
+                        </div>
+                        <div style={{flex:1}}>
+                          <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:15,fontWeight:900,color:T.text,letterSpacing:0.3,lineHeight:1.2}}>Alles in één bericht</div>
+                          <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginTop:2}}>
+                            {hasSome
+                              ? `Naar ${someName || `+${someCountry}${someNumber}`}`
+                              : "Voor de SoMe-beheerder van je club"}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Inhoud preview */}
+                      <div style={{background:"rgba(0,0,0,0.35)",borderRadius:12,padding:14,marginBottom:14,maxHeight:180,overflowY:"auto"}}>
+                        <div style={{fontSize:10,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>Inhoud bericht</div>
+                        {[
+                          ["📸","Instagram/Facebook caption"],
+                          // MOTM heeft geen caption — is een story (regel weg)
+                          ["📰","Headline + samenvatting"],
+                          ["⚽",`Doelpunten-overzicht (${goalLines.length})`],
+                          ["📋","Instructies voor plaatsing"],
+                        ].filter(Boolean).map(([ic,lab],i)=>(
+                          <div key={i} style={{display:"flex",alignItems:"center",gap:9,marginBottom:6,fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>
+                            <span style={{fontSize:12,opacity:0.8}}>{ic}</span><span>{lab}</span>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div style={{display:"flex",gap:8}}>
+                        <button
+                          onClick={()=>{navigator.clipboard.writeText(handoverText);setCopiedDistr("handover");setTimeout(()=>setCopiedDistr(null),2500);}}
+                          style={{flex:1,padding:"12px",background:"rgba(255,255,255,0.05)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:11,color:T.text2,fontSize:12,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textTransform:"uppercase"}}
+                        >
+                          {copiedDistr==="handover" ? "✓ Gekopieerd" : "📋 Kopiëren"}
+                        </button>
+                        <button
+                          onClick={()=>{
+                            if (!hasSome) { setScreen("club"); setClubSection("distributie"); return; }
+                            window.open(waUrl,"_blank");
+                          }}
+                          style={{flex:1.7,background:hasSome?"linear-gradient(90deg,#4f46e5,#a855f7,#ec4899)":"rgba(255,255,255,0.05)",borderRadius:11,padding:"12px 16px",textAlign:"center",display:"flex",alignItems:"center",justifyContent:"center",gap:6,cursor:"pointer",border:hasSome?"none":"1px solid rgba(255,255,255,0.12)"}}
+                        >
+                          <span style={{fontSize:14}}>{hasSome?"📤":"⚙️"}</span>
+                          <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:12,fontWeight:900,color:hasSome?"#fff":T.text3,letterSpacing:1,textTransform:"uppercase"}}>
+                            {hasSome ? "Versturen via WhatsApp" : "Beheerder instellen"}
+                          </span>
+                        </button>
+                      </div>
+
+                      <div style={{marginTop:12,padding:10,background:"rgba(0,0,0,0.2)",borderRadius:10,fontSize:10.5,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55}}>
+                        💡 Tip: stuur na dit bericht ook de match-afbeelding en eventueel de MOTM-afbeelding apart door in dezelfde chat — WhatsApp ondersteunt geen afbeeldingen via deellinks.
+                      </div>
+                    </div>
+                  );
+                })()}
 
                 {/* ══════════════════════════════════════════
                     WEDSTRIJDVERSLAG VOOR DE WEBSITE
@@ -3698,6 +3306,65 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   </div>
                 )}
                 <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
+                  <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:16}}>CLUB IDENTITEIT</div>
+
+                  {/* Club naam — auto-zoekt logo bij blur of Enter */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Clubnaam</div>
+                  <input
+                    value={clubName}
+                    onChange={e=>{
+                      const v = e.target.value;
+                      setClubName(v);
+                      // Logo wissen als naam verandert (alleen HV-gevonden logo, niet eigen upload)
+                      if (hvLogoUrl) setHvLogoUrl("");
+                      if (hvLogoMsg) setHvLogoMsg("");
+                    }}
+                    onBlur={triggerClubLogoSearch}
+                    onKeyDown={e=>{ if(e.key==="Enter"){ e.target.blur(); } }}
+                    placeholder="VV Ons Dorp"
+                    style={{...INP,marginBottom:16}}
+                  />
+
+                  {/* Logo row */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:10}}>Clublogo</div>
+                  <div style={{display:"flex",alignItems:"center",gap:14}}>
+                    {/* Preview */}
+                    <div style={{width:72,height:72,borderRadius:18,background:(hvLogoUrl||logo)?"#fff":T.bg3,border:`1px solid ${T.border2}`,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",flexShrink:0,boxShadow:"0 4px 16px rgba(0,0,0,0.4)",position:"relative"}}>
+                      {hvLogoLoading && !logo && !hvLogoUrl
+                        ? <span style={{fontSize:22,opacity:0.6}}>⏳</span>
+                        : (hvLogoUrl||logo)
+                          ? <img src={logo||hvLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:4}} onError={e=>{e.target.style.opacity="0.2";}} />
+                          : <span style={{fontSize:28,opacity:0.2}}>🛡️</span>
+                      }
+                    </div>
+                    {/* Upload + status */}
+                    <div style={{flex:1}}>
+                      <button onClick={()=>logoRef.current.click()} style={{width:"100%",padding:"10px 14px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:12,color:T.text3,fontSize:13,fontWeight:700,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:0.5,textAlign:"left"}}>
+                        📁 {logo ? "Vervang eigen logo" : "Upload eigen logo"}
+                      </button>
+                      <input ref={logoRef} type="file" accept="image/*" onChange={handleLogo} style={{display:"none"}} />
+                      {/* Status-tekst onder de knop */}
+                      {hvLogoLoading && !logo && (
+                        <div style={{marginTop:8,fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif"}}>Logo wordt gezocht...</div>
+                      )}
+                      {!hvLogoLoading && hvLogoMsg && !hvLogoMsg.startsWith("✓") && !logo && (
+                        <div style={{marginTop:8,fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif"}}>Geen logo gevonden</div>
+                      )}
+                      {logo && (
+                        <button onClick={()=>setLogo(null)} style={{marginTop:8,background:"none",border:"none",color:T.text4,fontFamily:"Barlow,sans-serif",fontSize:11,cursor:"pointer",padding:0,textDecoration:"underline",textDecorationStyle:"dotted"}}>Eigen logo verwijderen</button>
+                      )}
+                    </div>
+                  </div>
+                  {(hvLogoUrl||logo) && <div style={{marginTop:10,fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif"}}>✓ Logo actief in match header en content</div>}
+
+                  {/* Instagram handle */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Instagram handle</div>
+                  <input value={igHandle} onChange={e=>setIgHandle(e.target.value)} placeholder="@vjouvclub" style={{...INP,marginBottom:16}} />
+
+                  {/* Facebook handle */}
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Facebook handle</div>
+                  <input value={fbHandle} onChange={e=>setFbHandle(e.target.value)} placeholder="@vjouvclub of facebook.com/vjouvclub" style={{...INP,marginBottom:16}} />
+
                   {/* AI consent toggle */}
                   <div style={{background:aiConsent?"rgba(255,255,255,0.02)":hex(T.red,0.05),border:`1px solid ${aiConsent?T.border3:hex(T.red,0.25)}`,borderRadius:14,padding:14,marginBottom:16}}>
                     <div style={{display:"flex",alignItems:"flex-start",gap:10}}>
@@ -3714,7 +3381,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   </div>
 
                   {/* Volgende wedstrijd */}
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Volgende wedstrijd (komt terug op content)</div>
+                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6}}>Volgende wedstrijd (verschijnt op de post)</div>
                   <input value={nextGame} onChange={e=>setNextGame(e.target.value)} placeholder="Zo 25 mei | 14:00 | Uit vs FC Rivieren" style={{...INP,marginBottom:10}} />
                   <div style={{display:"flex",gap:8,marginBottom:8,flexWrap:"wrap"}}>
                     <button onClick={()=>nextMatchRef.current.click()} disabled={scanning} style={{flex:"1 1 45%",padding:"9px 8px",borderRadius:10,cursor:scanning?"default":"pointer",background:scanning==="nextmatch"?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px solid ${scanning==="nextmatch"?U:T.border3}`,color:scanning==="nextmatch"?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,letterSpacing:0.5,opacity:scanning&&scanning!=="nextmatch"?0.5:1}}>
@@ -3736,7 +3403,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                       {voetbalFallback&&<button onClick={async()=>{
                         setScanning("nextmatch");setScanError(null);
                         try{
-                          const res=await fetch("/.netlify/functions/anthropic",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
+                          const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:500,messages:[{role:"user",content:`Vind de eerstvolgende wedstrijd in deze tekst. Geef ALLEEN dit JSON: {"date":"Zo 25 mei","time":"14:00","opponent":"...","location":"Thuis|Uit"}\n\n${voetbalFallback}`}]})});
                           const d=await res.json();const raw=d.content?.map(b=>b.text||"").join("")||"";const out=JSON.parse(raw.replace(/```json|```/g,"").trim());
                           const parts=[out.date,out.time,out.location,out.opponent?"vs "+out.opponent:null].filter(Boolean);
                           setNextGame(parts.join(" | "));
@@ -3755,12 +3422,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                 <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:20,padding:20,marginBottom:20}}>
                   <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.8,marginBottom:16}}>ELFTAL</div>
 
-                  {teamLocked ? (
-                    <div style={{padding:"14px 16px",background:hex(U,0.1),border:`1px solid ${hex(U,0.3)}`,borderRadius:12,marginBottom:16}}>
-                      <div style={{fontSize:11,color:T.text3,marginBottom:3,fontFamily:"Barlow,sans-serif"}}>Je vult in voor</div>
-                      <div style={{fontSize:18,fontWeight:800,color:T.text,fontFamily:"'Barlow Condensed',sans-serif"}}>{team}</div>
-                    </div>
-                  ) : (<>
                   {/* Team chips */}
                   <div style={{display:"flex",flexWrap:"wrap",gap:7,marginBottom:10}}>
                     {["Heren 1","Heren 2","Heren 3","Heren 4","Dames 1","Dames 2","JO19-1","JO17-1","JO15-1"].map(t=>(
@@ -3768,7 +3429,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     ))}
                   </div>
                   <input value={team} onChange={e=>setTeam(e.target.value)} placeholder="Of typ zelf: Heren 5" style={{...INP,marginBottom:16}} />
-                  </>)}
 
                   {/* ── Heren 1: HollandseVelden competitie ── */}
                   {isHeren1 ? (
@@ -3918,26 +3578,30 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                 ────────────────────────────────── */}
                 <div style={{background:hex(U,0.04),border:`1px solid ${hex(U,0.2)}`,borderRadius:20,padding:20,marginBottom:20}}>
                   <div style={{fontSize:10,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",opacity:0.9,marginBottom:8}}>💬 Help & Feedback</div>
-                  <div style={{fontSize:13,color:T.text3,marginBottom:14,fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>Een vraag over de app? Stel 'm direct aan de Matchly Helpdesk. Een idee voor verbetering? Laat het ons weten.</div>
-                  <div style={{display:"flex",flexDirection:"column",gap:10}}>
-                    {/* Matchly Helpdesk — primair */}
-                    <button onClick={()=>setHdOpen(true)} style={{display:"flex",alignItems:"center",gap:11,padding:"13px 15px",background:"linear-gradient(135deg,#4f46e5,#a855f7,#ec4899)",border:"none",borderRadius:12,cursor:"pointer",fontFamily:"Barlow,sans-serif",fontSize:14,fontWeight:700,color:"#fff",textAlign:"left"}}>
-                      <img src={HD_LOGO_M} style={{width:26,height:26,borderRadius:"50%",objectFit:"cover",flexShrink:0}} alt=""/>
-                      <span style={{flex:1}}>Matchly Helpdesk</span>
-                      <span style={{fontSize:14,opacity:0.85}}>→</span>
-                    </button>
-                    {/* Idee delen — e-mail */}
-                    <button onClick={()=>{
+                  <div style={{fontSize:13,color:T.text3,marginBottom:14,fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>Een bug gevonden, idee voor verbetering, of een andere vraag? Laat het weten — elke melding helpt Matchly beter te maken.</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:8}}>
+                    {[
+                      {kind:"bug",   emoji:"🐛", label:"Bug melden",    subject:"Matchly · Bug report"},
+                      {kind:"idea",  emoji:"💡", label:"Idee delen",    subject:"Matchly · Feature idee"},
+                      {kind:"vraag", emoji:"❓", label:"Vraag stellen", subject:"Matchly · Vraag"},
+                    ].map(f=>(
+                      <button key={f.kind} onClick={()=>{
                         const ua = typeof navigator!=="undefined"?navigator.userAgent:"?";
-                        const body = ["Hoi Matchly team,","","Mijn idee:","[hier invullen]","","Waarom dit handig zou zijn:","[hier invullen]","","---","App versie: matchly-v30","Device: "+ua,"Club: "+(clubName||"-")].join("\n");
-                        window.location.href = `mailto:matchlycontent@gmail.com?subject=${encodeURIComponent("Matchly · Feature idee")}&body=${encodeURIComponent(body)}`;
+                        const tpl = {
+                          bug:   ["Hoi Matchly team,","","Beschrijving van de bug:","[hier invullen]","","Stappen om te reproduceren:","1. ","2. ","","Verwacht: [hier invullen]","Gebeurde: [hier invullen]"],
+                          idea:  ["Hoi Matchly team,","","Mijn idee:","[hier invullen]","","Waarom dit handig zou zijn:","[hier invullen]"],
+                          vraag: ["Hoi Matchly team,","","Mijn vraag:","[hier invullen]"],
+                        }[f.kind];
+                        const body = [...tpl,"","---","App versie: matchly-v30","Device: "+ua,"Club: "+(clubName||"-")].join("\n");
+                        window.location.href = `mailto:matchlycontent@gmail.com?subject=${encodeURIComponent(f.subject)}&body=${encodeURIComponent(body)}`;
                       }} style={{display:"flex",alignItems:"center",gap:10,padding:"12px 14px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border2}`,borderRadius:12,cursor:"pointer",fontFamily:"Barlow,sans-serif",fontSize:13,fontWeight:600,color:T.text,textAlign:"left"}}>
-                      <span style={{fontSize:18}}>💡</span>
-                      <span style={{flex:1}}>Idee delen</span>
-                      <span style={{fontSize:14,color:T.text4}}>→</span>
-                    </button>
+                        <span style={{fontSize:18}}>{f.emoji}</span>
+                        <span style={{flex:1}}>{f.label}</span>
+                        <span style={{fontSize:14,color:T.text4}}>→</span>
+                      </button>
+                    ))}
                   </div>
-                  <div style={{fontSize:10,color:T.text4,marginTop:12,fontFamily:"Barlow,sans-serif",fontStyle:"italic"}}>De helpdesk beantwoordt je vraag direct. Idee delen opent je e-mail-app.</div>
+                  <div style={{fontSize:10,color:T.text4,marginTop:12,fontFamily:"Barlow,sans-serif",fontStyle:"italic"}}>Opent je standaard e-mail-app met een vooringevuld bericht. Werkt ook offline.</div>
                 </div>
 
                 {/* Danger zone */}
@@ -3955,22 +3619,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     style={{width:"100%",padding:"12px",background:hex(T.red,0.08),border:`1px solid ${hex(T.red,0.3)}`,borderRadius:10,color:T.red,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer",letterSpacing:0.5}}
                   >
                     🗑️ Alle data wissen
-                  </button>
-                </div>
-
-                {/* ──────────────────────────────────
-                    ACCOUNT
-                ────────────────────────────────── */}
-                <div style={{fontSize:10,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:3,textTransform:"uppercase",marginBottom:12,opacity:0.6}}>ACCOUNT</div>
-                <div style={{background:"rgba(255,255,255,0.02)",border:`1px solid ${T.border2}`,borderRadius:14,padding:16,marginBottom:24}}>
-                  {boot?.user?.email && (
-                    <div style={{fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",marginBottom:12}}>Ingelogd als <strong style={{color:T.text2}}>{boot.user.email}</strong></div>
-                  )}
-                  <button
-                    onClick={async()=>{ if(window.confirm("Weet je zeker dat je wilt uitloggen?")){ await supabase.auth.signOut(); window.location.reload(); } }}
-                    style={{width:"100%",padding:"12px",background:"rgba(255,255,255,0.04)",border:`1px solid ${T.border3}`,borderRadius:10,color:T.text2,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:800,cursor:"pointer",letterSpacing:0.5}}
-                  >
-                    ↩ Uitloggen
                   </button>
                 </div>
               </>)}
@@ -4045,11 +3693,73 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
               {clubSection==="sponsoren" && (<>
                 <BackBtn onClick={()=>setClubSection("main")} label="Instellingen" />
                 <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:20,fontWeight:900,color:T.text,marginBottom:8,letterSpacing:0.5}}>🏅 Sponsoren</div>
-                <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:20}}>Beheer hier de sponsoren voor jouw team. De clubsponsoren (goud en zilver) regelt de clubbeheerder.</div>
+                <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:20}}>Sponsoren worden automatisch verwerkt in Instagram posts, afbeeldingen en verslagen. Drie niveaus: hoofdsponsoren (club), teamsponsor (één slot) en MOTM-sponsor (alleen op MOTM-story).</div>
 
-                {/* Clubsponsoren (goud + zilver) worden centraal beheerd in de admin */}
-                <div style={{background:hex(U,0.07),border:`1px solid ${hex(U,0.22)}`,borderRadius:14,padding:"14px 16px",marginBottom:24,fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif",lineHeight:1.6}}>
-                  🏛️ <strong style={{color:T.text}}>Clubsponsoren</strong> (goud en zilver) worden centraal beheerd door de clubbeheerder en verschijnen automatisch op je content. Hieronder beheer je je eigen <strong style={{color:T.text}}>teamsponsor</strong> en <strong style={{color:T.text}}>MOTM-sponsor</strong>.
+                {/* ── Sectie kop: HOOFDSPONSOREN (Club-laag) ── */}
+                <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6}}>
+                  <span style={{fontSize:18}}>🏛️</span>
+                  <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:T.text,letterSpacing:0.5}}>Hoofdsponsoren</div>
+                  <span style={{fontSize:9,fontWeight:900,color:U,fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:hex(U,0.12),border:`1px solid ${hex(U,0.3)}`,borderRadius:6,textTransform:"uppercase"}}>Club</span>
+                </div>
+                <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.55,marginBottom:14}}>Altijd zichtbaar op alle content. Worden later centraal beheerd door de clubbeheerder.</div>
+
+                {sponsors.length>5 && (
+                  <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:14,padding:14,marginBottom:14}}>
+                    <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:8}}>🔁 Rotatie-snelheid ({sponsors.length} sponsors, wisselen elke {sponsorSpeed/1000}s)</div>
+                    <div style={{display:"flex",gap:6}}>
+                      {[["Langzaam",5000],["Normaal",3500],["Snel",2000]].map(([lab,ms])=>(
+                        <button key={ms} onClick={()=>setSponsorSpeed(ms)} style={{flex:1,padding:"8px 6px",borderRadius:10,cursor:"pointer",background:sponsorSpeed===ms?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px solid ${sponsorSpeed===ms?U:T.border3}`,color:sponsorSpeed===ms?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:11,fontWeight:700,letterSpacing:0.5}}>{lab}</button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Sponsor logos preview */}
+                {sponsors.length>0 && (
+                  <div style={{display:"flex",flexWrap:"wrap",gap:10,marginBottom:20}}>
+                    {sponsors.map((s,i)=>(
+                      <div key={i} style={{background:"#fff",borderRadius:14,padding:"8px 12px",display:"flex",alignItems:"center",gap:10,boxShadow:"0 4px 16px rgba(0,0,0,0.3)"}}>
+                        {s.url
+                          ? <img src={s.url} style={{height:28,maxWidth:64,objectFit:"contain"}} />
+                          : <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:900,color:"#222",padding:"4px 0"}}>{s.name}</span>
+                        }
+                        <button onClick={()=>setSponsors(p=>p.filter((_,j)=>j!==i))} style={{background:"#ff4444",border:"none",borderRadius:"50%",width:18,height:18,color:"#fff",fontSize:10,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>×</button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {sponsors.length===0 && <Empty icon="🏅" label="Nog geen sponsorlogo's" />}
+
+                <div style={{display:"flex",gap:10,marginBottom:16}}>
+                  <button onClick={()=>sponsorRef.current.click()} disabled={scanning} style={{flex:1,padding:14,background:"rgba(255,255,255,0.04)",border:`1px dashed ${T.border3}`,borderRadius:14,color:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,cursor:scanning?"default":"pointer",letterSpacing:0.5,opacity:scanning?0.5:1}}>
+                    📁 Logo's uploaden
+                  </button>
+                  <button onClick={()=>sponsorScanRef.current.click()} disabled={scanning} style={{flex:1,padding:14,background:scanning==="sponsor"?hex(U,0.15):"rgba(255,255,255,0.04)",border:`1px dashed ${scanning==="sponsor"?U:T.border3}`,borderRadius:14,color:scanning==="sponsor"?U:T.text4,fontFamily:"'Barlow Condensed',sans-serif",fontSize:13,fontWeight:700,cursor:scanning?"default":"pointer",letterSpacing:0.5,opacity:scanning&&scanning!=="sponsor"?0.5:1}}>
+                    {scanning==="sponsor"?"🔍 Scannen...":"📸 Scan sponsorposter"}
+                  </button>
+                </div>
+                <input ref={sponsorRef} type="file" accept="image/*" multiple onChange={handleSponsor} style={{display:"none"}} />
+                <input ref={sponsorScanRef} type="file" accept="image/*" onChange={scanSponsors} style={{display:"none"}} />
+                {scanError&&scanning===null&&<div style={{padding:10,background:"rgba(255,68,68,0.1)",border:"1px solid rgba(255,68,68,0.3)",borderRadius:10,color:"#ff8888",fontSize:12,marginBottom:12,fontFamily:"Barlow,sans-serif"}}>{scanError}</div>}
+                {lastScanUndo&&lastScanUndo.mode==="sponsor"&&!scanning&&!scanError&&<div style={{display:"flex",alignItems:"center",gap:10,padding:10,background:`${hex(U,0.08)}`,border:`1px solid ${hex(U,0.2)}`,borderRadius:10,marginBottom:12}}>
+                  <span style={{flex:1,fontSize:12,color:T.text3,fontFamily:"Barlow,sans-serif"}}>✓ Sponsors toegevoegd</span>
+                  <button onClick={()=>{lastScanUndo.fn();setLastScanUndo(null);}} style={{background:"none",border:`1px solid ${T.border3}`,borderRadius:8,padding:"5px 12px",color:T.text4,fontSize:11,cursor:"pointer",fontFamily:"'Barlow Condensed',sans-serif",fontWeight:700,letterSpacing:0.5}}>↶ Ongedaan</button>
+                </div>}
+
+                {/* Placement info */}
+                <div style={{background:"rgba(255,255,255,0.03)",border:`1px solid ${T.border2}`,borderRadius:16,padding:16}}>
+                  <div style={{fontSize:11,color:U,fontFamily:"'Barlow Condensed',sans-serif",fontWeight:800,letterSpacing:2,textTransform:"uppercase",marginBottom:10}}>Plaatsing in content</div>
+                  {[
+                    ["📸 Instagram visual","Onderaan de afbeelding (sponsorbalk)"],
+                    ["📄 Wedstrijdverslag","'Mogelijk gemaakt door' blok"],
+                    ["📱 Instagram post mock","Sponsors voetbal"],
+                  ].map(([icon,desc])=>(
+                    <div key={icon} style={{display:"flex",alignItems:"center",gap:10,marginBottom:10}}>
+                      <span style={{fontSize:12}}>{icon}</span>
+                      <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.4}}>{desc}</div>
+                    </div>
+                  ))}
                 </div>
 
                 {/* ── TEAMSPONSOREN — Team-laag, 1 wisselend slot ── */}
@@ -4057,7 +3767,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                   <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:6,flexWrap:"wrap"}}>
                     <span style={{fontSize:18}}>👕</span>
                     <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:18,fontWeight:900,color:T.text,letterSpacing:0.5}}>Teamsponsoren</div>
-                    <span style={{fontSize:9,fontWeight:900,color:"#7dd3fc",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:"rgba(125,211,252,0.12)",border:"1px solid rgba(125,211,252,0.3)",borderRadius:6,textTransform:"uppercase"}}>Brons · 1</span>
+                    <span style={{fontSize:9,fontWeight:900,color:"#7dd3fc",fontFamily:"'Barlow Condensed',sans-serif",letterSpacing:2,padding:"2px 7px",background:"rgba(125,211,252,0.12)",border:"1px solid rgba(125,211,252,0.3)",borderRadius:6,textTransform:"uppercase"}}>Team · 1 slot</span>
                   </div>
                   <div style={{fontSize:12,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.6,marginBottom:16}}>Sponsoren specifiek voor dit team. Krijgen samen één vast slot op de sponsorbalk — bij meerdere wisselt het slot automatisch door tussen alle teamsponsoren (zelfde tempo als hoofdsponsoren). Als de lijst leeg is, vult een hoofdsponsor het slot op.</div>
 
@@ -4201,16 +3911,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
                     />
                   </div>
                   <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>💡 Zonder de 0 vooraan. Voor 06-12345678 vul je <strong style={{color:T.text3}}>612345678</strong> in.</div>
-
-                  <div style={{fontSize:11,color:T.text4,fontFamily:"Barlow,sans-serif",marginBottom:6,marginTop:16}}>E-mailadres <span style={{color:T.text4}}>(voor versturen van content per mail)</span></div>
-                  <input
-                    type="email"
-                    value={someEmail}
-                    onChange={e=>setSomeEmail(e.target.value.trim())}
-                    placeholder="bv. mark@club.nl"
-                    style={{...INP,marginBottom:8}}
-                  />
-                  <div style={{fontSize:10,color:T.text4,fontFamily:"Barlow,sans-serif",lineHeight:1.5}}>💡 Hiermee kun je na de wedstrijd het hele pakket (verslag + afbeeldingen) in één keer mailen.</div>
                 </div>
 
                 {/* ────────────────────────────────────
@@ -4292,7 +3992,7 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
       {/* MODALS */}
       {/* WEDSTRIJDMOMENT TOEVOEGEN MODAL */}
       {addMoment && (
-        <MomentSheet config={addMoment} liveMinute={elapsed} squad={activeSquad} C={U} clubName={clubName} onClose={()=>setAddMoment(null)}
+        <MomentSheet config={addMoment} liveMinute={elapsed} squad={activeSquad} C={U} onClose={()=>setAddMoment(null)}
           onAdd={(m)=>{setKeyMoments(p=>[...p,m]);setAddMoment(null);}} />
       )}
       {addSpecial && (
@@ -4323,12 +4023,11 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
         </div>
       )}
 
-      {modal==="GOAL"   && <GoalSheet type="GOAL"   onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} edit={editingEvent?.type==="GOAL"?editingEvent:null} />}
-      {modal==="OWN"    && <GoalSheet type="OWN"    onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} edit={editingEvent?.type==="OWN"?editingEvent:null} />}
-      {modal==="YELLOW" && <CardSheet type="YELLOW" onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} edit={editingEvent?.type==="YELLOW"?editingEvent:null} />}
-      {modal==="RED"    && <CardSheet type="RED"    onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} edit={editingEvent?.type==="RED"?editingEvent:null} />}
-      {modal==="RED_OPP" && <CardSheet type="RED"   onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} defaultOpponent />}
-      {modal==="SUB"    && <SubSheet               onAdd={addEv} onClose={()=>{setModal(null);setEditingEvent(null);}} activeSquad={activeSquad} benchSquad={benchSquad} C={U} liveMinute={elapsed} paused={paused} edit={editingEvent?.type==="SUB"?editingEvent:null} />}
+      {modal==="GOAL"   && <GoalSheet type="GOAL"   onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} />}
+      {modal==="OWN"    && <GoalSheet type="OWN"    onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} C={U} liveMinute={elapsed} paused={paused} />}
+      {modal==="YELLOW" && <CardSheet type="YELLOW" onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} />}
+      {modal==="RED"    && <CardSheet type="RED"    onAdd={addEv} onClose={()=>setModal(null)} squad={activeSquad} liveMinute={elapsed} paused={paused} opponent={opponent} openMoment={setAddMoment} />}
+      {modal==="SUB"    && <SubSheet               onAdd={addEv} onClose={()=>setModal(null)} activeSquad={activeSquad} benchSquad={benchSquad} C={U} liveMinute={elapsed} paused={paused} />}
       {confirm && <ConfirmSheet message="Wedstrijd beëindigen en content genereren?" onConfirm={endMatch} onCancel={()=>setConfirm(false)} />}
 
       {/* DEMO PREVIEW MODAL */}
@@ -4427,49 +4126,6 @@ ${goalRows || "    <li>Geen doelpunten</li>"}
           </div>
         </div>
       )}
-      {showGuide && (
-        <div onClick={()=>setShowGuide(false)} style={{position:"fixed",inset:0,zIndex:9999,background:"rgba(0,0,0,0.85)",backdropFilter:"blur(4px)",display:"flex",flexDirection:"column",animation:"splashFadeIn 0.2s ease"}}>
-          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 18px",flexShrink:0}}>
-            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:16,fontWeight:900,color:"#fff",letterSpacing:0.5,display:"flex",alignItems:"center",gap:8}}>
-              <span style={{fontSize:18}}>📖</span> Hoe werkt Matchly?
-            </div>
-            <button onClick={()=>setShowGuide(false)} style={{width:38,height:38,borderRadius:"50%",background:"rgba(255,255,255,0.1)",border:"1px solid rgba(255,255,255,0.2)",color:"#fff",fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>✕</button>
-          </div>
-          <div onClick={(e)=>e.stopPropagation()} style={{flex:1,margin:"0 12px 12px",borderRadius:16,overflow:"hidden",background:"#050208",border:"1px solid rgba(255,255,255,0.12)"}}>
-            <iframe src="/handleiding.html" title="Handleiding" style={{width:"100%",height:"100%",border:"none",display:"block"}} />
-          </div>
-        </div>
-      )}
-
-      {/* ── HELPDESK OVERLAY ── */}
-      {hdOpen && (
-        <div style={{position:"fixed",inset:0,background:"rgba(0,0,0,0.6)",zIndex:9999,display:"flex",flexDirection:"column",justifyContent:"flex-end"}} onClick={e=>{if(e.target===e.currentTarget){setHdOpen(false);setHdMsgs([HD_INIT_M]);setHdInput('');}}}>
-          <div style={{background:"#111115",borderRadius:"20px 20px 0 0",height:"75vh",display:"flex",flexDirection:"column",overflow:"hidden"}}>
-            <div style={{background:"linear-gradient(135deg,#4f46e5,#a855f7,#ec4899)",padding:"14px 16px",display:"flex",alignItems:"center",gap:10,flexShrink:0}}>
-              <img src={HD_LOGO_M} style={{width:34,height:34,borderRadius:10,objectFit:"cover"}} alt="" />
-              <div style={{flex:1}}>
-                <div style={{fontWeight:800,fontSize:15,color:"#fff"}}>Matchly Helpdesk</div>
-                <div style={{fontSize:11,color:"rgba(255,255,255,0.8)"}}>Stel je vraag — ik antwoord direct</div>
-              </div>
-              <button onClick={()=>{setHdOpen(false);setHdMsgs([HD_INIT_M]);setHdInput('');}} style={{background:"rgba(0,0,0,0.2)",border:"1px solid rgba(255,255,255,0.2)",borderRadius:8,color:"#fff",fontSize:18,width:32,height:32,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}>✕</button>
-            </div>
-            <div style={{flex:1,overflowY:"auto",padding:"12px 14px 6px"}}>
-              {hdMsgs.map((m,i)=>(
-                <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",marginBottom:8}}>
-                  {m.role==="assistant"&&<img src={HD_LOGO_M} style={{width:24,height:24,borderRadius:7,objectFit:"cover",marginRight:7,marginTop:2,flexShrink:0}} alt="" />}
-                  <div style={{maxWidth:"80%",padding:"9px 12px",borderRadius:m.role==="user"?"14px 14px 3px 14px":"14px 14px 14px 3px",background:m.role==="user"?"linear-gradient(135deg,#4f46e5,#a855f7)":"rgba(255,255,255,0.07)",border:m.role==="user"?"none":"1px solid rgba(255,255,255,0.09)",fontSize:13,lineHeight:1.5,color:m.role==="user"?"#fff":"rgba(255,255,255,0.88)",whiteSpace:"pre-wrap"}}>{m.content}</div>
-                </div>
-              ))}
-              {hdLoading&&<div style={{display:"flex",marginBottom:8}}><img src={HD_LOGO_M} style={{width:24,height:24,borderRadius:7,objectFit:"cover",marginRight:7,flexShrink:0}} alt="" /><div style={{background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.09)",borderRadius:"14px 14px 14px 3px",padding:"10px 14px",display:"flex",gap:5}}>{[0,1,2].map(i=><div key={i} style={{width:7,height:7,borderRadius:"50%",background:"rgba(255,255,255,0.4)",animation:"hdBounce 1.2s infinite",animationDelay:`${i*0.2}s`}}/>)}</div></div>}
-            </div>
-            <div style={{padding:"10px 14px 16px",borderTop:"1px solid rgba(255,255,255,0.07)",display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
-              <input value={hdInput} onChange={e=>setHdInput(e.target.value)} onKeyDown={e=>{if(e.key==="Enter")hdSend();}} placeholder="Stel je vraag..." disabled={hdLoading} style={{flex:1,background:"rgba(255,255,255,0.07)",border:"1px solid rgba(255,255,255,0.12)",borderRadius:10,color:"#fff",fontSize:13,padding:"10px 12px",fontFamily:"inherit",outline:"none"}} />
-              <button onClick={()=>hdSend()} disabled={!hdInput.trim()||hdLoading} style={{width:40,height:40,borderRadius:10,border:"none",background:hdInput.trim()&&!hdLoading?"linear-gradient(135deg,#4f46e5,#a855f7)":"rgba(255,255,255,0.07)",cursor:hdInput.trim()&&!hdLoading?"pointer":"default",color:"#fff",fontSize:16,flexShrink:0}}>↑</button>
-            </div>
-          </div>
-        </div>
-      )}
-      <style>{`@keyframes hdBounce{0%,80%,100%{transform:translateY(0)}40%{transform:translateY(-5px)}}`}</style>
     </>
   );
 }
