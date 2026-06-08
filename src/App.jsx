@@ -1822,7 +1822,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:Barlow,sans-serif;background:${T.bg0};}
         ::-webkit-scrollbar{width:0}
@@ -2614,7 +2614,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       </div>
                       <div id={`layout-${l.id}`} style={{borderRadius:18,overflow:"hidden",boxShadow:`0 16px 48px rgba(0,0,0,0.6)`,marginBottom:10,...(l.id==="story"?{maxWidth:260,margin:"0 auto 10px"}:{})}}>
                         {l.id==="classic" && (
-<div style={{width:"100%",aspectRatio:"1/1",containerType:"inline-size",position:"relative",background:TBG,fontFamily:"'Barlow Condensed',sans-serif",overflow:"hidden"}}>
+<div style={{width:"100%",aspectRatio:"1/1",containerType:"inline-size",position:"relative",background:TBG,fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",overflow:"hidden"}}>
 
                       {/* Achtergrond patroon — uit thema */}
                       {renderPattern(1)}
@@ -2638,7 +2638,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* THUIS — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -2656,7 +2656,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* UIT — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -2719,7 +2719,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }
                             return (<>
                               {cIsClean&&(<div style={{display:"flex",alignItems:"center",gap:"3%",marginBottom:cFs(2),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,padding:cFs(1)+" 3%",borderRadius:"0 2% 2% 0"}}>
-                                <span style={{fontSize:cFs(3.5)}}>🔒</span>
+                                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' style={{width:cFs(3.5),height:cFs(3.5),color:TAC,flexShrink:0}}><rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>
                                 <div><div style={{fontSize:cFs(2),fontWeight:900,color:TAC+"cc",textTransform:"uppercase",letterSpacing:1}}>Clean sheet</div><div style={{fontSize:cFs(2.5),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</div></div>
                               </div>)}
                               {cAll.length>0&&(<>
@@ -2780,19 +2780,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                         {/* SOCIAL PILL */}
                         {(igHandle||fbHandle)&&(
-                          <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4% 1%",gap:"2%",flexShrink:0}}>
+                          <div style={{display:"flex",alignItems:"center",justifyContent:"flex-start",padding:"0 4% 1%",gap:"2%",flexShrink:0}}>
                             <div style={{display:"inline-flex",alignItems:"center",border:`1px solid ${thex(TAC,0.35)}`,borderRadius:"40px",overflow:"hidden",background:"rgba(0,0,0,0.45)"}}>
-                              {igHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"1.2cqw 3.5cqw"}}>
-                                <img src={IG_ICON} alt="ig" style={{width:13,height:13,flexShrink:0,borderRadius:3}}/>
-                                <span style={{fontSize:"2.1cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{igHandle}</span>
+                              {igHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"0.8cqw 2.5cqw"}}>
+                                <img src={IG_ICON} alt="ig" style={{width:11,height:11,flexShrink:0,borderRadius:3}}/>
+                                <span style={{fontSize:"1.8cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{igHandle}</span>
                               </div>)}
                               {igHandle&&fbHandle&&<div style={{width:"1px",alignSelf:"stretch",background:thex(TAC,0.3)}}/>}
-                              {fbHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"1.2cqw 3.5cqw"}}>
-                                <img src={FB_ICON} alt="fb" style={{width:13,height:13,flexShrink:0,borderRadius:3}}/>
-                                <span style={{fontSize:"2.1cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{fbHandle}</span>
+                              {fbHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"0.8cqw 2.5cqw"}}>
+                                <img src={FB_ICON} alt="fb" style={{width:11,height:11,flexShrink:0,borderRadius:3}}/>
+                                <span style={{fontSize:"1.8cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{fbHandle}</span>
                               </div>)}
                             </div>
-                            {nextGame&&<span style={{fontSize:"1.8cqw",color:"rgba(255,255,255,0.32)"}}>📅 {nextGame}</span>}
+                            {nextGame&&<span style={{fontSize:"1.6cqw",color:"rgba(255,255,255,0.32)"}}>📅 {nextGame}</span>}
                           </div>
                         )}
 
