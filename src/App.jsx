@@ -2678,7 +2678,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             const len=aiOut.headline.length;
                             const fs=len>60?"2.8cqw":len>45?"3.3cqw":"3.8cqw";
                             return (
-                              <div style={{fontSize:fs,fontWeight:900,textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center",textShadow:"0 2px 10px rgba(0,0,0,0.95)"}}>"{aiOut.headline}"</div>
+                              <div style={{fontSize:fs,fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",fontWeight:900,textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center",textShadow:"0 2px 10px rgba(0,0,0,0.95)"}}>"{aiOut.headline}"</div>
                             );
                           })()}
                         </div>
@@ -2794,16 +2794,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4% 1%",gap:"2%",flexShrink:0}}>
                             <div style={{display:"inline-flex",alignItems:"center",border:`1px solid ${thex(TAC,0.35)}`,borderRadius:"40px",overflow:"hidden",background:"rgba(0,0,0,0.45)"}}>
                               {igHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"0.8cqw 2.5cqw"}}>
-                                <img src={IG_ICON} alt="ig" style={{width:11,height:11,flexShrink:0,borderRadius:3}}/>
-                                <span style={{fontSize:"1.8cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{igHandle}</span>
+                                <img src={IG_ICON} alt="ig" style={{width:10,height:10,flexShrink:0,borderRadius:3}}/>
+                                <span style={{fontSize:"1.62cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{igHandle}</span>
                               </div>)}
                               {igHandle&&fbHandle&&<div style={{width:"1px",alignSelf:"stretch",background:thex(TAC,0.3)}}/>}
                               {fbHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"0.8cqw 2.5cqw"}}>
-                                <img src={FB_ICON} alt="fb" style={{width:11,height:11,flexShrink:0,borderRadius:3}}/>
-                                <span style={{fontSize:"1.8cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{fbHandle}</span>
+                                <img src={FB_ICON} alt="fb" style={{width:10,height:10,flexShrink:0,borderRadius:3}}/>
+                                <span style={{fontSize:"1.62cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{fbHandle}</span>
                               </div>)}
                             </div>
-                            {nextGame&&<span style={{fontSize:"1.6cqw",color:"rgba(255,255,255,0.32)"}}>📅 {nextGame}</span>}
+                            
                           </div>
                         )}
 
