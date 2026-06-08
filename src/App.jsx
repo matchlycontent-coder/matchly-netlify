@@ -2634,7 +2634,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
 
                         {/* SCORE — groot en dominant, zoals screenshot */}
-                        <div style={{display:"flex",alignItems:"center",padding:"1% 3% 0",flexShrink:0,gap:"1%"}}>
+                        <div style={{flex:1,minHeight:0}}/>
+                        <div style={{display:"flex",alignItems:"center",padding:"0 3% 2%",flexShrink:0,gap:"1%"}}>
 
                           {/* THUIS — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
@@ -2718,9 +2719,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               </>);
                             }
                             return (<>
-                              {cIsClean&&(<div style={{display:"flex",alignItems:"center",gap:"3%",marginBottom:cFs(2),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,padding:cFs(1)+" 3%",borderRadius:"0 2% 2% 0"}}>
-                                <img src="/images/locks/lock-hangslot.png" style={{width:cFs(4.5),height:cFs(4.5),objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>
-                                <div><div style={{fontSize:cFs(2),fontWeight:900,color:TAC+"cc",textTransform:"uppercase",letterSpacing:1}}>Clean sheet</div><div style={{fontSize:cFs(2.5),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</div></div>
+                              {cIsClean&&(<div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:cFs(1)}}>
+                                <img src="/images/locks/lock-hangslot.png" style={{width:cFs(14),height:cFs(14),objectFit:"contain"}} crossOrigin="anonymous"/>
                               </div>)}
                               {cAll.length>0&&(<>
                                 <div style={{fontSize:cFs(2.2),fontWeight:900,letterSpacing:2,color:TAC+"88",textTransform:"uppercase",marginBottom:cFs(1)}}>{cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
@@ -2744,17 +2744,23 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           };
                           return (
                         <div style={{display:"flex",padding:"2% 4% 0",gap:"3%",flex:1,minHeight:0}}>
-                          <div style={{flex:1,overflow:"hidden"}}>{renderLeftCol()}</div>
+                          <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
+                            <div style={{marginBottom:"1.5cqw",flexShrink:0}}>
+                              <div style={{fontSize:"2.4cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw"}}>{cIsClean?"Clean Sheet":cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
+                              <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
+                            </div>
+                            <div style={{flex:1,overflow:"hidden"}}>{renderLeftCol()}</div>
+                          </div>
 
                           {/* MOTM midden — niet bij verlies */}
                           {motm&&home>=away&&(
                             <div style={{width:"24%",display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0}}>
                               <div style={{marginBottom:"1.5cqw",width:"100%"}}>
-                                <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",textAlign:"center",marginBottom:"0.6cqw"}}>Man of the Match</div>
+                                <div style={{fontSize:"2.4cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",textAlign:"center",marginBottom:"0.6cqw"}}>Man of the Match</div>
                                 <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                               </div>
                               <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%"}}>
-                                <img src="/images/cups/cup-goud.png" style={{width:"16cqw",height:"16cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                                <img src="/images/cups/cup-goud.png" style={{width:"22cqw",height:"22cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                                 <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
@@ -2763,7 +2769,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           {/* In het kort */}
                           <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,paddingBottom:"2%",paddingLeft:"4%"}}>
                             <div style={{marginBottom:"1.5cqw",flexShrink:0}}>
-                              <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw"}}>In het kort</div>
+                              <div style={{fontSize:"2.4cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw"}}>In het kort</div>
                               <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                             </div>
                             {(()=>{
