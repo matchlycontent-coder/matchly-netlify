@@ -2630,18 +2630,18 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
 
                         {/* SCORE — groot en dominant, zoals screenshot */}
-                        <div style={{height:"5%",flexShrink:0}}/>
+                        <div style={{height:"3%",flexShrink:0}}/>
                         <div style={{textAlign:"center",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"2cqw",paddingBottom:"0.5cqw"}}>
                           <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
                           <span style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
                           <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
                         </div>
-                        <div style={{height:"8%",flexShrink:0}}/>
+                        <div style={{height:"3%",flexShrink:0}}/>
                         <div style={{display:"flex",alignItems:"center",padding:"0 1% 2%",flexShrink:0,gap:"1%"}}>
 
                           {/* THUIS — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"36%"}}>
+                            <div style={{width:"40%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -2658,8 +2658,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"36%"}}>
+                            <div style={{width:"40%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -2668,6 +2668,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1}}>{opponent||"Tegenstander"}</span>
                           </div>
                         </div>
+
+                        {/* VELDRUIMTE — duwt quote naar fotorand */}
+                        <div style={{flex:1,minHeight:"8%"}}/>
 
                         {/* HEADLINE — donker italic */}
                         <div style={{flexShrink:0,background:"rgba(0,0,0,0.82)",borderTop:`1.5px solid ${thex(TAC,0.5)}`,padding:"2% 5%",margin:"1% 0 0 0"}}>
@@ -2745,7 +2748,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             </>);
                           };
                           return (
-                        <div style={{display:"flex",padding:"0.5% 4% 0",gap:"3%",flex:1,minHeight:0}}>
+                        <div style={{display:"flex",padding:"0.5% 4% 0",gap:"3%",flexShrink:0}}>
                           <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
                             <div style={{marginBottom:"1.5cqw",flexShrink:0}}>
                               <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw",textAlign:"center"}}>{cIsClean?"Clean Sheet":cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
