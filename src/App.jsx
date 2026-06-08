@@ -2647,7 +2647,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
                             </div>
-                            <span style={{fontSize:"2.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{clubName}</span>
+                            <span style={{fontSize:(clubName.length>16?"1.9cqw":clubName.length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{clubName}</span>
                           </div>
 
                           {/* CIJFERS — dominant maar in verhouding */}
@@ -2665,7 +2665,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
                             </div>
-                            <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1}}>{opponent||"Tegenstander"}</span>
+                            <span style={{fontSize:((opponent||"Tegenstander").length>16?"1.9cqw":(opponent||"Tegenstander").length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{opponent||"Tegenstander"}</span>
                           </div>
                         </div>
 
@@ -2764,8 +2764,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",textAlign:"center",marginBottom:"0.6cqw",whiteSpace:"nowrap"}}>Man of the Match</div>
                                 <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                               </div>
-                              <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%"}}>
-                                <img src="/images/cups/cup-goud.png" style={{width:"100%",maxWidth:"18cqw",maxHeight:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                              <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%",overflow:"hidden",minHeight:0}}>
+                                <img src="/images/cups/cup-goud.png" style={{width:"100%",maxWidth:"14cqw",maxHeight:"14cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                                 <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
