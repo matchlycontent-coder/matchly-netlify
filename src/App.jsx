@@ -2630,16 +2630,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
 
                         {/* SCORE — groot en dominant, zoals screenshot */}
-                        <div style={{flex:1,minHeight:0}}/>
+                        <div style={{height:"5%",flexShrink:0}}/>
                         <div style={{textAlign:"center",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"2cqw",paddingBottom:"0.5cqw"}}>
                           <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
                           <span style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
                           <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
                         </div>
-                        <div style={{display:"flex",alignItems:"center",padding:"0 3% 2%",flexShrink:0,gap:"1%"}}>
+                        <div style={{height:"14%",flexShrink:0}}/>
+                        <div style={{display:"flex",alignItems:"center",padding:"0 1% 2%",flexShrink:0,gap:"1%"}}>
 
                           {/* THUIS — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"17%"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
                             <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
@@ -2657,7 +2658,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"17%"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
                             <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
@@ -2744,7 +2745,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             </>);
                           };
                           return (
-                        <div style={{display:"flex",padding:"2% 4% 0",gap:"3%",flex:1,minHeight:0}}>
+                        <div style={{display:"flex",padding:"0.5% 4% 0",gap:"3%",flex:1,minHeight:0}}>
                           <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
                             <div style={{marginBottom:"1.5cqw",flexShrink:0}}>
                               <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw",textAlign:"center"}}>{cIsClean?"Clean Sheet":cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
@@ -2855,7 +2856,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               </div>
                             </div>
                             {/* THEMABALK met badge + quote, gradient ook op single-color thema's */}
-                            <div style={{flexShrink:0,background:themeBarGradient,padding:"2.5% 5% 2.5%",margin:"1% 0 0 0",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.2)"}}>
+                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.82)",borderTop:`1.5px solid ${thex(TAC,0.5)}`,borderBottom:`1.5px solid ${thex(TAC,0.5)}`,padding:"2% 5%",margin:"1% 0 0 0"}}>
                               <div style={{textAlign:"center",marginBottom:"1.5%"}}>
                                 <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(0,0,0,0.75)",letterSpacing:2}}>{home>away?"GEWONNEN 🏆":home===away?"GELIJKSPEL":"VERLOREN"}</span>
                               </div>
