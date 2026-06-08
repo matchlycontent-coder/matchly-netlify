@@ -1746,14 +1746,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
         {/* Donkere basis — voorkomt grijze bleed bij hoeken */}
         <div style={{position:"absolute",inset:0,background:TBG,pointerEvents:"none"}}/>
         {theme.bgImage && (
-          <div style={{
+          <img src={theme.bgImage} crossOrigin="anonymous" style={{
             position:"absolute",
             inset:0,
-            backgroundImage:`url(${theme.bgImage})`,
-            backgroundSize:"cover",           /* behoudt aspect ratio — geen distortie */
-            backgroundPosition:"center center",
-            backgroundRepeat:"no-repeat",
-            transform:"scale(1.08)",          /* proportionele inzoom om donkere randen weg te crop'en */
+            width:"100%",
+            height:"100%",
+            objectFit:"cover",
+            objectPosition:"center center",
+            transform:"scale(1.08)",
             transformOrigin:"center center",
             opacity:mul,
             pointerEvents:"none",
