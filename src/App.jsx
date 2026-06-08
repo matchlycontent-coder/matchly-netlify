@@ -2655,9 +2655,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
                               {String(home).split("").map((d,i)=><img key={"h"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
                             </div>
-                            <img src="/images/cijfers/streepje.png" style={{height:"5cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                            <img src="/images/cijfers/streepje.png" style={{height:"2.5cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                             <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
-                              {String(away).split("").map((d,i)=><img key={"a"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain",opacity:0.38}} crossOrigin="anonymous"/>)}
+                              {String(away).split("").map((d,i)=><img key={"a"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
                             </div>
                           </div>
 
@@ -2669,7 +2669,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
                             </div>
-                            <div style={{height:"3.5cqw",display:"flex",alignItems:"center",justifyContent:"center",width:"100%"}}><span style={{fontSize:((opponent||"Tegenstander").length>16?"1.9cqw":(opponent||"Tegenstander").length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{opponent||"Tegenstander"}</span></div>
+                            <div style={{height:"3.5cqw",display:"flex",alignItems:"center",justifyContent:"center",width:"100%"}}><span style={{fontSize:((opponent||"Tegenstander").length>16?"1.9cqw":(opponent||"Tegenstander").length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{opponent||"Tegenstander"}</span></div>
                           </div>
                         </div>
 
