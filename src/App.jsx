@@ -3022,10 +3022,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         const el=document.getElementById(`layout-${l.id}`);
                         if(!el) return;
                         const dpr=Math.max(window.devicePixelRatio||1,2);
-                        const canvas=await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                        const canvas=await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
                         const link=document.createElement("a");
-                        link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.png`;
-                        link.href=canvas.toDataURL("image/png");
+                        link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
+                        link.href=canvas.toDataURL("image/jpeg",0.95);
                         link.click();
                       }} style={{width:"100%",padding:"13px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,cursor:"pointer",letterSpacing:1,boxShadow:`0 6px 22px ${hex(M.purple,0.4)}`}}>
                         📸 {l.name} opslaan
@@ -3057,10 +3057,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     const el = document.getElementById(`layout-${id}`);
                     if(!el) return;
                     const dpr = Math.max(window.devicePixelRatio||1,2);
-                    const canvas = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:null,logging:false,allowTaint:true});
+                    const canvas = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
                     const link = document.createElement("a");
-                    link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.png`;
-                    link.href = canvas.toDataURL("image/png");
+                    link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
+                    link.href = canvas.toDataURL("image/jpeg",0.95);
                     link.click();
                   };
 
