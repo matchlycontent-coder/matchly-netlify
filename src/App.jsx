@@ -2640,7 +2640,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         <div style={{display:"flex",alignItems:"center",padding:"0 1% 2%",flexShrink:0,gap:"1%"}}>
 
                           {/* THUIS — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"48%"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"44%"}}>
                             <div style={{width:"34%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
@@ -2658,7 +2658,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"48%"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"44%"}}>
                             <div style={{width:"34%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
@@ -2748,7 +2748,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             </>);
                           };
                           return (
-                        <div style={{display:"flex",padding:"0.5% 4% 0",gap:"3%",flex:1,minHeight:0}}>
+                        <div style={{display:"flex",padding:"0.5% 4% 0",gap:"3%",flex:1,minHeight:0,marginTop:"-5%"}}>
                           <div style={{flex:1,overflow:"hidden",display:"flex",flexDirection:"column"}}>
                             <div style={{marginBottom:"1.5cqw",flexShrink:0}}>
                               <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw",textAlign:"center"}}>{cIsClean?"Clean Sheet":cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
