@@ -2630,7 +2630,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
 
                         {/* SCORE — groot en dominant, zoals screenshot */}
-                        <div style={{flex:1,minHeight:0}}/>
+                        <div style={{height:"4%",flexShrink:0}}/>
                         <div style={{textAlign:"center",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"2cqw",paddingBottom:"0.5cqw"}}>
                           <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
                           <span style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
