@@ -2723,7 +2723,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                   const sc2=h2+"-"+a2;
                                   return (<div key={i} style={{display:"flex",alignItems:"center",marginBottom:gFs(1.2),gap:"2%"}}>
                                     <span style={{fontSize:kortFs,color:i<4?TAC+"cc":TAC2+"cc",fontWeight:900,flexShrink:0,width:"9%",textAlign:"right"}}>{formatMinuut(e.minute,e.extra,e.half)}</span>
-                                    <span style={{fontSize:kortFs,color:"rgba(255,255,255,0.82)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600}}>{e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}</span>
+                                    <span style={{fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",fontWeight:400,fontSize:kortFs,color:"rgba(255,255,255,0.82)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}</span>
                                     <span style={{fontSize:gFs(1.9),color:thex(i<4?TAC:TAC2,0.85),fontWeight:800,flexShrink:0,background:thex(i<4?TAC:TAC2,0.12),padding:"0.4% 1.2%",borderRadius:"3px"}}>{sc2}</span>
                                   </div>);
                                 })}
