@@ -2758,7 +2758,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               <div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2}bb`,textTransform:"uppercase",textAlign:"center"}}>MOTM</div>
                               <div style={{background:thex(TAC,0.1),border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"10%",padding:"4% 3%",textAlign:"center",width:"100%",position:"relative",overflow:"hidden"}}>
                                 <div style={{position:"absolute",top:0,right:0,bottom:0,width:"3%",background:`linear-gradient(180deg,${thex(TAC2,0.6)},transparent)`}}/>
-                                <div style={{fontSize:"6cqw",marginBottom:"3%"}}>🏆</div>
+                                {(()=>{const bigId=(getMotmDisplay(motmHistory[motm]||[]).newCupId)||motmCup;const c=bigId?getCup(bigId):null;return c?<img src={c.bestand} style={{height:"12cqw",objectFit:"contain",marginBottom:"3%",filter:`drop-shadow(0 2px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 6px ${thex(TAC,0.4)})`}}/>:<div style={{fontSize:"6cqw",marginBottom:"3%"}}>🏆</div>;})()}
                                 <div style={{fontSize:(motm.length>16?"2.2cqw":motm.length>12?"2.5cqw":"2.8cqw"),fontWeight:900,color:"#fff",lineHeight:1.15}}>{motm}</div>
                               </div>
                             </div>
@@ -2907,7 +2907,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               );
                             })()}
 
-                            {motm&&home>=away&&<div style={{flexShrink:0,margin:"2% 4%",background:`linear-gradient(135deg,${thex(TAC,0.12)},${thex(TAC2||TAC,0.08)})`,border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"3%",padding:"2.5% 3.5%",display:"flex",alignItems:"center",gap:"3%"}}><span style={{fontSize:"5cqw"}}>🏆</span><div><div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2||TAC}cc`,textTransform:"uppercase"}}>Man of the Match</div><div style={{fontSize:"3.5cqw",fontWeight:900,color:"#fff"}}>{motm}</div></div></div>}
+                            {motm&&home>=away&&<div style={{flexShrink:0,margin:"2% 4%",background:`linear-gradient(135deg,${thex(TAC,0.12)},${thex(TAC2||TAC,0.08)})`,border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"3%",padding:"2.5% 3.5%",display:"flex",alignItems:"center",gap:"3%"}}>{(()=>{const bigId=(getMotmDisplay(motmHistory[motm]||[]).newCupId)||motmCup;const c=bigId?getCup(bigId):null;return c?<img src={c.bestand} style={{height:"8cqw",objectFit:"contain",filter:`drop-shadow(0 2px 6px rgba(0,0,0,0.5)) drop-shadow(0 0 6px ${thex(TAC,0.4)})`}}/>:<span style={{fontSize:"5cqw"}}>🏆</span>;})()}<div><div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2||TAC}cc`,textTransform:"uppercase"}}>Man of the Match</div><div style={{fontSize:"3.5cqw",fontWeight:900,color:"#fff"}}>{motm}</div></div></div>}
                             {(igHandle||fbHandle)&&<div style={{flexShrink:0,margin:"0 4% 2%",display:"flex",alignItems:"center",gap:"3%",flexWrap:"wrap"}}>
                               {igHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={IG_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{igHandle}</span></div>}
                               {fbHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={FB_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{fbHandle}</span></div>}
