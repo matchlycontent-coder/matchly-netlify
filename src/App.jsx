@@ -2625,16 +2625,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         {/* TOP BAR */}
                         <div style={{display:"grid",gridTemplateColumns:"1fr auto 1fr",alignItems:"center",padding:"3% 4% 0",flexShrink:0}}>
                           <span style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}99`,textTransform:"uppercase"}}>{teamLabel||clubName}</span>
-                          <div style={{display:"flex",alignItems:"center",gap:"2cqw"}}>
-                            <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
-                            <span style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
-                            <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
-                          </div>
+                          <div/>
                           <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)",textAlign:"right"}}>powered by Matchly</span>
                         </div>
 
                         {/* SCORE — groot en dominant, zoals screenshot */}
                         <div style={{flex:1,minHeight:0}}/>
+                        <div style={{textAlign:"center",flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"2cqw",paddingBottom:"0.5cqw"}}>
+                          <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
+                          <span style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
+                          <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
+                        </div>
                         <div style={{display:"flex",alignItems:"center",padding:"0 3% 2%",flexShrink:0,gap:"1%"}}>
 
                           {/* THUIS — logo cirkel + naam */}
@@ -2650,9 +2651,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* CIJFERS — dominant maar in verhouding */}
                           <div style={{flex:1,display:"flex",alignItems:"center",justifyContent:"center",gap:"1%"}}>
-                            <span style={{fontSize:"28cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
+                            <span style={{fontSize:"24cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
                             <span style={{fontSize:"8cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-4%"}}>-</span>
-                            <span style={{fontSize:"28cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
+                            <span style={{fontSize:"24cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
@@ -2720,7 +2721,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }
                             return (<>
                               {cIsClean&&(<div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:cFs(1)}}>
-                                <img src="/images/locks/lock-hangslot.png" style={{width:cFs(14),height:cFs(14),objectFit:"contain"}} crossOrigin="anonymous"/>
+                                <img src="/images/locks/lock-hangslot.png" style={{width:"80%",maxWidth:cFs(12),maxHeight:cFs(12),objectFit:"contain"}} crossOrigin="anonymous"/>
                               </div>)}
                               {cAll.length>0&&(<>
                                 <div style={{fontSize:cFs(2.2),fontWeight:900,letterSpacing:2,color:TAC+"88",textTransform:"uppercase",marginBottom:cFs(1)}}>{cGoals.length>0&&cCards.length===0&&cSubs.length===0?"Doelpunten":"Tijdlijn"}</div>
@@ -2760,7 +2761,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                               </div>
                               <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%"}}>
-                                <img src="/images/cups/cup-goud.png" style={{width:"22cqw",height:"22cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                                <img src="/images/cups/cup-goud.png" style={{width:"100%",maxWidth:"18cqw",maxHeight:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                                 <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
@@ -2777,7 +2778,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               // Sterke dynamische schaal: korte tekst groot, lange tekst krimpt fors mee zodat alles past
                               const len=txt.length;
                               const fsNum=Math.max(1.4,Math.min(2.9,2.9-Math.max(0,len-90)*0.0095));
-                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.4,margin:0,flex:1,overflow:"hidden"}}>{txt}</p>;
+                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.4,margin:0,flex:1,overflow:"hidden",textAlign:"center"}}>{txt}</p>;
                             })()}
                           </div>
                         </div>
@@ -2875,7 +2876,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               {stIsClean&&storyTimeline.filter(e=>e.isGoal).length===0&&(
                                 <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:sSp(1.8),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,borderRadius:"0 2% 2% 0",padding:sSp(1.2)+" 2.5%",flexShrink:0}}>
                                   <span style={{fontSize:sFs(3.5)}}>🔒</span>
-                                  <div><div style={{fontSize:sFs(1.9),fontWeight:900,letterSpacing:1,color:TAC+"cc",textTransform:"uppercase"}}>Clean sheet</div><div style={{fontSize:sFs(2.4),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</div></div>
+                                  <div><div style={{fontSize:sFs(1.9),fontWeight:900,letterSpacing:1,color:TAC+"cc",textTransform:"uppercase"}}>Clean sheet</div></div>
                                 </div>
                               )}
                               {storyTimeline.length>0&&(<>
