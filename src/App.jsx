@@ -2640,8 +2640,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         <div style={{display:"flex",alignItems:"center",padding:"0 1% 2%",flexShrink:0,gap:"1%"}}>
 
                           {/* THUIS — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"40%"}}>
-                            <div style={{width:"40%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"48%"}}>
+                            <div style={{width:"34%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -2658,8 +2658,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
-                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"40%"}}>
-                            <div style={{width:"40%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                          <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"48%"}}>
+                            <div style={{width:"34%",aspectRatio:"1/1",borderRadius:"50%",background:"rgba(0,0,0,0.15)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
@@ -2669,16 +2669,13 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           </div>
                         </div>
 
-                        {/* VELDRUIMTE — quote dicht op fotorand */}
-                        <div style={{height:"11%",flexShrink:0}}/>
-
-                        {/* HEADLINE — donker italic */}
-                        <div style={{flexShrink:0,background:"rgba(0,0,0,0.82)",padding:"2% 5%",margin:"0"}}>
+                        {/* HEADLINE — vrij op de foto, 15% omhoog */}
+                        <div style={{flexShrink:0,padding:"2% 5%",marginTop:"-4%"}}>
                           {(()=>{
                             const len=aiOut.headline.length;
                             const fs=len>60?"2.8cqw":len>45?"3.3cqw":"3.8cqw";
                             return (
-                              <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center"}}>"{aiOut.headline}"</div>
+                              <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center",textShadow:"0 2px 10px rgba(0,0,0,0.95)"}}>"{aiOut.headline}"</div>
                             );
                           })()}
                         </div>
