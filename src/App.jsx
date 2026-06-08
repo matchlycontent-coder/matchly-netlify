@@ -2652,9 +2652,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* CIJFERS — dominant maar in verhouding */}
                           <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"1%"}}>
-                            <span style={{fontSize:"24cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
-                            <span style={{fontSize:"8cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-4%"}}>-</span>
-                            <span style={{fontSize:"24cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
+                            <span style={{fontSize:"18cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
+                            <span style={{fontSize:"6cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-3%"}}>-</span>
+                            <span style={{fontSize:"18cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
