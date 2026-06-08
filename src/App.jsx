@@ -2719,7 +2719,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             }
                             return (<>
                               {cIsClean&&(<div style={{display:"flex",alignItems:"center",gap:"3%",marginBottom:cFs(2),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,padding:cFs(1)+" 3%",borderRadius:"0 2% 2% 0"}}>
-                                <svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' strokeWidth='2' strokeLinecap='round' strokeLinejoin='round' style={{width:cFs(3.5),height:cFs(3.5),color:TAC,flexShrink:0}}><rect x='3' y='11' width='18' height='11' rx='2' ry='2'/><path d='M7 11V7a5 5 0 0 1 10 0v4'/></svg>
+                                <img src="/locks/lock-hangslot.png" style={{width:cFs(3.5),height:cFs(3.5),objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>
                                 <div><div style={{fontSize:cFs(2),fontWeight:900,color:TAC+"cc",textTransform:"uppercase",letterSpacing:1}}>Clean sheet</div><div style={{fontSize:cFs(2.5),fontWeight:700,color:"rgba(255,255,255,0.7)"}}>Nul gehouden</div></div>
                               </div>)}
                               {cAll.length>0&&(<>
@@ -2754,7 +2754,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                               </div>
                               <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%"}}>
-                                <span style={{fontSize:"10cqw",lineHeight:1}}>🏆</span>
+                                <img src="/images/cups/cup-goud.png" style={{width:"10cqw",height:"10cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                                 <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
