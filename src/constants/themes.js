@@ -153,4 +153,20 @@ export const THEMES = [
   { id:"neon-oranje-blauw",  name:"Neon · Oranje/Blauw",  ac:"#ff8214", ac2:"#2d5fff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadium/stadium-oranje-blauw.png" },
   { id:"neon-groen-paars",   name:"Neon · Groen/Paars",   ac:"#28dc5a", ac2:"#aa46ff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadium/stadium-groen-paars.png" },
   { id:"neon-cyaan-magenta", name:"Neon · Cyaan/Magenta", ac:"#28d2eb", ac2:"#ff3ca0", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadium/stadium-cyaan-magenta.png" },
+
+  // ══════ Stadion3 (schoon veld, zonder ringen) ══════
+  { id:"stadion3-rood",          name:"Stadion · Rood",         ac:"#ff2d2d", ac2:"#ff2d2d", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-rood.png" },
+  { id:"stadion3-blauw",         name:"Stadion · Blauw",        ac:"#2d5fff", ac2:"#2d5fff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-blauw.png" },
+  { id:"stadion3-groen",         name:"Stadion · Groen",        ac:"#28dc5a", ac2:"#28dc5a", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-groen.png" },
+  { id:"stadion3-geel",          name:"Stadion · Geel",         ac:"#ffcd1e", ac2:"#ffcd1e", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-geel.png" },
+  { id:"stadion3-oranje",        name:"Stadion · Oranje",       ac:"#ff8214", ac2:"#ff8214", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-oranje.png" },
+  { id:"stadion3-paars",         name:"Stadion · Paars",        ac:"#aa46ff", ac2:"#aa46ff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-paars.png" },
+  { id:"stadion3-cyaan",         name:"Stadion · Cyaan",        ac:"#28d2eb", ac2:"#28d2eb", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-cyaan.png" },
+  { id:"stadion3-wit",           name:"Stadion · Wit",          ac:"#ebf0ff", ac2:"#ebf0ff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-wit.png" },
+  { id:"stadion3-blauw-rood",    name:"Stadion · Blauw/Rood",   ac:"#2d5fff", ac2:"#ff2d2d", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-blauw-rood.png" },
+  { id:"stadion3-geel-groen",    name:"Stadion · Geel/Groen",   ac:"#ffcd1e", ac2:"#28dc5a", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-geel-groen.png" },
+  { id:"stadion3-rood-geel",     name:"Stadion · Rood/Geel",    ac:"#ff2d2d", ac2:"#ffcd1e", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-rood-geel.png" },
+  { id:"stadion3-oranje-blauw",  name:"Stadion · Oranje/Blauw", ac:"#ff8214", ac2:"#2d5fff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-oranje-blauw.png" },
+  { id:"stadion3-groen-paars",   name:"Stadion · Groen/Paars",  ac:"#28dc5a", ac2:"#aa46ff", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-groen-paars.png" },
+  { id:"stadion3-cyaan-magenta", name:"Stadion · Cyaan/Magenta",ac:"#28d2eb", ac2:"#ff3ca0", bg:"#0a0a0d", pattern:"photo", bgImage:"/images/stadion3/stadion3-cyaan-magenta.png" },
 ];

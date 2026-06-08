@@ -2619,22 +2619,18 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       {/* Achtergrond patroon — uit thema */}
                       {renderPattern(1)}
 
-                      {theme.pattern==="photo"&&(<>
-                        <div style={{position:"absolute",top:"26.9%",left:"23.5%",transform:"translate(-50%,-50%)",width:"14%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
-                          {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{width:"100%",height:"100%",borderRadius:"50%",background:thex(TAC,0.25),display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                        </div>
-                        <div style={{position:"absolute",top:"26.9%",left:"76.5%",transform:"translate(-50%,-50%)",width:"14%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
-                          {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(255,255,255,0.07)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                        </div>
-                      </>)}
-
                       {/* Flex column wrapper — alles past binnen het vierkant */}
                       <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
 
                         {/* TOP BAR */}
                         <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3% 4% 0",flexShrink:0}}>
-                          <span style={{fontSize:((teamLabel||clubName).length>22?"2.2cqw":(teamLabel||clubName).length>16?"2.5cqw":"2.8cqw"),fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase"}}>{teamLabel||clubName}</span>
-                          <span style={{fontSize:"2.2cqw",color:"rgba(255,255,255,0.2)"}}>powered by Matchly</span>
+                          <span style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}99`,textTransform:"uppercase"}}>{teamLabel||clubName}</span>
+                          <div style={{display:"flex",alignItems:"center",gap:"2cqw"}}>
+                            <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
+                            <span style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.88)",textTransform:"uppercase"}}>FULL TIME</span>
+                            <div style={{height:".2cqw",width:"7cqw",background:"rgba(255,255,255,0.22)"}}/>
+                          </div>
+                          <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)"}}>powered by Matchly</span>
                         </div>
 
                         {/* SCORE — groot en dominant, zoals screenshot */}
@@ -2642,12 +2638,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* THUIS — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            {theme.pattern!=="photo"&&<div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
+                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
                               {(hvLogoUrl||logo)
                                 ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
-                            </div>}
+                            </div>
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{clubName}</span>
                           </div>
 
@@ -2660,23 +2656,23 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* UIT — logo cirkel + naam */}
                           <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",flexShrink:0,width:"22%"}}>
-                            {theme.pattern!=="photo"&&<div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                            <div style={{width:"65%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
                               {oppLogoUrl
                                 ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>
                                 :<div style={{fontSize:"9cqw",fontWeight:900,color:"rgba(255,255,255,0.3)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
                               }
-                            </div>}
+                            </div>
                             <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(255,255,255,0.45)",textAlign:"center",lineHeight:1.1}}>{opponent||"Tegenstander"}</span>
                           </div>
                         </div>
 
-                        {/* HEADLINE — themabalk met gradient, quote in donkere tekst */}
-                        <div style={{flexShrink:0,background:themeBarGradient,padding:"2.5% 5%",margin:"2% 0 0 0",boxShadow:"inset 0 1px 0 rgba(255,255,255,0.2), inset 0 -1px 0 rgba(0,0,0,0.2)"}}>
+                        {/* HEADLINE — donker italic */}
+                        <div style={{flexShrink:0,background:"rgba(0,0,0,0.82)",borderTop:`1.5px solid ${thex(TAC,0.5)}`,padding:"2% 5%",margin:"1% 0 0 0"}}>
                           {(()=>{
                             const len=aiOut.headline.length;
-                            const fs=len>60?"3cqw":len>45?"3.6cqw":"4.2cqw";
+                            const fs=len>60?"2.8cqw":len>45?"3.3cqw":"3.8cqw";
                             return (
-                              <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.2,color:"rgba(0,0,0,0.9)",textAlign:"center",textShadow:"0 1px 2px rgba(255,255,255,0.15)"}}>"{aiOut.headline}"</div>
+                              <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center"}}>"{aiOut.headline}"</div>
                             );
                           })()}
                         </div>
@@ -2752,19 +2748,24 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                           {/* MOTM midden — niet bij verlies */}
                           {motm&&home>=away&&(
-                            <div style={{width:"22%",display:"flex",flexDirection:"column",alignItems:"center",gap:"3%",flexShrink:0}}>
-                              <div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2}bb`,textTransform:"uppercase",textAlign:"center"}}>MOTM</div>
-                              <div style={{background:thex(TAC,0.1),border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"10%",padding:"4% 3%",textAlign:"center",width:"100%",position:"relative",overflow:"hidden"}}>
-                                <div style={{position:"absolute",top:0,right:0,bottom:0,width:"3%",background:`linear-gradient(180deg,${thex(TAC2,0.6)},transparent)`}}/>
-                                <div style={{fontSize:"6cqw",marginBottom:"3%"}}>🏆</div>
-                                <div style={{fontSize:(motm.length>16?"2.2cqw":motm.length>12?"2.5cqw":"2.8cqw"),fontWeight:900,color:"#fff",lineHeight:1.15}}>{motm}</div>
+                            <div style={{width:"24%",display:"flex",flexDirection:"column",alignItems:"center",flexShrink:0}}>
+                              <div style={{marginBottom:"1.5cqw",width:"100%"}}>
+                                <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",textAlign:"center",marginBottom:"0.6cqw"}}>Man of the Match</div>
+                                <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
+                              </div>
+                              <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%"}}>
+                                <span style={{fontSize:"10cqw",lineHeight:1}}>🏆</span>
+                                <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
                           )}
 
                           {/* In het kort */}
-                          <div style={{flex:1,display:"flex",flexDirection:"column",gap:"2%",minHeight:0,paddingBottom:"2%"}}>
-                            <div style={{fontSize:"2.5cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC}cc`,textTransform:"uppercase",flexShrink:0}}>In het kort</div>
+                          <div style={{flex:1,display:"flex",flexDirection:"column",minHeight:0,paddingBottom:"2%"}}>
+                            <div style={{marginBottom:"1.5cqw",flexShrink:0}}>
+                              <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:`${TAC}cc`,textTransform:"uppercase",marginBottom:"0.6cqw"}}>In het kort</div>
+                              <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
+                            </div>
                             {(()=>{
                               const txt=aiOut.samenvatting||aiOut.verslag||"";
                               // Sterke dynamische schaal: korte tekst groot, lange tekst krimpt fors mee zodat alles past
@@ -2777,42 +2778,34 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           );
                         })()}
 
-                        {/* INSTAGRAM + FACEBOOK + VOLGENDE WEDSTRIJD */}
-                        <div style={{display:"flex",gap:"2%",padding:"1% 4% 0",flexShrink:0}}>
-                          {igHandle&&(
-                            <div style={{flex:1.6,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC,0.08),border:`1px solid ${thex(TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%"}}>
-                              <img src={IG_ICON} alt="ig" style={{width:14,height:14,flexShrink:0,borderRadius:3}}/>
-                              <span style={{fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{igHandle}</span>
+                        {/* SOCIAL PILL */}
+                        {(igHandle||fbHandle)&&(
+                          <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"0 4% 1%",gap:"2%",flexShrink:0}}>
+                            <div style={{display:"inline-flex",alignItems:"center",border:`1px solid ${thex(TAC,0.35)}`,borderRadius:"40px",overflow:"hidden",background:"rgba(0,0,0,0.45)"}}>
+                              {igHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"1.2cqw 3.5cqw"}}>
+                                <img src={IG_ICON} alt="ig" style={{width:13,height:13,flexShrink:0,borderRadius:3}}/>
+                                <span style={{fontSize:"2.1cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{igHandle}</span>
+                              </div>)}
+                              {igHandle&&fbHandle&&<div style={{width:"1px",alignSelf:"stretch",background:thex(TAC,0.3)}}/>}
+                              {fbHandle&&(<div style={{display:"flex",alignItems:"center",gap:"1.5%",padding:"1.2cqw 3.5cqw"}}>
+                                <img src={FB_ICON} alt="fb" style={{width:13,height:13,flexShrink:0,borderRadius:3}}/>
+                                <span style={{fontSize:"2.1cqw",fontWeight:700,color:"rgba(255,255,255,0.75)"}}>{fbHandle}</span>
+                              </div>)}
                             </div>
-                          )}
-                          {fbHandle&&(
-                            <div style={{flex:1.6,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC,0.08),border:`1px solid ${thex(TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%"}}>
-                              <img src={FB_ICON} alt="fb" style={{width:14,height:14,flexShrink:0,borderRadius:3}}/>
-                              <span style={{fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.7)"}}>{fbHandle}</span>
-                            </div>
-                          )}
-                          {nextGame&&(
-                            <div style={{flex:2,display:"flex",alignItems:"center",gap:"1.5%",background:thex(TAC2||TAC,0.06),border:`1px solid ${thex(TAC2||TAC,0.14)}`,borderRadius:"5%",padding:"1% 2%",justifyContent:"flex-end"}}>
-                              <span style={{fontSize:"2.8cqw",flexShrink:0}}>📅</span>
-                              <div style={{textAlign:"right"}}>
-                                <div style={{fontSize:(nextGame.length>50?"1.6cqw":nextGame.length>35?"1.8cqw":"2cqw"),fontWeight:900,color:"rgba(255,255,255,0.7)",lineHeight:1.2}}>{nextGame}</div>
-                              </div>
-                            </div>
-                          )}
-                        </div>
+                            {nextGame&&<span style={{fontSize:"1.8cqw",color:"rgba(255,255,255,0.32)"}}>📅 {nextGame}</span>}
+                          </div>
+                        )}
 
                         {/* SPONSOR BALK */}
                         <div style={{flexShrink:0,marginTop:"1.5%"}}>
-                          <div style={{background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>
+                          <div style={{background:"rgba(0,0,0,0.75)",borderTop:`1px solid ${thex(TAC,0.2)}`}}>
                             {postSponsors.length>0&&(
                               <>
-                                <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
+                                <div style={{fontSize:"1.7cqw",fontWeight:900,letterSpacing:2.5,color:"rgba(255,255,255,0.18)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Mede mogelijk gemaakt door onze trouwe sponsors</div>
                                 <div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center"}}>
                                   {postSponsors.map((s,i)=>(
-                                    <div key={i} style={{flex:1,maxWidth:"18%",borderRadius:"8%",padding:"2px",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}>
-                                      <div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"6%",padding:"1.5% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>
-                                      {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:18,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}
-                                      </div>
+                                    <div key={i} style={{flex:1,background:"rgba(12,12,12,0.9)",border:`1px solid ${s._isTeam?TAC:thex(TAC,0.28)}`,borderRadius:"6%",padding:"1.5% 2%",display:"flex",alignItems:"center",justifyContent:"center",maxWidth:"18%"}}>
+                                      {s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:16,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.8cqw",fontWeight:900,color:"rgba(255,255,255,0.85)"}}>{s.name}</span>}
                                     </div>
                                   ))}
                                 </div>
