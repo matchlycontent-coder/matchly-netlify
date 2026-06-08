@@ -2670,7 +2670,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         </div>
 
                         {/* VELDRUIMTE — quote+blokjes net onder de fotolijn */}
-                        <div style={{height:"5%",flexShrink:0}}/>
+                        <div style={{height:"15%",flexShrink:0}}/>
 
                         {/* HEADLINE — vrij op de foto */}
                         <div style={{flexShrink:0,padding:"2% 5%"}}>
@@ -2678,7 +2678,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             const len=aiOut.headline.length;
                             const fs=len>60?"2.8cqw":len>45?"3.3cqw":"3.8cqw";
                             return (
-                              <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center",textShadow:"0 2px 10px rgba(0,0,0,0.95)"}}>"{aiOut.headline}"</div>
+                              <div style={{fontSize:fs,fontWeight:900,textTransform:"uppercase",lineHeight:1.25,color:"#fff",textAlign:"center",textShadow:"0 2px 10px rgba(0,0,0,0.95)"}}>"{aiOut.headline}"</div>
                             );
                           })()}
                         </div>
