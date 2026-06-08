@@ -2619,12 +2619,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                       {/* Achtergrond patroon — uit thema */}
                       {renderPattern(1)}
 
-                      {/* Absolute logo-overlays op neon-ringposities (alleen bij photo-thema) */}
                       {theme.pattern==="photo"&&(<>
-                        <div style={{position:"absolute",top:"27.3%",left:"23.7%",transform:"translate(-50%,-50%)",width:"18%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
+                        <div style={{position:"absolute",top:"26.9%",left:"23.5%",transform:"translate(-50%,-50%)",width:"14%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
                           {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{width:"100%",height:"100%",borderRadius:"50%",background:thex(TAC,0.25),display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
                         </div>
-                        <div style={{position:"absolute",top:"27.3%",left:"76.3%",transform:"translate(-50%,-50%)",width:"18%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
+                        <div style={{position:"absolute",top:"26.9%",left:"76.5%",transform:"translate(-50%,-50%)",width:"14%",aspectRatio:"1/1",borderRadius:"50%",overflow:"hidden",display:"flex",alignItems:"center",justifyContent:"center",zIndex:3}}>
                           {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(255,255,255,0.07)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
                         </div>
                       </>)}
