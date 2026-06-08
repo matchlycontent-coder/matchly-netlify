@@ -1822,7 +1822,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@400;500;600&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700;800;900&family=Barlow:wght@400;500;600&family=Montserrat:wght@600;700;800&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         body{font-family:Barlow,sans-serif;background:${T.bg0};}
         ::-webkit-scrollbar{width:0}
@@ -2650,11 +2650,15 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <span style={{fontSize:(clubName.length>16?"1.9cqw":clubName.length>11?"2.2cqw":"2.6cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1,whiteSpace:"nowrap"}}>{clubName}</span>
                           </div>
 
-                          {/* CIJFERS — dominant maar in verhouding */}
-                          <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"1%"}}>
-                            <span style={{fontSize:"18cqw",fontWeight:900,color:"#fff",lineHeight:0.85,textShadow:`0 0 60px ${thex(TAC,1)},0 0 120px ${thex(TAC,0.5)}`}}>{home}</span>
-                            <span style={{fontSize:"6cqw",color:"rgba(255,255,255,0.2)",fontWeight:300,lineHeight:1,marginTop:"-3%"}}>-</span>
-                            <span style={{fontSize:"18cqw",fontWeight:900,color:"rgba(255,255,255,0.38)",lineHeight:0.85}}>{away}</span>
+                          {/* CIJFERS — PNG cijfers met glow */}
+                          <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"2.5%"}}>
+                            <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
+                              {String(home).split("").map((d,i)=><img key={"h"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
+                            </div>
+                            <img src="/images/cijfers/streepje.png" style={{height:"5cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                            <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
+                              {String(away).split("").map((d,i)=><img key={"a"+i} src={`/images/cijfers/${d}.png`} style={{height:"18cqw",objectFit:"contain",opacity:0.38}} crossOrigin="anonymous"/>)}
+                            </div>
                           </div>
 
                           {/* UIT — logo cirkel + naam */}
@@ -2704,6 +2708,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                           const cTotal=cAll.length+cFases.length+(cIsClean?1:0);
                           const cSc=Math.max(0.7,Math.min(1.1,4/Math.max(cTotal,1)));
                           const cFs=v=>(parseFloat(v)*cSc)+"cqw";
+                          const kortTxt=aiOut.samenvatting||aiOut.verslag||"";
+                          const kortFs=Math.max(1.4,Math.min(2.9,2.9-Math.max(0,kortTxt.length-90)*0.0095))+"cqw";
                           const renderLeftCol=()=>{
                             if(!cFewGoals){
                               let h2=0,a2=0;
@@ -2716,8 +2722,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                   if(e.type==="OWN")a2++;else h2++;
                                   const sc2=h2+"-"+a2;
                                   return (<div key={i} style={{display:"flex",alignItems:"center",marginBottom:gFs(1.2),gap:"2%"}}>
-                                    <span style={{fontSize:gFs(2.6),color:i<4?TAC+"cc":TAC2+"cc",fontWeight:900,flexShrink:0,width:"9%",textAlign:"right"}}>{formatMinuut(e.minute,e.extra,e.half)}</span>
-                                    <span style={{fontSize:gFs(2.6),color:"rgba(255,255,255,0.82)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600}}>{e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}</span>
+                                    <span style={{fontSize:kortFs,color:i<4?TAC+"cc":TAC2+"cc",fontWeight:900,flexShrink:0,width:"9%",textAlign:"right"}}>{formatMinuut(e.minute,e.extra,e.half)}</span>
+                                    <span style={{fontSize:kortFs,color:"rgba(255,255,255,0.82)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",fontWeight:600}}>{e.type==="OWN"?(opponent||"Tegenstander"):(e.player||"—")}</span>
                                     <span style={{fontSize:gFs(1.9),color:thex(i<4?TAC:TAC2,0.85),fontWeight:800,flexShrink:0,background:thex(i<4?TAC:TAC2,0.12),padding:"0.4% 1.2%",borderRadius:"3px"}}>{sc2}</span>
                                   </div>);
                                 })}
@@ -2782,7 +2788,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               // Sterke dynamische schaal: korte tekst groot, lange tekst krimpt fors mee zodat alles past
                               const len=txt.length;
                               const fsNum=Math.max(1.4,Math.min(2.9,2.9-Math.max(0,len-90)*0.0095));
-                              return <p style={{fontSize:fsNum+"cqw",color:"rgba(255,255,255,0.82)",lineHeight:1.45,margin:0,flex:1,overflow:"hidden",textAlign:"left"}}>{txt}</p>;
+                              return <p style={{fontSize:kortFs,color:"rgba(255,255,255,0.82)",lineHeight:1.45,margin:0,flex:1,overflow:"hidden",textAlign:"left"}}>{txt}</p>;
                             })()}
                           </div>
                         </div>
