@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { GOAL_TYPES, AWAY_TYPES, RED_REASONS, H1_F1, H1_F2, H1_F3, H2_F1, H2_F2, H2_F3, ALG_BEELD, BIJZ, MOTM_REDENEN } from './constants/options';
 import { THEMES } from './constants/themes';
 import { LAYOUT_REGISTRY } from './constants/layouts';
-import { IG_ICON, FB_ICON } from './constants/icons';
+import { IG_ICON, FB_ICON, MATCHLY_LOGO } from './constants/icons';
 import { WEATHER, M, U, T, hex } from './constants/colors';
 import { usePersistedState, clearAllMatchlyStorage } from './hooks/usePersistedState';
 import { safeGet } from './utils/storage';
