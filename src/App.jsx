@@ -2948,11 +2948,15 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {/* 7. SPONSORS */}
                             {storySponsors.length>0 && (
                               <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 3% 4%"}}>
-                                <div style={{position:"relative",width:"94%",aspectRatio:"900/397"}}>
-                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gridTemplateRows:"1fr 1fr",columnGap:"1.2%",rowGap:"2.8%",zIndex:1}}>
-                                    {storySponsors.slice(0,10).map((s,i)=>(
-                                      <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                        {s.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>}
+                                <div style={{position:"relative",width:"75%",aspectRatio:"900/397"}}>
+                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"flex",flexDirection:"column",gap:"2.8%",zIndex:1}}>
+                                    {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
+                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.2%"}}>
+                                        {Array.from({length:5},(_,ci)=>row[ci]||null).map((s,ci)=>(
+                                          <div key={ci} style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                                            {s?.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
+                                          </div>
+                                        ))}
                                       </div>
                                     ))}
                                   </div>
@@ -3008,7 +3012,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {/* QUOTE */}
                             {motm && (
                               <div style={{textAlign:"center",padding:"2.5% 11% 0",flexShrink:0}}>
-                                <span style={{fontSize:"3cqw",fontStyle:"italic",color:"rgba(255,255,255,0.88)",lineHeight:1.4}}>&ldquo;{getMotmQuote(motmRedenen, motm)}&rdquo;</span>
+                                <span style={{fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",fontSize:"3cqw",color:"rgba(255,255,255,0.88)",lineHeight:1.4,letterSpacing:0.5}}>&ldquo;{getMotmQuote(motmRedenen, motm)}&rdquo;</span>
                               </div>
                             )}
 
@@ -3033,11 +3037,15 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {/* SPONSORBALK */}
                             {storySponsors.length>0 && (
                               <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 3% 4%"}}>
-                                <div style={{position:"relative",width:"94%",aspectRatio:"900/397"}}>
-                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gridTemplateRows:"1fr 1fr",columnGap:"1.2%",rowGap:"2.8%",zIndex:1}}>
-                                    {storySponsors.slice(0,10).map((s,i)=>(
-                                      <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                        {s.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#D4AF37",textAlign:"center",lineHeight:1.1}}>{s.name}</span>}
+                                <div style={{position:"relative",width:"75%",aspectRatio:"900/397"}}>
+                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"flex",flexDirection:"column",gap:"2.8%",zIndex:1}}>
+                                    {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
+                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.2%"}}>
+                                        {Array.from({length:5},(_,ci)=>row[ci]||null).map((s,ci)=>(
+                                          <div key={ci} style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                                            {s?.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#D4AF37",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
+                                          </div>
+                                        ))}
                                       </div>
                                     ))}
                                   </div>
