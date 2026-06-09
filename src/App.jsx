@@ -2906,20 +2906,30 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                   <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
                                   <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>Spelverloop</span>
                                 </div>
-                                {storyTimeline.map((e,i)=>(
-                                  <div key={i} style={{display:"flex",alignItems:"center",gap:"3%",padding:"1.1% 0"}}>
-                                    <div style={{width:"6cqw",height:"6cqw",flexShrink:0,borderRadius:"50%",border:`1.5px solid ${thex(TAC,0.45)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
-                                      {(()=>{const k=e.kind;
-                                        if(k==="goal") return <svg viewBox="0 0 24 24" style={{width:"62%",height:"62%"}}><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" strokeWidth="1.5"/><polygon points="12,7.4 15.6,10 14.2,14.2 9.8,14.2 8.4,10" fill="#fff"/></svg>;
-                                        if(k==="yellow"||k==="red") return <svg viewBox="0 0 24 24" style={{width:"55%",height:"55%"}}><rect x="8" y="5" width="8" height="13" rx="1.5" transform="rotate(8 12 12)" fill={k==="yellow"?"#f5c518":"#e53935"}/></svg>;
-                                        return <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{width:"60%",height:"60%"}}><path d="M7 9h9l-3-3M17 15H8l3 3"/></svg>;
-                                      })()}
+                                {(()=>{
+                                  const renderEvt=(e,key)=>(
+                                    <div key={key} style={{display:"flex",alignItems:"center",gap:"2.5%",padding:"1% 0"}}>
+                                      <div style={{width:"5cqw",height:"5cqw",flexShrink:0,borderRadius:"50%",border:`1.5px solid ${thex(TAC,0.45)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                        {(()=>{const k=e.kind;
+                                          if(k==="goal") return <svg viewBox="0 0 24 24" style={{width:"62%",height:"62%"}}><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" strokeWidth="1.5"/><polygon points="12,7.4 15.6,10 14.2,14.2 9.8,14.2 8.4,10" fill="#fff"/></svg>;
+                                          if(k==="yellow"||k==="red") return <svg viewBox="0 0 24 24" style={{width:"55%",height:"55%"}}><rect x="8" y="5" width="8" height="13" rx="1.5" transform="rotate(8 12 12)" fill={k==="yellow"?"#f5c518":"#e53935"}/></svg>;
+                                          return <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{width:"60%",height:"60%"}}><path d="M7 9h9l-3-3M17 15H8l3 3"/></svg>;
+                                        })()}
+                                      </div>
+                                      <span style={{fontSize:"2.5cqw",fontWeight:900,color:TAC,flexShrink:0}}>{e.minute}'</span>
+                                      <span style={{flex:1,minWidth:0,fontSize:"2.5cqw",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.kind==="sub"?`${e.outName} ↔ ${e.inName}`:e.label}</span>
+                                      {e.isGoal && <span style={{fontSize:"2.5cqw",fontWeight:900,color:TAC,flexShrink:0,marginLeft:"1.5%"}}>{e.hs}-{e.as}</span>}
                                     </div>
-                                    <span style={{fontSize:"2.9cqw",fontWeight:900,color:TAC,width:"10%",flexShrink:0}}>{e.minute}'</span>
-                                    <span style={{flex:1,minWidth:0,fontSize:"2.9cqw",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.kind==="sub"?`${e.outName} ↔ ${e.inName}`:e.label}</span>
-                                    {e.isGoal && <span style={{fontSize:"2.9cqw",fontWeight:900,color:TAC,flexShrink:0,marginLeft:"2%"}}>{e.hs}-{e.as}</span>}
-                                  </div>
-                                ))}
+                                  );
+                                  const half=Math.ceil(storyTimeline.length/2);
+                                  return (
+                                    <div style={{display:"flex",gap:"5%"}}>
+                                      {[storyTimeline.slice(0,half),storyTimeline.slice(half)].map((col,ci)=>(
+                                        <div key={ci} style={{flex:1,minWidth:0}}>{col.map((e,i)=>renderEvt(e,ci*half+i))}</div>
+                                      ))}
+                                    </div>
+                                  );
+                                })()}
                               </div>)}
 
                               {baseSquad.length>0 && <div style={{height:"0.22cqw",background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>}
