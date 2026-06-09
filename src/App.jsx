@@ -2965,9 +2965,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                             {/* 7. SPONSORS */}
                             {storySponsors.length>0 && (
-                              <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 3% 4%"}}>
-                                <div style={{position:"relative",width:"84%",aspectRatio:"1672/396"}}>
-                                  <div style={{position:"absolute",top:"18%",bottom:"18%",left:"4%",right:"4%",display:"flex",flexDirection:"column",gap:"8%",zIndex:1}}>
+                              <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 1% 4%"}}>
+                                <div style={{position:"relative",width:"94%",aspectRatio:"1621/296"}}>
+                                  <div style={{position:"absolute",top:"5%",bottom:"5%",left:"3%",right:"3%",display:"flex",flexDirection:"column",gap:"8%",zIndex:1}}>
                                     {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
                                       <div key={ri} style={{display:"flex",flex:1,gap:"1.5%"}}>
                                         {Array.from({length:5},(_,ci)=>row[ci]||null).map((s,ci)=>(
