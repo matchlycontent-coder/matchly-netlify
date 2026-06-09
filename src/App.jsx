@@ -1084,12 +1084,12 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
     // Korte samenvatting — voor de wedstrijdkaart en match post (leesbaarheid: max 140 tekens)
     const samenvattingSpec = goalCount<=2
-      ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin. Hou het bondig."
+      ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Schrijf zoals een mens het aan een vriend zou vertellen — bondig, natuurlijk, geen AI-zinnen. Voorbeeld van goede toon: 'Een moeizame maar verdiende zege. De enige goal viel al vroeg en daarna hield de ploeg stand.' Geen afgeknipte zin."
       : goalCount>=5
-        ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Vat het verloop en de beslissende fase samen — geen afgeknipte zin, kies de kern."
-        : "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin.";
+        ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Pak de kern: wie domineerde en hoe viel de beslissing. Schrijf zoals een mens het zou zeggen. Voorbeeld: 'Een doelpuntenfestijn waarin de thuisploeg vroeg op stoom kwam en nooit meer losliet.' Geen afgeknipte zin."
+        : "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Vat het verloop samen zoals je het aan een vriend vertelt — helder en natuurlijk. Voorbeeld: 'VVO begon sterk, maar HBSS bracht de spanning terug. In de slotfase trok de thuisploeg het over de streep.' Geen afgeknipte zin.";
     // Lange samenvatting — alleen voor de uitgebreidere match story
-    const samenvattingLangSpec = "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Een complete, lopende samenvatting met het verloop, de sleutelmomenten en de beslissende fase — geen afgeknipte zin.";
+    const samenvattingLangSpec = "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Schrijf zoals een ervaren sportjournalist het zou verwoorden: concreet, vloeiend, geen houterige of AI-achtige constructies. Beschrijf het verloop, de sleutelmomenten en de beslissende fase. Voorbeeld van goede toon: 'VVO vloog uit de startblokken en stond binnen een minuut voor. HBSS vocht terug en maakte gelijk via een afstandsschot. Na rust pakte VVO het heft in handen — Zwanenburg en Toutijn bezegelden de winst.' Geen afgeknipte zin.";
 
     const sysAdult=`Je schrijft wedstrijdverslagen voor Matchly, een app voor amateurvoetbalclubs.
 SCHRIJFSTIJL: ${stijl}.
@@ -1215,12 +1215,28 @@ INSTAGRAM: 3–5 korte zinnen. Warm en enthousiast. Vermeld de teamnaam "${fullT
 HEADLINE: 1 zin. Positief en simpel.`;
 
     const sys = stijl === "Jeugd & Plezier" ? sysJeugd : sysAdult;
+    const sysRedacteur = `Je bent een Nederlandse sportredacteur. Je krijgt een JSON met wedstrijdteksten (verslag, samenvatting, samenvattingLang, instagram, headline).
+Herschrijf alle tekstvelden zodat ze klinken als natuurlijk, gesproken Nederlands — zoals een journalist bij het AD of Voetbalzone het zou schrijven.
+REGELS:
+- Wijzig NOOIT feiten, namen, scores, minuten of de volgorde van gebeurtenissen.
+- Verbeter alleen toon, woordkeuze, zinsloop en grammatica.
+- Verwijder AI-achtige constructies en vervang door hoe een Nederlander het echt zou zeggen.
+- Houd dezelfde lengte aan als het origineel — niet inkorten of uitbreiden.
+- Geef ALLEEN de verbeterde JSON terug (geen tekst eromheen), exact hetzelfde formaat: {"verslag":"...","samenvatting":"...","samenvattingLang":"...","instagram":"...","headline":"..."}`;
     try {
       const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1500, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
       const raw=d.content?.map(b=>b.text||"").join("")||"";
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
-      setAiOut(parsed);
+      // Redacteur-pass: verbeter taalgebruik zonder feiten te wijzigen
+      let final = parsed;
+      try {
+        const d2 = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1500, system:sysRedacteur, messages:[{role:"user",content:`Verbeter deze teksten:\n${JSON.stringify(parsed,null,2)}`}] });
+        const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
+        const parsed2 = parseJsonSafely(raw2);
+        if(parsed2.verslag&&parsed2.samenvatting&&parsed2.instagram&&parsed2.headline) final = parsed2;
+      } catch { /* redacteur mislukt, gebruik origineel */ }
+      setAiOut(final);
       setLocked(true);
       archiveMatch(parsed);
       // Kwam de toegang van een wedstrijdpas? Stempel die nu af (eenmalig gebruik).
