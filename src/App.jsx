@@ -1082,11 +1082,14 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     const bijzondereInfo = specialInfo.map(s=>`${s.type.label}${s.player?` (${s.player})`:""}`).join(", ")||null;
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
+    // Korte samenvatting — voor de wedstrijdkaart en match post (leesbaarheid: max 140 tekens)
     const samenvattingSpec = goalCount<=2
-      ? "2 tot 3 zinnen, maximaal 300 tekens (inclusief spaties). Een complete, lopende samenvatting van de wedstrijd met het verloop en de sleutelmomenten — geen afgeknipte zin. Er gebeurde weinig, dus vul niet kunstmatig aan."
+      ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin. Hou het bondig."
       : goalCount>=5
-        ? "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Vat het verloop, de doelpuntenmakers en de beslissende fase samen in een complete, lopende tekst — geen afgeknipte zin."
-        : "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Een complete, lopende samenvatting met het verloop, de sleutelmomenten en de beslissende fase — geen afgeknipte zin.";
+        ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Vat het verloop en de beslissende fase samen — geen afgeknipte zin, kies de kern."
+        : "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin.";
+    // Lange samenvatting — alleen voor de uitgebreidere match story
+    const samenvattingLangSpec = "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Een complete, lopende samenvatting met het verloop, de sleutelmomenten en de beslissende fase — geen afgeknipte zin.";
 
     const sysAdult=`Je schrijft wedstrijdverslagen voor Matchly, een app voor amateurvoetbalclubs.
 SCHRIJFSTIJL: ${stijl}.
@@ -1131,7 +1134,7 @@ In een spannende slotfase raakte de thuisploeg nog het aluminium, maar een minuu
 REGELS:
 - Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd — geen verzonnen kansen, blessures, weersomstandigheden of sfeerbeelden tenzij die letterlijk zijn aangeleverd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
 - Noem de eigen ploeg precies zoals aangeleverd in het "club"-veld. Voeg er NOOIT zelf een teamaanduiding zoals "Heren 1", "het eerste" of een elftalnummer aan toe als dat niet in de aangeleverde naam staat. Staat er "Kethel Spaland", schrijf dan "Kethel Spaland", niet "Kethel Spaland Heren 1".
-- Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
+- Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","samenvattingLang":"...","instagram":"...","headline":"..."}
 - Verwerk het spelbeeld chronologisch per fase in het verslag.
 - Vermijd clichés als "spannend duel", "de jongens", "goed gestreden", "beide ploegen", "belangrijke punten", "onder toeziend oog van", "knappe prestatie", "uitstekend werk".
 - Schrijf actieve zinnen. Vermijd passieve constructies. Begin zinnen gevarieerd (niet steeds met de clubnaam).
@@ -1154,7 +1157,8 @@ REGELS:
 - Zorg voor een logische opbouw: openingsfase → doelpuntenmoment → slotfase → eindstand. Concrete observaties zijn altijd beter.
 
 VERSLAG: 150–250 woorden. Chronologisch per fase. Sluit af met eindstand.
-SAMENVATTING: ${samenvattingSpec} Puur voor op de wedstrijdkaart.
+SAMENVATTING (kort): ${samenvattingSpec} Voor de wedstrijdkaart en match post.
+SAMENVATTINGLANG: ${samenvattingLangSpec} Inhoudelijk rijker dan de korte samenvatting; voor de uitgebreidere match story.
 INSTAGRAM: 3–5 korte zinnen. Knallend, socialmedia-waardig. Vermeld de teamnaam "${fullTeamName}" in de caption. Hashtags verplicht.
 HEADLINE: 1 zin. Pakkend en concreet, geen clichés.`;
 
@@ -1180,7 +1184,7 @@ TAAL: heel eenvoudige, toegankelijke woorden. Korte zinnen. Geen moeilijke terme
 REGELS:
 - Gebruik UITSLUITEND de aangeleverde data. Verzin NOOIT spelersnamen, doelpuntenmakers, assists, minuten, kaarten, wissels, scores of gebeurtenissen die niet in de data staan. Voeg geen details toe die niet zijn ingevoerd. Bij twijfel: laat het weg. Het is beter om iets niet te noemen dan iets te verzinnen.
 - Noem de eigen ploeg precies zoals aangeleverd in het "club"-veld. Voeg er NOOIT zelf een teamaanduiding zoals "Heren 1", "het eerste" of een elftalnummer aan toe als dat niet in de aangeleverde naam staat.
-- Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","instagram":"...","headline":"..."}
+- Geef ALLEEN dit JSON terug (geen tekst eromheen): {"verslag":"...","samenvatting":"...","samenvattingLang":"...","instagram":"...","headline":"..."}
 - Schrijf korte zinnen (gemiddeld 6–12 woorden). Een enkele langere zin mag, maar wees zuinig.
 - Beschrijf wat er gebeurde in begrijpelijke taal. Geen tactiek, geen analyse, geen technische bespiegelingen.
 - Schrijf "coach" als één woord — nooit "coach/trainer" of vergelijkbare dubbelingen. Gebruik een natuurlijk lidwoord ervoor (bijv. "De coach besloot te wisselen", niet "Coach besloot te wisselen").
@@ -1205,13 +1209,14 @@ REGELS:
 - Schrijf actieve zinnen. Begin zinnen gevarieerd (niet steeds met de clubnaam).
 
 VERSLAG: 120–180 woorden. Vertel in chronologische volgorde wat er gebeurde. Sluit af met een warme zin over de inzet of het plezier.
-SAMENVATTING: ${samenvattingSpec} Eenvoudig en positief. Puur voor op de wedstrijdkaart.
+SAMENVATTING (kort): ${samenvattingSpec} Eenvoudig en positief. Voor de wedstrijdkaart en match post.
+SAMENVATTINGLANG: ${samenvattingLangSpec} Eenvoudig en positief, inhoudelijk rijker dan de korte; voor de uitgebreidere match story.
 INSTAGRAM: 3–5 korte zinnen. Warm en enthousiast. Vermeld de teamnaam "${fullTeamName}". Hashtags verplicht. Geen emoji's in de caption.
 HEADLINE: 1 zin. Positief en simpel.`;
 
     const sys = stijl === "Jeugd & Plezier" ? sysJeugd : sysAdult;
     try {
-      const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1000, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
+      const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1500, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
       const raw=d.content?.map(b=>b.text||"").join("")||"";
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
@@ -2893,12 +2898,12 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",padding:"3% 7% 0",overflow:"hidden"}}>
 
                               {/* 4. IN HET KORT */}
-                              {aiOut.samenvatting && (<div style={{flexShrink:0}}>
+                              {(aiOut.samenvattingLang||aiOut.samenvatting) && (<div style={{flexShrink:0}}>
                                 <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:"1.5%"}}>
                                   <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
                                   <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>In het kort</span>
                                 </div>
-                                <p style={{fontSize:"2.5cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.4,margin:0}}>{aiOut.samenvatting}</p>
+                                <p style={{fontSize:"2.5cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.4,margin:0}}>{aiOut.samenvattingLang||aiOut.samenvatting}</p>
                               </div>)}
 
                               <div style={{height:2,background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>
