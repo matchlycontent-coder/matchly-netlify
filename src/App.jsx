@@ -16,11 +16,19 @@ const MATCHLY_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABYCAYA
 
 // html2canvas shim — keep original loadH2C() calls working
 
-const loadH2C = () => new Promise(res => {
+const loadH2C = () => new Promise((res, rej) => {
   if (window.html2canvas) return res(window.html2canvas);
+  const existing = document.getElementById("h2c-script");
+  if (existing) {
+    existing.addEventListener("load", () => res(window.html2canvas));
+    existing.addEventListener("error", () => rej(new Error("html2canvas kon niet laden")));
+    return;
+  }
   const s = document.createElement("script");
-  s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+  s.id = "h2c-script";
+  s.src = "/html2canvas.min.js";
   s.onload = () => res(window.html2canvas);
+  s.onerror = () => rej(new Error("html2canvas kon niet laden"));
   document.head.appendChild(s);
 });
 
