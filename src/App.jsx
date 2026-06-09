@@ -3037,7 +3037,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         )}
                         {l.id==="motm" && (
                         <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",overflow:"hidden"}}>
-                          {renderPattern(1, "motm")}
+                          {renderPattern(1, "story")}
                           <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
 
                             {/* STAND */}
