@@ -1084,12 +1084,12 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
     // Korte samenvatting — voor de wedstrijdkaart en match post (leesbaarheid: max 140 tekens)
     const samenvattingSpec = goalCount<=2
-      ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Schrijf zoals een mens het aan een vriend zou vertellen — bondig, natuurlijk, geen AI-zinnen. Voorbeeld van goede toon: 'Een moeizame maar verdiende zege. De enige goal viel al vroeg en daarna hield de ploeg stand.' Geen afgeknipte zin."
+      ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin. Hou het bondig."
       : goalCount>=5
-        ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Pak de kern: wie domineerde en hoe viel de beslissing. Schrijf zoals een mens het zou zeggen. Voorbeeld: 'Een doelpuntenfestijn waarin de thuisploeg vroeg op stoom kwam en nooit meer losliet.' Geen afgeknipte zin."
-        : "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Vat het verloop samen zoals je het aan een vriend vertelt — helder en natuurlijk. Voorbeeld: 'VVO begon sterk, maar HBSS bracht de spanning terug. In de slotfase trok de thuisploeg het over de streep.' Geen afgeknipte zin.";
+        ? "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Vat het verloop en de beslissende fase samen — geen afgeknipte zin, kies de kern."
+        : "1 tot 2 korte zinnen, maximaal 140 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin.";
     // Lange samenvatting — alleen voor de uitgebreidere match story
-    const samenvattingLangSpec = "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Schrijf zoals een ervaren sportjournalist het zou verwoorden: concreet, vloeiend, geen houterige of AI-achtige constructies. Beschrijf het verloop, de sleutelmomenten en de beslissende fase. Voorbeeld van goede toon: 'VVO vloog uit de startblokken en stond binnen een minuut voor. HBSS vocht terug en maakte gelijk via een afstandsschot. Na rust pakte VVO het heft in handen — Zwanenburg en Toutijn bezegelden de winst.' Geen afgeknipte zin.";
+    const samenvattingLangSpec = "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Een complete, lopende samenvatting met het verloop, de sleutelmomenten en de beslissende fase — geen afgeknipte zin.";
 
     const sysAdult=`Je schrijft wedstrijdverslagen voor Matchly, een app voor amateurvoetbalclubs.
 SCHRIJFSTIJL: ${stijl}.
@@ -1215,28 +1215,12 @@ INSTAGRAM: 3–5 korte zinnen. Warm en enthousiast. Vermeld de teamnaam "${fullT
 HEADLINE: 1 zin. Positief en simpel.`;
 
     const sys = stijl === "Jeugd & Plezier" ? sysJeugd : sysAdult;
-    const sysRedacteur = `Je bent een Nederlandse sportredacteur. Je krijgt een JSON met wedstrijdteksten (verslag, samenvatting, samenvattingLang, instagram, headline).
-Herschrijf alle tekstvelden zodat ze klinken als natuurlijk, gesproken Nederlands — zoals een journalist bij het AD of Voetbalzone het zou schrijven.
-REGELS:
-- Wijzig NOOIT feiten, namen, scores, minuten of de volgorde van gebeurtenissen.
-- Verbeter alleen toon, woordkeuze, zinsloop en grammatica.
-- Verwijder AI-achtige constructies en vervang door hoe een Nederlander het echt zou zeggen.
-- Houd dezelfde lengte aan als het origineel — niet inkorten of uitbreiden.
-- Geef ALLEEN de verbeterde JSON terug (geen tekst eromheen), exact hetzelfde formaat: {"verslag":"...","samenvatting":"...","samenvattingLang":"...","instagram":"...","headline":"..."}`;
     try {
       const d = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1500, system:sys, messages:[{role:"user",content:`Genereer content:\n${JSON.stringify(md,null,2)}`}] });
       const raw=d.content?.map(b=>b.text||"").join("")||"";
       const parsed=parseJsonSafely(raw);
       if(!parsed.verslag||!parsed.samenvatting||!parsed.instagram||!parsed.headline) throw new Error();
-      // Redacteur-pass: verbeter taalgebruik zonder feiten te wijzigen
-      let final = parsed;
-      try {
-        const d2 = await callClaudeAPI({ model:"claude-sonnet-4-20250514", max_tokens:1500, system:sysRedacteur, messages:[{role:"user",content:`Verbeter deze teksten:\n${JSON.stringify(parsed,null,2)}`}] });
-        const raw2 = d2.content?.map(b=>b.text||"").join("")||"";
-        const parsed2 = parseJsonSafely(raw2);
-        if(parsed2.verslag&&parsed2.samenvatting&&parsed2.instagram&&parsed2.headline) final = parsed2;
-      } catch { /* redacteur mislukt, gebruik origineel */ }
-      setAiOut(final);
+      setAiOut(parsed);
       setLocked(true);
       archiveMatch(parsed);
       // Kwam de toegang van een wedstrijdpas? Stempel die nu af (eenmalig gebruik).
@@ -2934,7 +2918,7 @@ REGELS:
                                 {(()=>{
                                   const renderEvt=(e,key)=>(
                                     <div key={key} style={{display:"flex",alignItems:"center",gap:"2.5%",padding:"0.5% 0"}}>
-                                      <div style={{width:"4cqw",height:"4cqw",flexShrink:0,borderRadius:"50%",border:`1.5px solid ${thex(TAC,0.45)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                      <div style={{width:"3.4cqw",height:"3.4cqw",flexShrink:0,borderRadius:"50%",background:thex(TAC,0.16),border:`1px solid ${thex(TAC,0.55)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
                                         {(()=>{const k=e.kind;
                                           if(k==="goal") return <svg viewBox="0 0 24 24" style={{width:"62%",height:"62%"}}><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" strokeWidth="1.5"/><polygon points="12,7.4 15.6,10 14.2,14.2 9.8,14.2 8.4,10" fill="#fff"/></svg>;
                                           if(k==="yellow"||k==="red") return <svg viewBox="0 0 24 24" style={{width:"55%",height:"55%"}}><rect x="8" y="5" width="8" height="13" rx="1.5" transform="rotate(8 12 12)" fill={k==="yellow"?"#f5c518":"#e53935"}/></svg>;
