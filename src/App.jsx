@@ -2965,27 +2965,30 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             </div>
 
                             {/* 7. SPONSORS */}
-                            {storySponsors.length>0 && (
-                              <div style={{flexShrink:0,padding:"1% 1% 4%"}}>
-                                <div style={{fontSize:"1.8cqw",fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.32)",textTransform:"uppercase",textAlign:"center",marginBottom:"1.3%"}}>Sponsored by</div>
-                                <div style={{display:"flex",justifyContent:"center"}}>
-                                <div style={{position:"relative",width:"94%",aspectRatio:"1628/349"}}>
-                                  <div style={{position:"absolute",top:"6.5%",bottom:"8%",left:"1.5%",right:"1.5%",display:"flex",flexDirection:"column",gap:"8%",zIndex:1}}>
-                                    {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
-                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.2%"}}>
-                                        {Array.from({length:5},(_,ci)=>row[ci]||null).map((s,ci)=>(
-                                          <div key={ci} style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",padding:"0 1%"}}>
-                                            {s?.url?<img src={s.url} style={{maxWidth:"88%",maxHeight:"80%",objectFit:"contain",display:"block"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
+                            {storySponsors.length>0 && (()=>{
+                              const N=Math.min(storySponsors.length,10);
+                              const list=storySponsors.slice(0,N);
+                              const rows=N<=5?[list]:[list.slice(0,Math.ceil(N/2)),list.slice(Math.ceil(N/2))];
+                              return (
+                              <div style={{flexShrink:0,padding:"1% 3% 4%"}}>
+                                <div style={{fontSize:"1.8cqw",fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.32)",textTransform:"uppercase",textAlign:"center",marginBottom:"1.4%"}}>Sponsored by</div>
+                                <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2cqw"}}>
+                                  {rows.map((row,ri)=>(
+                                    <div key={ri} style={{display:"flex",justifyContent:"center",gap:"1.6cqw"}}>
+                                      {row.map((s,ci)=>(
+                                        <div key={ci} style={{position:"relative",width:"17cqw",aspectRatio:"321/144"}}>
+                                          <div style={{position:"absolute",inset:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",padding:"0 5%",zIndex:1}}>
+                                            {s?.url?<img src={s.url} style={{maxWidth:"84%",maxHeight:"72%",objectFit:"contain",display:"block"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.5cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
                                           </div>
-                                        ))}
-                                      </div>
-                                    ))}
-                                  </div>
-                                  <img src="/images/sponsor-grid.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
-                                </div>
+                                          <img src="/images/sponsor-frame.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ))}
                                 </div>
                               </div>
-                            )}
+                              );
+                            })()}
 
                           </div>
                         </div>
