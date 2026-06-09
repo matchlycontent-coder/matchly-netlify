@@ -3063,15 +3063,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         const el=document.getElementById(`layout-${l.id}`);
                         if(!el) return;
                         try {
-                          const sc=Math.max(1,Math.ceil(1080/el.offsetWidth));
+                          const elW=el.offsetWidth>0?el.offsetWidth:(el.firstElementChild?.offsetWidth||390);
+                          const sc=Math.max(1,Math.min(4,Math.ceil(1080/elW)));
                           const src=await h2c(el,{scale:sc,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
                           const tw=1080,th=Math.round(src.height*(tw/src.width));
-                          const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
-                          const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
-                          const link=document.createElement("a");
-                          link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
-                          link.href=canvas.toDataURL("image/jpeg",0.95);
-                          link.click();
+                          const cv=document.createElement("canvas");cv.width=tw;cv.height=th;
+                          const ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
+                          const fn=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
+                          const durl=cv.toDataURL("image/jpeg",0.95);
+                          const w=window.open();
+                          if(w){w.document.write(`<html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;"><p style="color:#555;font-family:sans-serif;font-size:13px;">\u{1F4F1} Houd ingedrukt om op te slaan</p><img src="${durl}" style="max-width:92vw;max-height:92vh;border-radius:16px;"/></body></html>`);}
+                          else{const a=document.createElement("a");a.href=durl;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);}
                         } catch(err){ alert("Download fout: "+err.message); }
                       }} style={{width:"100%",padding:"13px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,cursor:"pointer",letterSpacing:1,boxShadow:`0 6px 22px ${hex(M.purple,0.4)}`}}>
                         📸 {l.name} opslaan
@@ -3103,15 +3105,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     const el = document.getElementById(`layout-${id}`);
                     if(!el) return;
                     try {
-                      const sc=Math.max(1,Math.ceil(1080/el.offsetWidth));
+                      const elW=el.offsetWidth>0?el.offsetWidth:(el.firstElementChild?.offsetWidth||390);
+                      const sc=Math.max(1,Math.min(4,Math.ceil(1080/elW)));
                       const src = await h2c(el,{scale:sc,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
                       const tw=1080,th=Math.round(src.height*(tw/src.width));
-                      const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
-                      const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
-                      const link = document.createElement("a");
-                      link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
-                      link.href = canvas.toDataURL("image/jpeg",0.95);
-                      link.click();
+                      const cv=document.createElement("canvas");cv.width=tw;cv.height=th;
+                      const ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
+                      const fn=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
+                      const durl=cv.toDataURL("image/jpeg",0.95);
+                      const w=window.open();
+                      if(w){w.document.write(`<html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:16px;"><p style="color:#555;font-family:sans-serif;font-size:13px;">\u{1F4F1} Houd ingedrukt om op te slaan</p><img src="${durl}" style="max-width:92vw;max-height:92vh;border-radius:16px;"/></body></html>`);}
+                      else{const a=document.createElement("a");a.href=durl;a.download=fn;document.body.appendChild(a);a.click();document.body.removeChild(a);}
                     } catch(err){ alert("Download fout: "+err.message); }
                   };
 
