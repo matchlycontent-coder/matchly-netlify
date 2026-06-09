@@ -2908,7 +2908,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <p style={{fontSize:"2.7cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.45,margin:0}}>{aiOut.samenvatting}</p>
                               </div>)}
 
-                              <div style={{height:"0.22cqw",background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>
+                              <div style={{height:2,background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>
 
                               {/* 5. SPELVERLOOP */}
                               {storyTimeline.length>0 && (<div style={{flexShrink:0}}>
@@ -2942,7 +2942,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 })()}
                               </div>)}
 
-                              {baseSquad.length>0 && <div style={{height:"0.22cqw",background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>}
+                              {baseSquad.length>0 && <div style={{height:2,background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>}
 
                               {/* 6. BASISELF */}
                               {baseSquad.length>0 && (<div style={{flex:1,minHeight:0,overflow:"hidden"}}>
