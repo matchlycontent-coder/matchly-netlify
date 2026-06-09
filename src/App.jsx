@@ -336,6 +336,46 @@ export default function App({ boot }) {
   const [motm,setMotm]       = usePersistedState("motm", "");
   const [motmRedenen,setMotmRedenen] = usePersistedState("motmRedenen", []);
   const toggleMotmReden = (key) => setMotmRedenen(prev => prev.includes(key) ? prev.filter(k=>k!==key) : [...prev,key]);
+  // ── MOTM beker-rotatie ──
+  // Alle beschikbare bekers. Elke speler doorloopt z'n eigen reeks: telkens een
+  // willekeurige beker die hij nog niet had, tot alle 6 geweest zijn → dan reset.
+  const MOTM_CUPS = ["cup-goud.png","cup-zilver.png","cup-brons.png","cup-goud-kroon.png","cup-zwart-goud.png","cup-voetbal.png"];
+  const [motmCup,setMotmCup] = usePersistedState("motmCup", "cup-goud.png");
+  // Kent de volgende beker toe aan een speler en onthoudt dit in Supabase.
+  // Valt bij elke fout stil terug op een willekeurige beker, zodat de content-flow nooit blokkeert.
+  const kenMotmCupToe = async (speler) => {
+    const naam = (speler||"").trim();
+    const randomCup = () => MOTM_CUPS[Math.floor(Math.random()*MOTM_CUPS.length)];
+    if (!naam) { const c=randomCup(); setMotmCup(c); return c; }
+    const dbTeamId = boot?.profile?.team_id || null;
+    // Geen DB-koppeling → gewoon willekeurig, geen rotatie mogelijk
+    if (!supabase || !dbTeamId) { const c=randomCup(); setMotmCup(c); return c; }
+    try {
+      const { data: row } = await supabase
+        .from("motm_cups")
+        .select("used_cups")
+        .eq("team_id", dbTeamId)
+        .eq("speler", naam)
+        .maybeSingle();
+      let used = Array.isArray(row?.used_cups) ? row.used_cups.filter(c=>MOTM_CUPS.includes(c)) : [];
+      // Reeks vol? Begin opnieuw.
+      if (used.length >= MOTM_CUPS.length) used = [];
+      const beschikbaar = MOTM_CUPS.filter(c => !used.includes(c));
+      const gekozen = beschikbaar[Math.floor(Math.random()*beschikbaar.length)];
+      const nieuwUsed = [...used, gekozen];
+      await supabase.from("motm_cups").upsert({
+        team_id: dbTeamId,
+        speler: naam,
+        used_cups: nieuwUsed,
+        last_cup: gekozen,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "team_id,speler" });
+      setMotmCup(gekozen);
+      return gekozen;
+    } catch (e) {
+      const c = randomCup(); setMotmCup(c); return c;
+    }
+  };
   // MOTM slogan generator — pakkende kreet op basis van geselecteerde redenen
   const getMotmSlogan = (redenen) => {
     if (!redenen || redenen.length === 0) return "UITBLINKER";
@@ -1223,6 +1263,8 @@ HEADLINE: 1 zin. Positief en simpel.`;
       setAiOut(parsed);
       setLocked(true);
       archiveMatch(parsed);
+      // Ken een MOTM-beker toe (alleen bij winst/gelijkspel én een gekozen speler)
+      if (motm && home >= away) { try { await kenMotmCupToe(motm); } catch (e) {} }
       // Kwam de toegang van een wedstrijdpas? Stempel die nu af (eenmalig gebruik).
       if (viaPasRef.current) {
         const _cid = boot?.profile?.club_id;
@@ -2792,7 +2834,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 <div style={{height:"0.25cqw",background:TAC,opacity:0.45,borderRadius:1}}/>
                               </div>
                               <div style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"4%",overflow:"hidden",minHeight:0}}>
-                                <img src="/images/cups/cup-goud.png" style={{width:"100%",maxWidth:"16cqw",maxHeight:"16cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
+                                <img src={`/images/cups/${motmCup}`} style={{width:"100%",maxWidth:"16cqw",maxHeight:"16cqw",objectFit:"contain"}} crossOrigin="anonymous"/>
                                 <div style={{fontSize:(motm.length>16?"2.1cqw":motm.length>12?"2.4cqw":"2.7cqw"),fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.2}}>{motm}</div>
                               </div>
                             </div>
@@ -3056,7 +3098,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                             {/* TROFEE */}
                             <div style={{flex:1,minHeight:0,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"3% 0 2%"}}>
-                              <img src="/images/cups/cup-goud.png" style={{height:"100%",maxHeight:"24cqw",objectFit:"contain",filter:"drop-shadow(0 6px 16px rgba(0,0,0,0.5))"}} crossOrigin="anonymous"/>
+                              <img src={`/images/cups/${motmCup}`} style={{height:"100%",maxHeight:"24cqw",objectFit:"contain",filter:"drop-shadow(0 6px 16px rgba(0,0,0,0.5))"}} crossOrigin="anonymous"/>
                             </div>
 
                             {/* SPONSORBALK */}
