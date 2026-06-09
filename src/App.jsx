@@ -3062,15 +3062,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         const h2c=await loadH2C();
                         const el=document.getElementById(`layout-${l.id}`);
                         if(!el) return;
-                        const dpr=Math.max(window.devicePixelRatio||1,2);
-                        const src=await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                        const tw=1080,th=Math.round(src.height*(tw/src.width));
-                        const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
-                        const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
-                        const link=document.createElement("a");
-                        link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
-                        link.href=canvas.toDataURL("image/jpeg",0.95);
-                        link.click();
+                        try {
+                          const sc=Math.max(1,Math.ceil(1080/el.offsetWidth));
+                          const src=await h2c(el,{scale:sc,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
+                          const tw=1080,th=Math.round(src.height*(tw/src.width));
+                          const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
+                          const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
+                          const link=document.createElement("a");
+                          link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
+                          link.href=canvas.toDataURL("image/jpeg",0.95);
+                          link.click();
+                        } catch(err){ alert("Download fout: "+err.message); }
                       }} style={{width:"100%",padding:"13px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,cursor:"pointer",letterSpacing:1,boxShadow:`0 6px 22px ${hex(M.purple,0.4)}`}}>
                         📸 {l.name} opslaan
                       </button>
@@ -3100,15 +3102,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     const h2c = await loadH2C();
                     const el = document.getElementById(`layout-${id}`);
                     if(!el) return;
-                    const dpr = Math.max(window.devicePixelRatio||1,2);
-                    const src = await h2c(el,{scale:dpr*2,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                    const tw=1080,th=Math.round(src.height*(tw/src.width));
-                    const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
-                    const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
-                    const link = document.createElement("a");
-                    link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
-                    link.href = canvas.toDataURL("image/jpeg",0.95);
-                    link.click();
+                    try {
+                      const sc=Math.max(1,Math.ceil(1080/el.offsetWidth));
+                      const src = await h2c(el,{scale:sc,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
+                      const tw=1080,th=Math.round(src.height*(tw/src.width));
+                      const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
+                      const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
+                      const link = document.createElement("a");
+                      link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
+                      link.href = canvas.toDataURL("image/jpeg",0.95);
+                      link.click();
+                    } catch(err){ alert("Download fout: "+err.message); }
                   };
 
                   // E-mail het hele pakket (verslag + afbeeldingen als bijlage) via Resend
