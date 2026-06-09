@@ -2966,19 +2966,19 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {/* 7. SPONSORS */}
                             {storySponsors.length>0 && (
                               <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 3% 4%"}}>
-                                <div style={{position:"relative",width:"75%",aspectRatio:"900/397"}}>
-                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"flex",flexDirection:"column",gap:"2.8%",zIndex:1}}>
+                                <div style={{position:"relative",width:"84%",aspectRatio:"1672/396"}}>
+                                  <div style={{position:"absolute",top:"18%",bottom:"18%",left:"4%",right:"4%",display:"flex",flexDirection:"column",gap:"8%",zIndex:1}}>
                                     {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
-                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.2%"}}>
+                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.5%"}}>
                                         {Array.from({length:5},(_,ci)=>row[ci]||null).map((s,ci)=>(
                                           <div key={ci} style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                            {s?.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
+                                            {s?.url?<img src={s.url} style={{maxWidth:"82%",maxHeight:"82%",objectFit:"contain"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
                                           </div>
                                         ))}
                                       </div>
                                     ))}
                                   </div>
-                                  <img src="/images/sponsor-bar.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
+                                  <img src="/images/sponsor-grid.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
                                 </div>
                               </div>
                             )}
