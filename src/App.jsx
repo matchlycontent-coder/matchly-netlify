@@ -1519,10 +1519,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
     let hs=0,as=0;
     const ge=events.filter(e=>e.type==="GOAL"||e.type==="OWN").map(g=>{
       if(g.type==="OWN")as++;else hs++;
-      return {minute:parseInt(g.minute)||0,icon:"\u26bd",label:g.type==="OWN"?(opponent||"Teg."):g.player||"\u2014",sub:hs+"-"+as,isGoal:true,hs,as};
+      return {minute:parseInt(g.minute)||0,icon:"\u26bd",label:g.type==="OWN"?(opponent||"Teg."):g.player||"\u2014",sub:hs+"-"+as,isGoal:true,hs,as,kind:"goal"};
     });
-    const ce=events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(c=>({minute:parseInt(c.minute)||0,icon:c.type==="YELLOW"?"\ud83d\udfe8":"\ud83d\udfe5",label:c.player||"\u2014",sub:c.type==="YELLOW"?"Gele kaart":"Rode kaart",isGoal:false}));
-    const se=events.filter(e=>e.type==="SUB").map(s=>({minute:parseInt(s.minute)||0,icon:"\ud83d\udd04",label:s.playerIn||"\u2014",sub:"\u2191 \u00b7 "+(s.playerOut||"\u2014")+" eraf",isGoal:false}));
+    const ce=events.filter(e=>e.type==="YELLOW"||e.type==="RED").map(c=>({minute:parseInt(c.minute)||0,icon:c.type==="YELLOW"?"\ud83d\udfe8":"\ud83d\udfe5",label:c.player||"\u2014",sub:c.type==="YELLOW"?"Gele kaart":"Rode kaart",isGoal:false,kind:c.type==="YELLOW"?"yellow":"red"}));
+    const se=events.filter(e=>e.type==="SUB").map(s=>({minute:parseInt(s.minute)||0,icon:"\ud83d\udd04",label:s.playerIn||"\u2014",sub:"\u2191 \u00b7 "+(s.playerOut||"\u2014")+" eraf",isGoal:false,kind:"sub",inName:s.playerIn||"\u2014",outName:s.playerOut||"\u2014"}));
     return [...ge,...ce,...se].sort((a,b)=>a.minute-b.minute);
   })();
 
@@ -1742,12 +1742,16 @@ HEADLINE: 1 zin. Positief en simpel.`;
     ),
 
     // 13. Photo — sfeer-afbeelding behoudt verhouding (ronde bal) + lichte zoom
-    photo: (mul=1) => (
+    photo: (mul=1, variant="") => {
+      const _sq = theme.bgImage;
+      const _suf = variant==="story"?"-story":variant==="motm"?"-motm":"";
+      const _src = (_suf && _sq) ? _sq.replace(/(\.\w+)$/, _suf+"$1") : _sq;
+      return (
       <>
         {/* Donkere basis — voorkomt grijze bleed bij hoeken */}
         <div style={{position:"absolute",inset:0,background:TBG,pointerEvents:"none"}}/>
-        {theme.bgImage && (
-          <img src={theme.bgImage} crossOrigin="anonymous" style={{
+        {_src && (
+          <img src={_src} crossOrigin="anonymous" onError={(e)=>{if(e.currentTarget.dataset.fb!=="1"&&_sq){e.currentTarget.dataset.fb="1";e.currentTarget.src=_sq;}}} style={{
             position:"absolute",
             inset:0,
             width:"100%",
@@ -1761,13 +1765,14 @@ HEADLINE: 1 zin. Positief en simpel.`;
           }}/>
         )}
       </>
-    ),
+      );
+    },
   };
 
   // Selecteer achtergrond op basis van het thema
-  const renderBackground = (mul=1) => {
+  const renderBackground = (mul=1, variant="") => {
     const bg = CARD_BACKGROUNDS[theme.pattern] || CARD_BACKGROUNDS.carbon;
-    return bg(mul);
+    return bg(mul, variant);
   };
 
   // Alias voor achterwaartse compatibiliteit
@@ -2836,184 +2841,211 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     </div>
                         )}
                         {l.id==="story" && (
-                        <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Barlow Condensed',sans-serif",overflow:"hidden"}}>
-                          {renderPattern(0.85)}
+                        <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",overflow:"hidden"}}>
+                          {renderPattern(1, "story")}
                           <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
-                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"4% 4% 0",flexShrink:0}}>
-                              <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
-                                {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"8%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"0.5%"}} crossOrigin="anonymous"/>:<div style={{width:"8%",aspectRatio:"1/1",background:thex(TAC,0.2),borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"3cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                                <div style={{marginLeft:"2%"}}><div style={{fontSize:"3cqw",fontWeight:900,color:"rgba(255,255,255,0.9)",letterSpacing:0.5}}>{clubName}</div>{teamLabel && <div style={{fontSize:"2cqw",color:`${TAC}cc`,letterSpacing:0.5}}>{teamLabel}</div>}</div>
-                              </div>
-                              <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)"}}>Matchly</span>
-                            </div>
-                            <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"3% 4%",flexShrink:0}}>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",width:"24%"}}>
-                                <div style={{width:"90%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
-                                  {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                                </div>
-                                <span style={{fontSize:(clubName.length>20?"1.9cqw":clubName.length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"#fff",textAlign:"center"}}>{clubName}</span>
-                              </div>
-                              <div style={{display:"flex",alignItems:"baseline",gap:"1%"}}>
-                                <span style={{fontSize:"26cqw",fontWeight:900,color:"#fff",lineHeight:1,textShadow:`0 0 40px ${thex(TAC,0.8)}`}}>{home}</span>
-                                <span style={{fontSize:"9cqw",color:"rgba(255,255,255,0.25)"}}>–</span>
-                                <span style={{fontSize:"26cqw",fontWeight:900,color:"rgba(255,255,255,0.35)",lineHeight:1}}>{away}</span>
-                              </div>
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"2%",width:"24%"}}>
-                                <div style={{width:"90%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                  {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"10%"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                                </div>
-                                <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.9cqw":(opponent||"Tegenstander").length>14?"2.2cqw":"2.5cqw"),fontWeight:900,color:"rgba(255,255,255,0.4)",textAlign:"center"}}>{opponent||"Tegenstander"}</span>
-                              </div>
-                            </div>
-                            {/* THEMABALK met badge + quote, gradient ook op single-color thema's */}
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.82)",borderTop:`1.5px solid ${thex(TAC,0.5)}`,borderBottom:`1.5px solid ${thex(TAC,0.5)}`,padding:"2% 5%",margin:"1% 0 0 0"}}>
-                              <div style={{textAlign:"center",marginBottom:"1.5%"}}>
-                                <span style={{fontSize:"2.6cqw",fontWeight:900,color:"rgba(0,0,0,0.75)",letterSpacing:2}}>{home>away?"GEWONNEN 🏆":home===away?"GELIJKSPEL":"VERLOREN"}</span>
-                              </div>
-                              {(()=>{const len=(aiOut.headline||"").length;const fs=len>55?"3.4cqw":len>40?"4cqw":"4.6cqw";
-                              return <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",lineHeight:1.2,color:"rgba(0,0,0,0.9)",textAlign:"center",textShadow:"0 1px 2px rgba(255,255,255,0.15)"}}>"{aiOut.headline}"</div>;})()}
-                            </div>
-                            {(()=>{
-                              const stIsClean=away===0;
-                              const stFases=[{label:"1e helft",value:h1f1},{label:"2e helft",value:h2f3}].filter(f=>f.value);
-                              const stClean=stIsClean&&storyTimeline.filter(e=>e.isGoal).length===0?1:0;
-                              const stTotal=storyTimeline.length+stFases.length+stClean;
-                              const stSc=storyCalcScale(stTotal);
-                              const sFs=v=>(parseFloat(v)*stSc)+"%";
-                              const sSp=v=>(parseFloat(v)*stSc)+"%";
-                              const stOnlyGoals=storyTimeline.length>0&&storyTimeline.every(e=>e.isGoal);
-                              return (
-                            <div style={{flex:1,padding:"0 4%",overflow:"hidden",minHeight:0,display:"flex",flexDirection:"column",justifyContent:"center"}}>
-                              {stIsClean&&storyTimeline.filter(e=>e.isGoal).length===0&&(
-                                <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:sSp(1.8),background:"linear-gradient(90deg,"+thex(TAC,0.1)+",transparent)",borderLeft:"2px solid "+TAC,borderRadius:"0 2% 2% 0",padding:sSp(1.2)+" 2.5%",flexShrink:0}}>
-                                  <span style={{fontSize:sFs(3.5)}}>🔒</span>
-                                  <div><div style={{fontSize:sFs(1.9),fontWeight:900,letterSpacing:1,color:TAC+"cc",textTransform:"uppercase"}}>Clean sheet</div></div>
-                                </div>
-                              )}
-                              {storyTimeline.length>0&&(<>
-                                <div style={{fontSize:sFs(2),fontWeight:900,letterSpacing:2,color:TAC+"88",textTransform:"uppercase",marginBottom:sSp(1),flexShrink:0}}>{stOnlyGoals?"Doelpunten":"Tijdlijn"}</div>
-                                {storyTimeline.map((e,i)=>(
-                                  <div key={i} style={{display:"flex",alignItems:"center",gap:"2%",marginBottom:sSp(0.85),background:"rgba(255,255,255,0.04)",borderRadius:"2%",padding:sSp(0.85)+" 2%",flexShrink:0}}>
-                                    <span style={{fontSize:sFs(2.6),fontWeight:900,color:TAC,width:"8%",textAlign:"right",flexShrink:0}}>{e.minute}'</span>
-                                    <span style={{fontSize:sFs(2.7),flexShrink:0}}>{e.icon}</span>
-                                    <div style={{flex:1,minWidth:0}}>
-                                      <div style={{fontSize:sFs(2.4),fontWeight:700,color:"rgba(255,255,255,0.85)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:1}}>{e.isGoal&&<span style={{color:"rgba(255,255,255,0.3)",marginRight:"2%",fontSize:sFs(2)}}>{e.hs}-{e.as} </span>}{e.label}</div>
-                                      {!e.isGoal&&<div style={{fontSize:sFs(1.9),color:"rgba(255,255,255,0.35)"}}>{e.sub}</div>}
-                                    </div>
-                                  </div>
-                                ))}
-                              </>)}
-                              {stFases.length>0&&(<>
-                                <div style={{fontSize:sFs(2),fontWeight:900,letterSpacing:2,color:TAC+"88",textTransform:"uppercase",marginBottom:sSp(1),marginTop:storyTimeline.length>0?sSp(1.5):"0",flexShrink:0}}>Spelbeeld</div>
-                                {stFases.map((f,i)=>(
-                                  <div key={i} style={{display:"flex",alignItems:"center",gap:"2%",marginBottom:sSp(0.85),background:"rgba(255,255,255,0.04)",borderRadius:"2%",padding:sSp(0.85)+" 2%",flexShrink:0}}>
-                                    <span style={{fontSize:sFs(1.9),fontWeight:900,color:TAC+"88",width:"20%",flexShrink:0}}>{f.label}</span>
-                                    <span style={{fontSize:sFs(2.3),fontWeight:700,color:"rgba(255,255,255,0.75)",flex:1}}>{f.value}</span>
-                                  </div>
-                                ))}
-                              </>)}
-                            </div>
-                              );
-                            })()}
 
-                            {motm&&home>=away&&<div style={{flexShrink:0,margin:"2% 4%",background:`linear-gradient(135deg,${thex(TAC,0.12)},${thex(TAC2||TAC,0.08)})`,border:`1px solid ${thex(TAC,0.25)}`,borderRadius:"3%",padding:"2.5% 3.5%",display:"flex",alignItems:"center",gap:"3%"}}><span style={{fontSize:"5cqw"}}>🏆</span><div><div style={{fontSize:"2.2cqw",fontWeight:900,letterSpacing:1.5,color:`${TAC2||TAC}cc`,textTransform:"uppercase"}}>Man of the Match</div><div style={{fontSize:"3.5cqw",fontWeight:900,color:"#fff"}}>{motm}</div></div></div>}
-                            {(igHandle||fbHandle)&&<div style={{flexShrink:0,margin:"0 4% 2%",display:"flex",alignItems:"center",gap:"3%",flexWrap:"wrap"}}>
-                              {igHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={IG_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{igHandle}</span></div>}
-                              {fbHandle&&<div style={{display:"flex",alignItems:"center",gap:"1.5%"}}><img src={FB_ICON} alt="" style={{width:"2.5%",borderRadius:"20%"}}/><span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.35)"}}>{fbHandle}</span></div>}
-                            </div>}
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:1.5,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Onze sponsors</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,borderRadius:"6%",padding:"0.7%",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}><div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"4%",padding:"2% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:15,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div></div>)}</div></>)}</div>
+                            {/* 1. FULL TIME */}
+                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"2.5%",padding:"5% 0 0",flexShrink:0}}>
+                              <div style={{height:"0.25cqw",width:"8%",background:thex(TAC,0.55)}}/>
+                              <span style={{fontSize:"3cqw",fontWeight:900,letterSpacing:4,color:"#fff",textTransform:"uppercase"}}>Full Time</span>
+                              <div style={{height:"0.25cqw",width:"8%",background:thex(TAC,0.55)}}/>
+                            </div>
+
+                            {/* 2. STAND */}
+                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"3.5% 5% 0",gap:"2%",flexShrink:0}}>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%",width:"30%"}}>
+                                <div style={{width:"70%",aspectRatio:"1/1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                  {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{fontSize:"8cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                                </div>
+                                <div style={{height:"3cqw",display:"flex",alignItems:"center",justifyContent:"center",width:"100%"}}><span style={{fontSize:(fullTeamName.length>16?"1.9cqw":"2.3cqw"),fontWeight:900,color:"#fff",textAlign:"center",letterSpacing:0.5,textTransform:"uppercase",whiteSpace:"nowrap"}}>{fullTeamName}</span></div>
+                              </div>
+                              <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"3%"}}>
+                                <div style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"3%"}}>
+                                  {String(home).split("").map((d,i)=><img key={"sh"+i} src={`/images/cijfers/${d}.png`} style={{height:"15cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
+                                </div>
+                                <img src="/images/cijfers/streepje.png" style={{height:"2.2cqw",objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>
+                                <div style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",justifyContent:"flex-start",gap:"3%"}}>
+                                  {String(away).split("").map((d,i)=><img key={"sa"+i} src={`/images/cijfers/${d}.png`} style={{height:"15cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
+                                </div>
+                              </div>
+                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%",width:"30%"}}>
+                                <div style={{width:"70%",aspectRatio:"1/1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                  {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{fontSize:"8cqw",fontWeight:900,color:"rgba(255,255,255,0.5)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                                </div>
+                                <div style={{height:"3cqw",display:"flex",alignItems:"center",justifyContent:"center",width:"100%"}}><span style={{fontSize:((opponent||"Tegenstander").length>16?"1.9cqw":"2.3cqw"),fontWeight:900,color:"#fff",textAlign:"center",letterSpacing:0.5,textTransform:"uppercase",whiteSpace:"nowrap"}}>{opponent||"Tegenstander"}</span></div>
+                              </div>
+                            </div>
+
+                            {/* 3. QUOTE */}
+                            {aiOut.headline && (
+                              <div style={{padding:"4.5% 9% 1%",textAlign:"center",flexShrink:0,position:"relative"}}>
+                                <span style={{fontFamily:"Georgia,serif",fontSize:"7cqw",color:TAC,lineHeight:0,verticalAlign:"-0.45em",marginRight:"1.5%"}}>&ldquo;</span>
+                                <span style={{fontSize:(aiOut.headline.length>75?"2.9cqw":aiOut.headline.length>50?"3.3cqw":"3.7cqw"),fontWeight:900,fontStyle:"italic",color:"#fff",lineHeight:1.25}}>{aiOut.headline}</span>
+                                <span style={{fontFamily:"Georgia,serif",fontSize:"7cqw",color:TAC,lineHeight:0,verticalAlign:"-0.7em",marginLeft:"1%"}}>&rdquo;</span>
+                              </div>
+                            )}
+
+                            {/* ONDERSTE SECTIES */}
+                            <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",padding:"3% 7% 0",overflow:"hidden"}}>
+
+                              {/* 4. IN HET KORT */}
+                              {aiOut.samenvatting && (<div style={{flexShrink:0}}>
+                                <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:"1.5%"}}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
+                                  <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>In het kort</span>
+                                </div>
+                                <p style={{fontSize:"2.7cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.45,margin:0}}>{aiOut.samenvatting}</p>
+                              </div>)}
+
+                              <div style={{height:"0.22cqw",background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>
+
+                              {/* 5. SPELVERLOOP */}
+                              {storyTimeline.length>0 && (<div style={{flexShrink:0}}>
+                                <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:"2%"}}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+                                  <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>Spelverloop</span>
+                                </div>
+                                {storyTimeline.map((e,i)=>(
+                                  <div key={i} style={{display:"flex",alignItems:"center",gap:"3%",padding:"1.1% 0"}}>
+                                    <div style={{width:"6cqw",height:"6cqw",flexShrink:0,borderRadius:"50%",border:`1.5px solid ${thex(TAC,0.45)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                      {(()=>{const k=e.kind;
+                                        if(k==="goal") return <svg viewBox="0 0 24 24" style={{width:"62%",height:"62%"}}><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" strokeWidth="1.5"/><polygon points="12,7.4 15.6,10 14.2,14.2 9.8,14.2 8.4,10" fill="#fff"/></svg>;
+                                        if(k==="yellow"||k==="red") return <svg viewBox="0 0 24 24" style={{width:"55%",height:"55%"}}><rect x="8" y="5" width="8" height="13" rx="1.5" transform="rotate(8 12 12)" fill={k==="yellow"?"#f5c518":"#e53935"}/></svg>;
+                                        return <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{width:"60%",height:"60%"}}><path d="M7 9h9l-3-3M17 15H8l3 3"/></svg>;
+                                      })()}
+                                    </div>
+                                    <span style={{fontSize:"2.9cqw",fontWeight:900,color:TAC,width:"10%",flexShrink:0}}>{e.minute}'</span>
+                                    <span style={{flex:1,minWidth:0,fontSize:"2.9cqw",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.kind==="sub"?`${e.outName} ↔ ${e.inName}`:e.label}</span>
+                                    {e.isGoal && <span style={{fontSize:"2.9cqw",fontWeight:900,color:TAC,flexShrink:0,marginLeft:"2%"}}>{e.hs}-{e.as}</span>}
+                                  </div>
+                                ))}
+                              </div>)}
+
+                              {baseSquad.length>0 && <div style={{height:"0.22cqw",background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>}
+
+                              {/* 6. BASISELF */}
+                              {baseSquad.length>0 && (<div style={{flex:1,minHeight:0,overflow:"hidden"}}>
+                                <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:"2%"}}>
+                                  <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/><path d="M15.5 14c2.4 0 5.5 1.2 5.5 5"/></svg>
+                                  <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>Basiself</span>
+                                </div>
+                                <div style={{display:"flex",gap:"5%"}}>
+                                  {[baseSquad.slice(0,Math.ceil(baseSquad.length/2)),baseSquad.slice(Math.ceil(baseSquad.length/2))].map((col,ci)=>(
+                                    <div key={ci} style={{flex:1,minWidth:0}}>
+                                      {col.map((p,pi)=>(
+                                        <div key={pi} style={{display:"flex",alignItems:"center",gap:"3.5%",padding:"0.9% 0"}}>
+                                          <div style={{width:"1.6cqw",height:"1.6cqw",borderRadius:"50%",background:TAC,flexShrink:0,boxShadow:`0 0 6px ${thex(TAC,0.6)}`}}/>
+                                          <span style={{fontSize:"2.7cqw",fontWeight:600,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p}</span>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>)}
+                            </div>
+
+                            {/* 7. SPONSORS */}
+                            {storySponsors.length>0 && (
+                              <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 3% 4%"}}>
+                                <div style={{position:"relative",width:"94%",aspectRatio:"900/397"}}>
+                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gridTemplateRows:"1fr 1fr",columnGap:"1.2%",rowGap:"2.8%",zIndex:1}}>
+                                    {storySponsors.slice(0,10).map((s,i)=>(
+                                      <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                                        {s.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <img src="/images/sponsor-bar.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
+                                </div>
+                              </div>
+                            )}
+
                           </div>
                         </div>
                         )}
                         {l.id==="motm" && (
-                        <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Barlow Condensed',sans-serif",overflow:"hidden"}}>
-                          {renderPattern(0.9)}
-                          <div style={{position:"absolute",top:"48%",left:"50%",transform:"translate(-50%,-50%)",fontSize:"40cqw",opacity:0.04,lineHeight:1,pointerEvents:"none"}}>🏆</div>
+                        <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",overflow:"hidden"}}>
+                          {renderPattern(1, "motm")}
                           <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
-                            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"3% 4% 0",flexShrink:0}}>
-                              <div style={{display:"flex",alignItems:"center",gap:"2%"}}>
-                                {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"7%",aspectRatio:"1/1",objectFit:"contain",background:"#fff",borderRadius:"12%",padding:"0.5%"}} crossOrigin="anonymous"/>:<div style={{width:"7%",aspectRatio:"1/1",background:thex(TAC,0.2),borderRadius:"12%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"2.5cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
-                                <span style={{fontSize:(clubName.length>22?"2.2cqw":clubName.length>16?"2.5cqw":"2.8cqw"),fontWeight:900,letterSpacing:1,color:"rgba(255,255,255,0.8)"}}>{clubName}</span>
+
+                            {/* STAND */}
+                            <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:"4%",padding:"7% 6% 0",flexShrink:0}}>
+                              <div style={{width:"17%",aspectRatio:"1/1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                {(hvLogoUrl||logo)?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:"#E9C766"}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
                               </div>
-                              <span style={{fontSize:"2cqw",color:"rgba(255,255,255,0.2)"}}>Matchly</span>
+                              <div style={{width:"0.3cqw",height:"10cqw",background:"rgba(255,255,255,0.22)"}}/>
+                              <span style={{fontSize:"10cqw",fontWeight:900,color:"#fff",lineHeight:1,letterSpacing:1}}>{home} - {away}</span>
+                              <div style={{width:"0.3cqw",height:"10cqw",background:"rgba(255,255,255,0.22)"}}/>
+                              <div style={{width:"17%",aspectRatio:"1/1",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                {oppLogoUrl?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>:<div style={{fontSize:"6cqw",fontWeight:900,color:"rgba(255,255,255,0.5)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>}
+                              </div>
                             </div>
-                            {/* MOTM-sponsor — bovenaan, boven matchup */}
-                            {motmSponsor && motmSponsor.name ? (
-                              <div style={{textAlign:"center",marginTop:"2%",padding:"0 4%",flexShrink:0}}>
-                                <div style={{fontSize:"2cqw",fontWeight:900,letterSpacing:3,color:"rgba(255,255,255,0.55)",textTransform:"uppercase",marginBottom:"1.2%"}}>MOTM is mogelijk gemaakt door:</div>
-                                <div style={{display:"inline-flex",alignItems:"center",gap:"2.5%",justifyContent:"center",background:"rgba(0,0,0,0.35)",borderRadius:"14px",padding:"1.5% 4%",border:`1px solid ${thex(TAC,0.25)}`}}>
-                                  {motmSponsor.url && <img src={motmSponsor.url} style={{height:"5cqw",width:"auto",maxWidth:"18cqw",objectFit:"contain",background:"#fff",borderRadius:"6%",padding:"0.6%"}} crossOrigin="anonymous"/>}
-                                  <span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"3.6cqw",fontWeight:900,color:"#fff",letterSpacing:1}}>{motmSponsor.name}</span>
-                                </div>
+
+                            {/* MOTM BADGE */}
+                            <div style={{display:"flex",justifyContent:"center",marginTop:"7%",flexShrink:0}}>
+                              <img src="/images/motm/motm-badge.png" style={{width:"36%",objectFit:"contain"}} crossOrigin="anonymous"/>
+                            </div>
+
+                            {/* MAN OF THE MATCH + NAAM */}
+                            <div style={{textAlign:"center",marginTop:"3.5%",flexShrink:0,padding:"0 6%"}}>
+                              <div style={{fontSize:"3cqw",fontWeight:700,letterSpacing:5,color:"rgba(255,255,255,0.9)",textTransform:"uppercase"}}>Man of the Match</div>
+                              {motm ? (()=>{
+                                const nm=(motm||"").toUpperCase();
+                                const lh=Math.min(9,Math.max(5,Math.floor(115/nm.length)));
+                                const mH=lh+"cqw";
+                                return (
+                                  <div style={{display:"flex",justifyContent:"center",alignItems:"center",flexWrap:"nowrap",marginTop:"1%",padding:"0 4%",gap:"0.3%"}}>
+                                    {nm.split("").map((ch,i)=>{
+                                      const src=ch===" "?"/images/letters/space.png":ch==="'"||ch==="\u2019"?"/images/letters/apostrophe.png":/[A-Z]/.test(ch)?`/images/letters/${ch.toLowerCase()}.png`:null;
+                                      return src?<img key={i} src={src} style={{height:mH,objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>:<span key={i} style={{fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",fontSize:mH,fontWeight:900,color:"#E9C766",lineHeight:1,flexShrink:0}}>{ch}</span>;
+                                    })}
+                                  </div>
+                                );
+                              })() : <div style={{fontSize:"9cqw",fontWeight:900,color:"#E9C766",textAlign:"center",marginTop:"1%"}}>—</div>}
+                            </div>
+
+                            {/* QUOTE */}
+                            {motm && (
+                              <div style={{textAlign:"center",padding:"2.5% 11% 0",flexShrink:0}}>
+                                <span style={{fontSize:"3cqw",fontStyle:"italic",color:"rgba(255,255,255,0.88)",lineHeight:1.4}}>&ldquo;{getMotmQuote(motmRedenen, motm)}&rdquo;</span>
                               </div>
-                            ) : (
-                              <div style={{height:"1%",flexShrink:0}}></div>
                             )}
-                            <div style={{
-                              display:"grid",
-                              gridTemplateColumns:"1fr auto 1fr",
-                              alignItems:"center",
-                              gap:"4%",
-                              padding:"1% 4%",
-                              flexShrink:0
-                            }}>
-                              {/* Linker team - eigen club */}
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:`2.5px solid ${thex(TAC,0.7)}`,background:thex(TAC,0.12),display:"flex",alignItems:"center",justifyContent:"center",boxShadow:`0 0 16px ${thex(TAC,0.3)}`,overflow:"hidden"}}>
-                                  {(hvLogoUrl||logo)
-                                    ?<img src={hvLogoUrl||logo} style={{width:"100%",height:"100%",objectFit:"contain",padding:"12%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:TAC}}>{clubName.replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                  }
-                                </div>
-                                <span style={{fontSize:(clubName.length>20?"1.7cqw":clubName.length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.85)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{clubName}</span>
-                              </div>
 
-                              {/* Score - centraal */}
-                              <div style={{display:"flex",alignItems:"baseline",justifyContent:"center",gap:"2%"}}>
-                                <span style={{fontSize:"16cqw",fontWeight:900,color:"rgba(255,255,255,0.95)",lineHeight:1,textShadow:`0 0 30px ${thex(TAC,0.6)}`}}>{home}</span>
-                                <span style={{fontSize:"5cqw",color:"rgba(255,255,255,0.3)",lineHeight:1}}>–</span>
-                                <span style={{fontSize:"16cqw",fontWeight:900,color:"rgba(255,255,255,0.4)",lineHeight:1}}>{away}</span>
+                            {/* MOTM SPONSOR */}
+                            <div style={{display:"flex",justifyContent:"center",marginTop:"4%",flexShrink:0}}>
+                              <div style={{position:"relative",width:"66%",aspectRatio:"2.93/1"}}>
+                                <img src="/images/motm/motm-sponsor-frame.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>
+                                {(motmSponsor&&(motmSponsor.url||motmSponsor.name))&&(
+                                  <div style={{position:"absolute",left:"12%",right:"12%",top:"47%",bottom:"13%",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"center",gap:"3%"}}>
+                                    {motmSponsor.url && <img src={motmSponsor.url} style={{maxWidth:"100%",maxHeight:"100%",objectFit:"contain"}} crossOrigin="anonymous"/>}
+                                    {motmSponsor.name && <span style={{fontSize:"2.4cqw",fontWeight:900,color:"#E9C766",textAlign:"center",lineHeight:1}}>{motmSponsor.name}</span>}
+                                  </div>
+                                )}
                               </div>
+                            </div>
 
-                              {/* Rechter team - tegenstander */}
-                              <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%"}}>
-                                <div style={{width:"60%",aspectRatio:"1/1",borderRadius:"50%",border:"1.5px solid rgba(255,255,255,0.2)",background:"rgba(255,255,255,0.06)",display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                  {oppLogoUrl
-                                    ?<img src={oppLogoUrl} style={{width:"100%",height:"100%",objectFit:"contain",padding:"12%"}} crossOrigin="anonymous"/>
-                                    :<div style={{fontSize:"7cqw",fontWeight:900,color:"rgba(255,255,255,0.4)"}}>{(opponent||"TG").replace(/[^A-Za-z]/g,"").slice(0,2).toUpperCase()}</div>
-                                  }
+                            {/* TROFEE */}
+                            <div style={{flex:1,minHeight:0,display:"flex",alignItems:"flex-end",justifyContent:"center",padding:"3% 0 2%"}}>
+                              <img src="/images/cups/cup-goud.png" style={{height:"100%",maxHeight:"24cqw",objectFit:"contain",filter:"drop-shadow(0 6px 16px rgba(0,0,0,0.5))"}} crossOrigin="anonymous"/>
+                            </div>
+
+                            {/* SPONSORBALK */}
+                            {storySponsors.length>0 && (
+                              <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 3% 4%"}}>
+                                <div style={{position:"relative",width:"94%",aspectRatio:"900/397"}}>
+                                  <div style={{position:"absolute",top:"5.8%",bottom:"5.5%",left:"2.7%",right:"2.6%",display:"grid",gridTemplateColumns:"repeat(5,1fr)",gridTemplateRows:"1fr 1fr",columnGap:"1.2%",rowGap:"2.8%",zIndex:1}}>
+                                    {storySponsors.slice(0,10).map((s,i)=>(
+                                      <div key={i} style={{display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
+                                        {s.url?<img src={s.url} style={{maxWidth:"85%",maxHeight:"85%",objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#D4AF37",textAlign:"center",lineHeight:1.1}}>{s.name}</span>}
+                                      </div>
+                                    ))}
+                                  </div>
+                                  <img src="/images/sponsor-bar.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
                                 </div>
-                                <span style={{fontSize:((opponent||"Tegenstander").length>20?"1.7cqw":(opponent||"Tegenstander").length>14?"2cqw":"2.2cqw"),fontWeight:700,color:"rgba(255,255,255,0.55)",textAlign:"center",lineHeight:1.15,fontFamily:"'Barlow Condensed',sans-serif"}}>{opponent||"Tegenstander"}</span>
                               </div>
-                            </div>
-                            <div style={{display:"flex",justifyContent:"center",marginTop:"2%",flexShrink:0}}>
-                              <div style={{width:"18%",aspectRatio:"1/1",borderRadius:"50%",background:`linear-gradient(135deg,${TAC},${TAC2||TAC})`,padding:"2%",boxShadow:`0 0 30px ${thex(TAC,0.5)}`,animation:"trophyGlow 2.4s ease-in-out infinite",perspective:"200px"}}>
-                                <div style={{width:"100%",height:"100%",borderRadius:"50%",background:"rgba(0,0,0,0.45)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"8cqw",animation:"trophySpin 3.6s linear infinite",transformStyle:"preserve-3d"}}>🏆</div>
-                              </div>
-                            </div>
-                            {/* Pakkende quote onder beker, boven naam */}
-                            <div style={{textAlign:"center",marginTop:"2.5%",padding:"0 6%",flexShrink:0}}>
-                              <div style={{display:"inline-block",fontFamily:"'Barlow Condensed',sans-serif",fontSize:"3.6cqw",fontStyle:"italic",fontWeight:700,color:`${TAC}ee`,lineHeight:1.35,maxWidth:"95%",textShadow:`0 0 8cqw ${thex(TAC,0.25)}`}}>
-                                <span style={{color:TAC,fontSize:"5.5cqw",fontWeight:900,verticalAlign:"middle",marginRight:"0.25em"}}>"</span>
-                                {getMotmQuote(motmRedenen, motm)}
-                                <span style={{color:TAC,fontSize:"5.5cqw",fontWeight:900,verticalAlign:"middle",marginLeft:"0.15em"}}>"</span>
-                              </div>
-                            </div>
-                            <div style={{textAlign:"center",padding:"2% 8%",flex:1,display:"flex",flexDirection:"column",justifyContent:"center"}}>
-                              {(()=>{const n=(motm||"").length;const fs=n>20?"9cqw":n>16?"11cqw":n>12?"13cqw":"15cqw";
-                              return <div style={{fontSize:fs,fontWeight:900,fontStyle:"italic",textTransform:"uppercase",
-                              lineHeight:1.05,
-                              color:TAC,
-                              textShadow:`0 0 12px ${thex(TAC,0.6)}, 0 0 24px ${thex(TAC,0.35)}, 0 2px 4px rgba(0,0,0,0.5)`
-                              }}>{motm||"—"}</div>;})()} 
-                              <div style={{display:"flex",justifyContent:"center",marginTop:"3%"}}>
-                                <div style={{display:"inline-block",background:`linear-gradient(90deg,${TAC},${TAC2||TAC})`,color:"#000",
-                                fontWeight:900,fontSize:"2.4cqw",letterSpacing:2,textTransform:"uppercase",padding:"1% 5%",borderRadius:3}}>Man of the Match</div>
-                              </div>
-                              <div style={{fontSize:(fullTeamName.length>30?"1.5cqw":fullTeamName.length>22?"1.7cqw":"2cqw"),color:`${TAC}88`,letterSpacing:1,fontWeight:700,marginTop:"1.5%",textTransform:"uppercase",textAlign:"center"}}>{fullTeamName}</div>
-                              <div style={{fontSize:(((opponent||"Tegenstander").length>20)?"1.7cqw":"2cqw"),color:"rgba(255,255,255,0.3)",marginTop:"1%"}}>{home>away?"Gewonnen":home===away?"Gelijkspel":"Verloren"} · {home}-{away} vs {opponent||"Tegenstander"}</div>
-                            </div>
-                            <div style={{flexShrink:0,background:"rgba(0,0,0,0.55)",borderTop:`3px solid ${TAC}`}}>{storySponsors.length>0&&(<><div style={{fontSize:"1.8cqw",fontWeight:900,letterSpacing:2,color:"rgba(255,255,255,0.2)",textTransform:"uppercase",textAlign:"center",padding:"1.5% 0 1%"}}>Sponsored by</div><div style={{display:"flex",gap:"2%",padding:"0 3% 2%",justifyContent:"center",flexWrap:"wrap"}}>{storySponsors.map((s,i)=><div key={i} style={{width:"18%",flexShrink:0,borderRadius:"7%",padding:"0.7%",background:tierGradient(s),boxShadow:`0 1px 4px rgba(0,0,0,0.3)`}}><div style={{width:"100%",height:"100%",background:"#e8e8e8",borderRadius:"5%",padding:"2% 2%",boxSizing:"border-box",display:"flex",alignItems:"center",justifyContent:"center"}}>{s.url?<img src={s.url} style={{width:"100%",height:"auto",maxHeight:20,objectFit:"contain"}} crossOrigin="anonymous"/>:<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"2.25cqw",fontWeight:900,color:"#222"}}>{s.name}</span>}</div></div>)}</div></>)}</div>
+                            )}
+
                           </div>
                         </div>
                         )}
