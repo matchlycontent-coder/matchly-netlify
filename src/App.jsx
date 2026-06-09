@@ -2966,13 +2966,13 @@ HEADLINE: 1 zin. Positief en simpel.`;
                             {/* 7. SPONSORS */}
                             {storySponsors.length>0 && (
                               <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 1% 4%"}}>
-                                <div style={{position:"relative",width:"94%",aspectRatio:"1628/317"}}>
-                                  <div style={{position:"absolute",top:"9%",bottom:"9%",left:"3%",right:"3%",display:"flex",flexDirection:"column",gap:"9%",zIndex:1}}>
+                                <div style={{position:"relative",width:"94%",aspectRatio:"1628/349"}}>
+                                  <div style={{position:"absolute",top:"6.5%",bottom:"8%",left:"1.5%",right:"1.5%",display:"flex",flexDirection:"column",gap:"8%",zIndex:1}}>
                                     {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
-                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.5%"}}>
+                                      <div key={ri} style={{display:"flex",flex:1,gap:"1.2%"}}>
                                         {Array.from({length:5},(_,ci)=>row[ci]||null).map((s,ci)=>(
-                                          <div key={ci} style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden"}}>
-                                            {s?.url?<img src={s.url} style={{maxWidth:"82%",maxHeight:"82%",objectFit:"contain"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
+                                          <div key={ci} style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",overflow:"hidden",padding:"0 1%"}}>
+                                            {s?.url?<img src={s.url} style={{maxWidth:"88%",maxHeight:"80%",objectFit:"contain",display:"block"}} crossOrigin="anonymous"/>:s?.name?<span style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:"1.6cqw",fontWeight:900,color:"#fff",textAlign:"center",lineHeight:1.1}}>{s.name}</span>:null}
                                           </div>
                                         ))}
                                       </div>
