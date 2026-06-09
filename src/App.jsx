@@ -2858,6 +2858,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         {l.id==="story" && (
                         <div style={{width:"100%",aspectRatio:"9/16",containerType:"inline-size",background:TBG,position:"relative",fontFamily:"'Bebas Neue','Barlow Condensed',sans-serif",overflow:"hidden"}}>
                           {renderPattern(1, "story")}
+                          <span style={{position:"absolute",top:"2.5%",right:"4.5%",fontSize:"1.7cqw",color:"rgba(255,255,255,0.22)",letterSpacing:0.5,zIndex:3}}>powered by Matchly</span>
                           <div style={{position:"absolute",inset:0,display:"flex",flexDirection:"column"}}>
 
                             {/* 1. FULL TIME */}
@@ -2877,11 +2878,11 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               </div>
                               <div style={{flex:1,minWidth:0,display:"flex",alignItems:"center",justifyContent:"center",gap:"3%"}}>
                                 <div style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",justifyContent:"flex-end",gap:"3%"}}>
-                                  {String(home).split("").map((d,i)=><img key={"sh"+i} src={`/images/cijfers/${d}.png`} style={{height:"15cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
+                                  {String(home).split("").map((d,i)=><img key={"sh"+i} src={`/images/cijfers/${d}.png`} style={{height:"20cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
                                 </div>
-                                <img src="/images/cijfers/streepje.png" style={{height:"2.2cqw",objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>
+                                <img src="/images/cijfers/streepje.png" style={{height:"3cqw",objectFit:"contain",flexShrink:0}} crossOrigin="anonymous"/>
                                 <div style={{flex:"1 1 0",minWidth:0,display:"flex",alignItems:"center",justifyContent:"flex-start",gap:"3%"}}>
-                                  {String(away).split("").map((d,i)=><img key={"sa"+i} src={`/images/cijfers/${d}.png`} style={{height:"15cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
+                                  {String(away).split("").map((d,i)=><img key={"sa"+i} src={`/images/cijfers/${d}.png`} style={{height:"20cqw",objectFit:"contain"}} crossOrigin="anonymous"/>)}
                                 </div>
                               </div>
                               <div style={{display:"flex",flexDirection:"column",alignItems:"center",gap:"6%",width:"30%"}}>
@@ -2903,7 +2904,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                   <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
                                   <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>In het kort</span>
                                 </div>
-                                <p style={{fontSize:"2.5cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.4,margin:0}}>{aiOut.samenvattingLang||aiOut.samenvatting}</p>
+                                <p style={{fontSize:"2.75cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.4,margin:0}}>{aiOut.samenvattingLang||aiOut.samenvatting}</p>
                               </div>)}
 
                               <div style={{height:2,background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>
@@ -2965,7 +2966,9 @@ HEADLINE: 1 zin. Positief en simpel.`;
 
                             {/* 7. SPONSORS */}
                             {storySponsors.length>0 && (
-                              <div style={{flexShrink:0,display:"flex",justifyContent:"center",padding:"1% 1% 4%"}}>
+                              <div style={{flexShrink:0,padding:"1% 1% 4%"}}>
+                                <div style={{fontSize:"1.8cqw",fontWeight:700,letterSpacing:3,color:"rgba(255,255,255,0.32)",textTransform:"uppercase",textAlign:"center",marginBottom:"1.3%"}}>Sponsored by</div>
+                                <div style={{display:"flex",justifyContent:"center"}}>
                                 <div style={{position:"relative",width:"94%",aspectRatio:"1628/349"}}>
                                   <div style={{position:"absolute",top:"6.5%",bottom:"8%",left:"1.5%",right:"1.5%",display:"flex",flexDirection:"column",gap:"8%",zIndex:1}}>
                                     {[storySponsors.slice(0,5),storySponsors.slice(5,10)].map((row,ri)=>(
@@ -2979,6 +2982,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                     ))}
                                   </div>
                                   <img src="/images/sponsor-grid.png" style={{position:"absolute",inset:0,width:"100%",height:"100%",objectFit:"fill",pointerEvents:"none",zIndex:2}} crossOrigin="anonymous"/>
+                                </div>
                                 </div>
                               </div>
                             )}
