@@ -19,7 +19,7 @@ const MATCHLY_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABYCAYA
 const loadH2C = () => new Promise(res => {
   if (window.html2canvas) return res(window.html2canvas);
   const s = document.createElement("script");
-  s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
+  s.src = "/html2canvas.min.js";
   s.onload = () => res(window.html2canvas);
   document.head.appendChild(s);
 });
