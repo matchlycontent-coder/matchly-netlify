@@ -1083,10 +1083,10 @@ Als je het niet zeker weet, gebruik "vertrouwen": "laag". Als je niets vindt, ge
     const md = {club:fullTeamName,opponent:opponent||"Tegenstander",score:`${home}-${away}`,locatie:loc,tijdstip:new Date().toISOString(),weer:weather?(WEATHER.find(w=>w.v===weather)||{}).label||null:null,algemeenBeld:algBeld||null,eersteHelft:{openingsfase:h1f1||null,middenfase:h1f2||null,slotfase:h1f3||null},tweedeHelft:{openingsfase:h2f1||null,middenfase:h2f2||null,slotfase:h2f3||null},motm:(home>=away?motm:null)||null,motmRedenen:(home>=away&&motm&&motmRedenen.length)?MOTM_REDENEN.filter(r=>motmRedenen.includes(r.key)).map(r=>r.label):null,wedstrijdMomenten,bijzondereInfo,toelichting:bijzN.trim()||null,events:evData};
     const goalCount=events.filter(e=>e.type==="GOAL"||e.type==="OWN").length;
     const samenvattingSpec = goalCount<=2
-      ? "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Een complete, lopende samenvatting van de wedstrijd — geen losse flard of afgeknipte zin. Hou het bondig want er gebeurde weinig."
+      ? "2 tot 3 zinnen, maximaal 300 tekens (inclusief spaties). Een complete, lopende samenvatting van de wedstrijd met het verloop en de sleutelmomenten — geen afgeknipte zin. Er gebeurde weinig, dus vul niet kunstmatig aan."
       : goalCount>=5
-        ? "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Vat het verloop en de beslissende fase samen in een complete, lopende tekst — nooit langer dan 150 tekens, dus kies de kern."
-        : "1 tot 2 korte zinnen, maximaal 150 tekens (inclusief spaties). Een complete, lopende samenvatting — geen afgeknipte zin.";
+        ? "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Vat het verloop, de doelpuntenmakers en de beslissende fase samen in een complete, lopende tekst — geen afgeknipte zin."
+        : "3 tot 4 zinnen, maximaal 340 tekens (inclusief spaties). Een complete, lopende samenvatting met het verloop, de sleutelmomenten en de beslissende fase — geen afgeknipte zin.";
 
     const sysAdult=`Je schrijft wedstrijdverslagen voor Matchly, een app voor amateurvoetbalclubs.
 SCHRIJFSTIJL: ${stijl}.
@@ -2887,14 +2887,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               </div>
                             </div>
 
-                            {/* 3. QUOTE */}
-                            {aiOut.headline && (
-                              <div style={{padding:"4.5% 9% 1%",textAlign:"center",flexShrink:0,position:"relative"}}>
-                                <span style={{fontFamily:"Georgia,serif",fontSize:"7cqw",color:TAC,lineHeight:0,verticalAlign:"-0.45em",marginRight:"1.5%"}}>&ldquo;</span>
-                                <span style={{fontSize:(aiOut.headline.length>75?"2.9cqw":aiOut.headline.length>50?"3.3cqw":"3.7cqw"),fontWeight:900,fontStyle:"italic",color:"#fff",lineHeight:1.25}}>{aiOut.headline}</span>
-                                <span style={{fontFamily:"Georgia,serif",fontSize:"7cqw",color:TAC,lineHeight:0,verticalAlign:"-0.7em",marginLeft:"1%"}}>&rdquo;</span>
-                              </div>
-                            )}
+                            {/* QUOTE verwijderd — overlapte met In het kort */}
 
                             {/* ONDERSTE SECTIES */}
                             <div style={{flex:1,minHeight:0,display:"flex",flexDirection:"column",padding:"3% 7% 0",overflow:"hidden"}}>
@@ -2905,7 +2898,7 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                   <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><rect x="4" y="3" width="16" height="18" rx="2"/><line x1="8" y1="8" x2="16" y2="8"/><line x1="8" y1="12" x2="16" y2="12"/><line x1="8" y1="16" x2="13" y2="16"/></svg>
                                   <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>In het kort</span>
                                 </div>
-                                <p style={{fontSize:"2.7cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.45,margin:0}}>{aiOut.samenvatting}</p>
+                                <p style={{fontSize:"2.5cqw",fontWeight:600,color:"rgba(255,255,255,0.92)",lineHeight:1.4,margin:0}}>{aiOut.samenvatting}</p>
                               </div>)}
 
                               <div style={{height:2,background:`linear-gradient(90deg,transparent,${TAC},transparent)`,margin:"4% 0",flexShrink:0}}/>
@@ -2918,17 +2911,17 @@ HEADLINE: 1 zin. Positief en simpel.`;
                                 </div>
                                 {(()=>{
                                   const renderEvt=(e,key)=>(
-                                    <div key={key} style={{display:"flex",alignItems:"center",gap:"2.5%",padding:"1% 0"}}>
-                                      <div style={{width:"5cqw",height:"5cqw",flexShrink:0,borderRadius:"50%",border:`1.5px solid ${thex(TAC,0.45)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
+                                    <div key={key} style={{display:"flex",alignItems:"center",gap:"2.5%",padding:"0.5% 0"}}>
+                                      <div style={{width:"4cqw",height:"4cqw",flexShrink:0,borderRadius:"50%",border:`1.5px solid ${thex(TAC,0.45)}`,display:"flex",alignItems:"center",justifyContent:"center"}}>
                                         {(()=>{const k=e.kind;
                                           if(k==="goal") return <svg viewBox="0 0 24 24" style={{width:"62%",height:"62%"}}><circle cx="12" cy="12" r="9" fill="none" stroke="#fff" strokeWidth="1.5"/><polygon points="12,7.4 15.6,10 14.2,14.2 9.8,14.2 8.4,10" fill="#fff"/></svg>;
                                           if(k==="yellow"||k==="red") return <svg viewBox="0 0 24 24" style={{width:"55%",height:"55%"}}><rect x="8" y="5" width="8" height="13" rx="1.5" transform="rotate(8 12 12)" fill={k==="yellow"?"#f5c518":"#e53935"}/></svg>;
                                           return <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" style={{width:"60%",height:"60%"}}><path d="M7 9h9l-3-3M17 15H8l3 3"/></svg>;
                                         })()}
                                       </div>
-                                      <span style={{fontSize:"2.5cqw",fontWeight:900,color:TAC,flexShrink:0}}>{e.minute}'</span>
-                                      <span style={{flex:1,minWidth:0,fontSize:"2.5cqw",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.kind==="sub"?`${e.outName} ↔ ${e.inName}`:e.label}</span>
-                                      {e.isGoal && <span style={{fontSize:"2.5cqw",fontWeight:900,color:TAC,flexShrink:0,marginLeft:"1.5%"}}>{e.hs}-{e.as}</span>}
+                                      <span style={{fontSize:"2.3cqw",fontWeight:900,color:TAC,flexShrink:0}}>{e.minute}'</span>
+                                      <span style={{flex:1,minWidth:0,fontSize:"2.3cqw",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{e.kind==="sub"?`${e.outName} ↔ ${e.inName}`:e.label}</span>
+                                      {e.isGoal && <span style={{fontSize:"2.3cqw",fontWeight:900,color:TAC,flexShrink:0,marginLeft:"1.5%"}}>{e.hs}-{e.as}</span>}
                                     </div>
                                   );
                                   const half=Math.ceil(storyTimeline.length/2);
@@ -2948,15 +2941,15 @@ HEADLINE: 1 zin. Positief en simpel.`;
                               {baseSquad.length>0 && (<div style={{flex:1,minHeight:0,overflow:"hidden"}}>
                                 <div style={{display:"flex",alignItems:"center",gap:"2.5%",marginBottom:"2%"}}>
                                   <svg viewBox="0 0 24 24" fill="none" stroke={TAC} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{width:"4.4cqw",height:"4.4cqw",flexShrink:0}}><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/><path d="M15.5 14c2.4 0 5.5 1.2 5.5 5"/></svg>
-                                  <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>Basiself</span>
+                                  <span style={{fontSize:"3.4cqw",fontWeight:900,letterSpacing:2.5,color:TAC,textTransform:"uppercase"}}>Basis</span>
                                 </div>
                                 <div style={{display:"flex",gap:"5%"}}>
                                   {[baseSquad.slice(0,Math.ceil(baseSquad.length/2)),baseSquad.slice(Math.ceil(baseSquad.length/2))].map((col,ci)=>(
                                     <div key={ci} style={{flex:1,minWidth:0}}>
                                       {col.map((p,pi)=>(
-                                        <div key={pi} style={{display:"flex",alignItems:"center",gap:"3.5%",padding:"0.9% 0"}}>
-                                          <div style={{width:"1.6cqw",height:"1.6cqw",borderRadius:"50%",background:TAC,flexShrink:0,boxShadow:`0 0 6px ${thex(TAC,0.6)}`}}/>
-                                          <span style={{fontSize:"2.7cqw",fontWeight:600,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p}</span>
+                                        <div key={pi} style={{display:"flex",alignItems:"center",gap:"3.5%",padding:"0.5% 0"}}>
+                                          <div style={{width:"1.4cqw",height:"1.4cqw",borderRadius:"50%",background:TAC,flexShrink:0,boxShadow:`0 0 6px ${thex(TAC,0.6)}`}}/>
+                                          <span style={{fontSize:"2.3cqw",fontWeight:700,color:"#fff",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p}</span>
                                         </div>
                                       ))}
                                     </div>
