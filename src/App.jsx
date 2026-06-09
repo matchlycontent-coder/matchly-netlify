@@ -1752,10 +1752,10 @@ HEADLINE: 1 zin. Positief en simpel.`;
     // 13. Photo — sfeer-afbeelding behoudt verhouding (ronde bal) + lichte zoom
     photo: (mul=1, variant="") => {
       const _sq = theme.bgImage;
-      // Altijd het bestaande basisbestand gebruiken (center-crop dekt 9:16/story af).
-      // De oude -story/-motm-naamtruc wees naar niet-bestaande bestanden, waardoor
-      // html2canvas crashte op een 0x0-afbeelding (createPattern-fout) bij downloaden.
-      const _src = _sq;
+      // Story/motm gebruiken een eigen 9:16-render (bv. stadion3-groen-story.png).
+      // Bestaat die niet, dan valt de onError-handler hieronder terug op het basisbestand.
+      const _suf = variant==="story"?"-story":variant==="motm"?"-motm":"";
+      const _src = (_suf && _sq) ? _sq.replace(/(\.\w+)$/, _suf+"$1") : _sq;
       return (
       <>
         {/* Donkere basis — voorkomt grijze bleed bij hoeken */}
