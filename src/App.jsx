@@ -19,7 +19,7 @@ const MATCHLY_LOGO = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFgAAABYCAYA
 const loadH2C = () => new Promise(res => {
   if (window.html2canvas) return res(window.html2canvas);
   const s = document.createElement("script");
-  s.src = "/html2canvas.min.js";
+  s.src = "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js";
   s.onload = () => res(window.html2canvas);
   document.head.appendChild(s);
 });
@@ -3063,28 +3063,15 @@ HEADLINE: 1 zin. Positief en simpel.`;
                         const el=document.getElementById(`layout-${l.id}`);
                         if(!el) return;
                         try {
-                          const ow=el.style.width,om=el.style.maxWidth;
-                          el.style.width="390px";el.style.maxWidth="none";
-                          await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-                          const elW=el.offsetWidth||390;
-                          const sc=Math.max(1,Math.min(4,Math.ceil(1080/elW)));
+                          const sc=Math.max(1,Math.ceil(1080/el.offsetWidth));
                           const src=await h2c(el,{scale:sc,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                          el.style.width=ow;el.style.maxWidth=om;
                           const tw=1080,th=Math.round(src.height*(tw/src.width));
-                          const cv=document.createElement("canvas");cv.width=tw;cv.height=th;
-                          const ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
-                          const fn=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
-                          cv.toBlob(async(blob)=>{
-                            if(!blob)return;
-                            const file=new File([blob],fn,{type:"image/jpeg"});
-                            if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-                              try{await navigator.share({files:[file],title:"Matchly"});return;}catch(se){if(se.name==="AbortError")return;}
-                            }
-                            const url=URL.createObjectURL(blob);
-                            const a=document.createElement("a");a.href=url;a.download=fn;
-                            document.body.appendChild(a);a.click();document.body.removeChild(a);
-                            setTimeout(()=>URL.revokeObjectURL(url),1000);
-                          },"image/jpeg",0.95);
+                          const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
+                          const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
+                          const link=document.createElement("a");
+                          link.download=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${l.id}.jpg`;
+                          link.href=canvas.toDataURL("image/jpeg",0.95);
+                          link.click();
                         } catch(err){ alert("Download fout: "+err.message); }
                       }} style={{width:"100%",padding:"13px",background:M.gradD,border:"none",borderRadius:100,color:"#fff",fontFamily:"'Barlow Condensed',sans-serif",fontSize:14,fontWeight:900,cursor:"pointer",letterSpacing:1,boxShadow:`0 6px 22px ${hex(M.purple,0.4)}`}}>
                         📸 {l.name} opslaan
@@ -3116,28 +3103,15 @@ HEADLINE: 1 zin. Positief en simpel.`;
                     const el = document.getElementById(`layout-${id}`);
                     if(!el) return;
                     try {
-                      const ow=el.style.width,om=el.style.maxWidth;
-                      el.style.width="390px";el.style.maxWidth="none";
-                      await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-                      const elW=el.offsetWidth||390;
-                      const sc=Math.max(1,Math.min(4,Math.ceil(1080/elW)));
+                      const sc=Math.max(1,Math.ceil(1080/el.offsetWidth));
                       const src = await h2c(el,{scale:sc,useCORS:true,backgroundColor:"#0A0A0C",logging:false,allowTaint:true});
-                      el.style.width=ow;el.style.maxWidth=om;
                       const tw=1080,th=Math.round(src.height*(tw/src.width));
-                      const cv=document.createElement("canvas");cv.width=tw;cv.height=th;
-                      const ctx=cv.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
-                      const fn=`${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
-                      cv.toBlob(async(blob)=>{
-                        if(!blob)return;
-                        const file=new File([blob],fn,{type:"image/jpeg"});
-                        if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
-                          try{await navigator.share({files:[file],title:"Matchly"});return;}catch(se){if(se.name==="AbortError")return;}
-                        }
-                        const url=URL.createObjectURL(blob);
-                        const a=document.createElement("a");a.href=url;a.download=fn;
-                        document.body.appendChild(a);a.click();document.body.removeChild(a);
-                        setTimeout(()=>URL.revokeObjectURL(url),1000);
-                      },"image/jpeg",0.95);
+                      const canvas=document.createElement("canvas");canvas.width=tw;canvas.height=th;
+                      const ctx=canvas.getContext("2d");ctx.imageSmoothingEnabled=true;ctx.imageSmoothingQuality="high";ctx.drawImage(src,0,0,tw,th);
+                      const link = document.createElement("a");
+                      link.download = `${clubName.replace(/\s/g,"_")}_${home}-${away}_${id}.jpg`;
+                      link.href = canvas.toDataURL("image/jpeg",0.95);
+                      link.click();
                     } catch(err){ alert("Download fout: "+err.message); }
                   };
 
